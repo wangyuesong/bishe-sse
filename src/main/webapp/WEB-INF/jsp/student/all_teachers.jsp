@@ -63,10 +63,10 @@
       }, '-' ]
     });
 
-    alert($("#2"));
+  /*   alert($("#2"));
     $(".oneTeacherDetail").each(function() {
       alert($(this).attr('id'));
-    })
+    }) */
 
   });
 </script>

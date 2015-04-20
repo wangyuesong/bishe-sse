@@ -22,7 +22,10 @@
           else if (r.obj.role == 'Teacher')
             window.location.href = "dispatch/tea_index";
         } else if (!r.success) {
-          uo
+          $.messager.show({
+            title : '错误',
+            msg : '用户名密码错误'
+          });
         }
 
       }

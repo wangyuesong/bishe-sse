@@ -34,7 +34,7 @@ public class Document extends BaseModel implements Serializable {
 
     // bi-directional many-to-one association to Documenttype
     @ManyToOne
-    @JoinColumn(name = "DOCUMENTTYPE_ID", nullable = false)
+    @JoinColumn(name = "DOCUMENTTYPE", nullable = false)
     private Documenttype documenttype;
 
     @ManyToOne

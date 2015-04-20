@@ -1,12 +1,12 @@
 package sse.enums;
 
-public enum StatusEnum {
+public enum WillStatusEnum {
 
     PENDING("Pending"), REJECTED("Rejected"), ACCEPTED("Accepted"), UNKNOWN("Unknown");
 
     private final String value;
 
-    private StatusEnum(String value) {
+    private WillStatusEnum(String value) {
         this.value = value;
     }
 
@@ -19,8 +19,8 @@ public enum StatusEnum {
         return this.value;
     }
 
-    public static StatusEnum getType(String value) {
-        for (StatusEnum type : StatusEnum.values()) {
+    public static WillStatusEnum getType(String value) {
+        for (WillStatusEnum type : WillStatusEnum.values()) {
             if (type.value.equalsIgnoreCase(value)) {
                 return type;
             }

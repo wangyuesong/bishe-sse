@@ -21,23 +21,12 @@ public class Student extends User {
     @JoinColumn(name = "TEACHER_ID")
     private Teacher teacher;
 
-    @OneToMany(mappedBy = "creator")
-    List<Document> documents;
-
     public Teacher getTeacher() {
         return teacher;
     }
 
     public void setTeacher(Teacher teacher) {
         this.teacher = teacher;
-    }
-
-    public List<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(List<Document> documents) {
-        this.documents = documents;
     }
 
     public Student() {

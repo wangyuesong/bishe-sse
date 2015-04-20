@@ -60,11 +60,35 @@ public abstract class User extends BaseModel implements Serializable {
     @Column(name = "SELF_DESCRIPTION", length = 1000)
     private String selfDescription;
 
-//    // bi-directional many-to-one association to Document
-//    @OneToMany(mappedBy = "user")
-//    private List<Document> documents;
+    // // bi-directional many-to-one association to Document
+    // @OneToMany(mappedBy = "user")
+    // private List<Document> documents;
+    @OneToMany(mappedBy = "creator")
+    private List<Attachment> attachments;
+
+    @OneToMany(mappedBy = "creator")
+    private List<Document> documents;
+
+    @OneToMany(mappedBy = "user")
+    private List<DocumentComment> documentComments;
 
     public User() {
+    }
+
+    public List<Document> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<Document> documents) {
+        this.documents = documents;
+    }
+
+    public List<DocumentComment> getDocumentComments() {
+        return documentComments;
+    }
+
+    public void setDocumentComments(List<DocumentComment> documentComments) {
+        this.documentComments = documentComments;
     }
 
     public int getId() {
@@ -147,12 +171,20 @@ public abstract class User extends BaseModel implements Serializable {
         this.selfDescription = selfDescription;
     }
 
-//    public List<Document> getDocuments() {
-//        return this.documents;
-//    }
-//
-//    public void setDocuments(List<Document> documents) {
-//        this.documents = documents;
-//    }
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    // public List<Document> getDocuments() {
+    // return this.documents;
+    // }
+    //
+    // public void setDocuments(List<Document> documents) {
+    // this.documents = documents;
+    // }
 
 }

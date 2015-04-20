@@ -11,7 +11,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
-import sse.enums.StatusEnum;
+import sse.enums.WillStatusEnum;
 
 /**
  * The persistent class for the topic database table.
@@ -38,18 +38,18 @@ public class Will extends BaseModel implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
-    private StatusEnum status = StatusEnum.PENDING;
+    private WillStatusEnum status = WillStatusEnum.PENDING;
 
     public Will()
     {
 
     }
 
-    public StatusEnum getStatus() {
+    public WillStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(StatusEnum status) {
+    public void setStatus(WillStatusEnum status) {
         this.status = status;
     }
 

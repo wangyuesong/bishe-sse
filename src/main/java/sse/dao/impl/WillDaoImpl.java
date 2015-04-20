@@ -13,7 +13,7 @@ import sse.dao.base.GenericDao;
 import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.entity.WillPK;
-import sse.enums.StatusEnum;
+import sse.enums.WillStatusEnum;
 import sse.pageModel.WillModel;
 
 /**
@@ -101,7 +101,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
         String queryStr = "select w from Will w where w.id.teacherId= :teacherId and w.status!= :status and w.level= :level order by w.updateTime asc";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("teacherId", teacherId)
-                .setParameter("status", StatusEnum.REJECTED)
+                .setParameter("status", WillStatusEnum.REJECTED)
                 .setParameter("level", level)
                 .getResultList();
     }

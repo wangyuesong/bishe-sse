@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import sse.enums.AttachmentStatusEnum;
+import sse.enums.WillStatusEnum;
+
 import java.sql.Timestamp;
 
 /**
@@ -21,8 +24,12 @@ public class Attachment extends BaseModel implements Serializable {
     @Column(unique = true, nullable = false)
     private int id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(nullable = false, length = 500)
+    private String realName;
+
+    
+    @Column(nullable = false, length = 500)
+    private String listName;
 
     @Column(nullable = false, length = 100)
     private String size;
@@ -34,14 +41,24 @@ public class Attachment extends BaseModel implements Serializable {
     private boolean finalVersion;
 
     @ManyToOne
-    @JoinColumn(name = "DOCUMENT", nullable = false)
+    @JoinColumn(name = "DOCUMENT")
     private Document document;
 
-    @Column(name = "LAST_MODIFIED_BY")
-    private int lastModifiedBy;
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "CREATOR")
+    private User creator;
 
-    @Column(nullable = false, name = "CREATOR")
-    private int creator;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private AttachmentStatusEnum status;
+
+    public AttachmentStatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(AttachmentStatusEnum status) {
+        this.status = status;
+    }
 
     public Document getDocument() {
         return document;
@@ -59,12 +76,20 @@ public class Attachment extends BaseModel implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getRealName() {
+        return realName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public String getListName() {
+        return listName;
+    }
+
+    public void setListName(String listName) {
+        this.listName = listName;
     }
 
     public String getSize() {
@@ -91,20 +116,11 @@ public class Attachment extends BaseModel implements Serializable {
         this.finalVersion = finalVersion;
     }
 
-
-    public int getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(int lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public int getCreator() {
+    public User getCreator() {
         return creator;
     }
 
-    public void setCreator(int creator) {
+    public void setCreator(User creator) {
         this.creator = creator;
     }
 

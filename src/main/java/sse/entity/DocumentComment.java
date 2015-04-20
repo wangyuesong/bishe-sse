@@ -42,11 +42,11 @@ public class DocumentComment extends BaseModel implements Serializable {
     private RatingEnum rating;
 
     @ManyToOne
-    @JoinColumn(name = "TEACHER_ID", nullable = false)
-    Teacher teacher;
+    @JoinColumn(name = "USER", nullable = false)
+    User user;
 
     @ManyToOne
-    @JoinColumn(name = "DOCUMENT_ID", nullable = false)
+    @JoinColumn(name = "PARENT_DOCUMENT", nullable = false)
     Document document;
 
     public int getId() {
@@ -81,12 +81,12 @@ public class DocumentComment extends BaseModel implements Serializable {
         this.rating = rating;
     }
 
-    public Teacher getTeacher() {
-        return teacher;
+    public User getUser() {
+        return user;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Document getDocument() {
