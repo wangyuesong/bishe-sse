@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="SSEPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>sse.entity.Documenttype</class>
+    <class>sse.entity.Topic</class>
+    <class>sse.entity.Topictype</class>
+    <class>sse.entity.User</class>
+    <class>sse.entity.Student</class>
+    <class>sse.entity.Teacher</class>
+    <class>sse.entity.BaseModel</class>
+    <class>sse.entity.Menu</class>
+    <class>sse.entity.Will</class>
+    <class>sse.entity.WillPK</class>
+    <class>sse.entity.TimeNode</class>
+    <class>sse.entity.DocumentComment</class>
+    <class>sse.entity.Attachment</class>
+    <class>sse.entity.Document</class>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/sse?characterEncoding=utf-8"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="eclipselink.exclude-eclipselink-orm" value="true"/>
+    </properties>
+  </persistence-unit>
+</persistence>
