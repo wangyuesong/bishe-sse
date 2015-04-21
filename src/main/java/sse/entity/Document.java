@@ -3,8 +3,11 @@ package sse.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import sse.enums.DocumentTypeEnum;
 
 /**
  * The persistent class for the document database table.
@@ -32,10 +37,12 @@ public class Document extends BaseModel implements Serializable {
     @Column(nullable = false, length = 45)
     private String name;
 
-    // bi-directional many-to-one association to Documenttype
-    @ManyToOne
-    @JoinColumn(name = "DOCUMENTTYPE", nullable = false)
-    private Documenttype documenttype;
+    @Column(nullable = false, length = 5000)
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private DocumentTypeEnum documenttype;
 
     @ManyToOne
     @JoinColumn(name = "LAST_MODIFIED_BY")
@@ -43,10 +50,27 @@ public class Document extends BaseModel implements Serializable {
 
     @ManyToOne
     @JoinColumn(nullable = false, name = "CREATOR")
-    private Student creator;
+    private User creator;
 
-    @OneToMany(mappedBy = "document")
+    @OneToMany(mappedBy = "document", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<DocumentComment> documentComments;
+
+    @OneToMany(mappedBy = "document", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    private List<Attachment> documentAttachments;
+
+    public void addAttachment(Attachment a)
+    {
+        a.setDocument(this);
+        documentAttachments.add(a);
+    }
+
+    public List<Attachment> getDocumentAttachments() {
+        return documentAttachments;
+    }
+
+    public void setDocumentAttachments(List<Attachment> documentAttachments) {
+        this.documentAttachments = documentAttachments;
+    }
 
     public List<DocumentComment> getDocumentComments() {
         return documentComments;
@@ -56,7 +80,19 @@ public class Document extends BaseModel implements Serializable {
         this.documentComments = documentComments;
     }
 
-    public void setCreator(Student creator) {
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public void setCreator(User creator) {
         this.creator = creator;
     }
 
@@ -76,11 +112,11 @@ public class Document extends BaseModel implements Serializable {
         this.name = name;
     }
 
-    public Documenttype getDocumenttype() {
+    public DocumentTypeEnum getDocumenttype() {
         return documenttype;
     }
 
-    public void setDocumenttype(Documenttype documenttype) {
+    public void setDocumenttype(DocumentTypeEnum documenttype) {
         this.documenttype = documenttype;
     }
 
@@ -90,10 +126,6 @@ public class Document extends BaseModel implements Serializable {
 
     public void setLastModifiedBy(User lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public Student getCreator() {
-        return creator;
     }
 
 }

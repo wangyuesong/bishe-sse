@@ -27,7 +27,6 @@ public class Attachment extends BaseModel implements Serializable {
     @Column(nullable = false, length = 500)
     private String realName;
 
-    
     @Column(nullable = false, length = 500)
     private String listName;
 
@@ -40,7 +39,7 @@ public class Attachment extends BaseModel implements Serializable {
     @Column(nullable = false)
     private boolean finalVersion;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "DOCUMENT")
     private Document document;
 

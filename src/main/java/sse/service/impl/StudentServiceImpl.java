@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
-import sse.jsonmodel.TeacherModel;
+import sse.jsonmodel.TeacherListModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
 
@@ -22,9 +22,9 @@ public class StudentServiceImpl {
     @Autowired
     private WillDaoImpl willDaoImpl;
 
-    public DataGrid<TeacherModel> findTeachersForPaging(int pageSize, int page, String sortCriteria, String order)
+    public DataGrid<TeacherListModel> findTeachersForPaging(int pageSize, int page, String sortCriteria, String order)
     {
-        DataGrid<TeacherModel> dg = new DataGrid<>();
+        DataGrid<TeacherListModel> dg = new DataGrid<>();
         dg.setRows(teacherDaoImpl.findTeachersForPaging(pageSize, page, sortCriteria, order));
         dg.setTotal(teacherDaoImpl.findTeachersForCount());
         return dg;

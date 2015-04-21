@@ -2,6 +2,7 @@ package sse.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -45,7 +46,7 @@ public class DocumentComment extends BaseModel implements Serializable {
     @JoinColumn(name = "USER", nullable = false)
     User user;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "PARENT_DOCUMENT", nullable = false)
     Document document;
 

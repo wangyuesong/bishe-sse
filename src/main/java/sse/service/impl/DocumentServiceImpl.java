@@ -30,8 +30,10 @@ import sse.entity.Attachment;
 import sse.entity.Document;
 import sse.entity.User;
 import sse.enums.AttachmentStatusEnum;
+import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
-import sse.jsonmodel.DocumentModel;
+import sse.jsonmodel.DocumentFormModel;
+import sse.jsonmodel.DocumentListModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
 
@@ -188,19 +190,54 @@ public class DocumentServiceImpl {
         return true;
     }
 
-    public DataGrid<DocumentModel> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort, String order,
+    /**
+     * @Method: confirmCreateDocumentAndAddDocumentToDB
+     * @Description: TODO
+     * @param @param u
+     * @param @param documentModel
+     * @return void
+     * @throws
+     */
+    public void confirmCreateDocumentAndAddDocumentToDB(User u, DocumentFormModel documentModel) {
+        if (u != null)
+        {
+            // Create document
+            Document document = new Document();
+            document.setCreator(u);
+            document.setDocumenttype(DocumentTypeEnum.getType(documentModel.getDocument_type()));
+            document.setName(documentModel.getDocument_name());
+            document.setContent(documentModel.getDocument_description());
+            document.setLastModifiedBy(u);
+            // Firstly find all the temp attachment belongs to this user
+            documentDaoImpl.persistWithTransaction(document);
+            List<Attachment> tempAttachmentList = attachmentDaoImpl.findTempAttachmentsByUserId(u.getId());
+            if (tempAttachmentList != null)
+                for (Attachment attachment : tempAttachmentList)
+                {
+                    // Change the status of attachment to FOREVER
+                    attachment.setStatus(AttachmentStatusEnum.FOREVER);
+                    attachment.setDocument(document);
+                    if (org.springframework.util.CollectionUtils.isEmpty(document.getDocumentAttachments()))
+                        document.setDocumentAttachments(new LinkedList<Attachment>());
+                    attachmentDaoImpl.mergeWithTransaction(attachment);
+                }
+        }
+    }
+
+    public DataGrid<DocumentListModel> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort,
+            String order,
             Integer creatorId)
     {
-        DataGrid<DocumentModel> dg = new DataGrid<>();
+        DataGrid<DocumentListModel> dg = new DataGrid<>();
         List<Document> documents = documentDaoImpl.findDocumentsForPagingByCreatorId(page, pageSize, sort, order,
                 creatorId);
-        List<DocumentModel> documentModels = new LinkedList<DocumentModel>();
+        List<DocumentListModel> documentModels = new LinkedList<DocumentListModel>();
         for (Document d : documents)
         {
-            DocumentModel dm = new DocumentModel();
+            DocumentListModel dm = new DocumentListModel();
             dm.setCreator(d.getCreator().getName());
             dm.setDocumentCommentsCount(d.getDocumentComments().size());
-            dm.setDocumentType(d.getDocumenttype().getTypeName());
+            dm.setDocumentType(d.getDocumenttype().getValue());
             dm.setId(d.getId());
             dm.setLastModifiedBy(d.getLastModifiedBy().getName());
             dm.setName(d.getName());
@@ -343,4 +380,5 @@ public class DocumentServiceImpl {
         }
 
     }
+
 }

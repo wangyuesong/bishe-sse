@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import sse.entity.Teacher;
-import sse.jsonmodel.TeacherModel;
+import sse.jsonmodel.TeacherListModel;
 
 /**
  * @author yuesongwang
@@ -75,12 +75,12 @@ public class ClassTool<J, P> {
 
     public static void main(String args[])
     {
-        ClassTool<Teacher, TeacherModel> classConverter = new ClassTool<Teacher, TeacherModel>(Teacher.class, TeacherModel.class);
+        ClassTool<Teacher, TeacherListModel> classConverter = new ClassTool<Teacher, TeacherListModel>(Teacher.class, TeacherListModel.class);
         Teacher t = new Teacher();
         t.setName("Shabi");
         t.setCapacity(10);
 
-        TeacherModel tm = new TeacherModel();
+        TeacherListModel tm = new TeacherListModel();
         tm = classConverter.convertJPAEntityToPOJO(t);
         System.out.println(tm.getName() + " " + tm.getCapacity());
     }

@@ -84,14 +84,12 @@
 
     function project_list_addFun() {
       project_list_datagrid.datagrid('uncheckAll').datagrid('unselectAll').datagrid('clearSelections');
-      $('<div/>').dialog({
+      $('#one_document_datagrid').dialog({
         href : '${pageContext.request.contextPath}/dispatch/document/add_document',
-        onClose: function()
-        {
-          
+        onClose : function() {
         },
-        width : 900,
-        height : 500,
+        width : $(document.body).width() * 0.9,
+        height : $(document.body).height() * 0.9,
         collapsible : true,
         modal : true,
         title : '添加新文档',
@@ -99,52 +97,9 @@
           text : '增加',
           iconCls : 'icon-add',
           handler : function() {
+            alert("hello");
             var d = $(this).closest('.window-body');
-            $('#project_add_addForm').form('submit', {
-              url : '${pageContext.request.contextPath}/addprojectAction.html',
-              success : function(result) {
-                try {
-                  var r = $.parseJSON(result);
-                  if (r.success) {
-                    project_list_datagrid.datagrid('insertRow', {
-                      index : 0,
-                      row : r.obj
-                    });
-                    d.dialog('destroy');
-                    //使用ajax在添加过项目后自动解析数据库表
-                    $.ajax({
-                      url : '${pageContext.request.contextPath}/structsDbAction.html',
-                      data : 'project.sprojcode=' + r.obj.sprojcode,
-                      timeout : 1000 * 60 * 20, //超时时间20分钟
-                      success : function(result) {
-                        var rs = $.parseJSON(result);
-                        if (rs.success) {
-                          $.messager.show({
-                            title : '提示',
-                            msg : rs.msg
-                          });
-                        } else {
-                          $.messager.show({
-                            title : '错误',
-                            msg : rs.msg
-                          });
-                        }
-                      },
-                      error : function(result) {
-                        var rs = $.parseJSON(result);
-                        $.messager.alter('错误', rs);
-                      }
-                    });
-                  }
-                  $.messager.show({
-                    title : '提示',
-                    msg : r.msg
-                  });
-                } catch (e) {
-                  $.messager.alert('提示', result);
-                }
-              }
-            });
+            $('#document_add_form').submit();
           }
         } ],
         onClose : function() {
@@ -189,5 +144,49 @@
 		<div data-options="region:'center',border:false">
 			<table id="project_list_datagrid"></table>
 		</div>
+		<div id="one_document_datagrid" />
 	</div>
 </body>
+
+
+
+<%-- try {
+                  var r = $.parseJSON(result);
+                  if (r.success) {
+                    project_list_datagrid.datagrid('insertRow', {
+                      index : 0,
+                      row : r.obj
+                    });
+                    d.dialog('destroy');
+                    //使用ajax在添加过项目后自动解析数据库表
+                    $.ajax({
+                      url : '${pageContext.request.contextPath}/structsDbAction.html',
+                      data : 'project.sprojcode=' + r.obj.sprojcode,
+                      timeout : 1000 * 60 * 20, //超时时间20分钟
+                      success : function(result) {
+                        var rs = $.parseJSON(result);
+                        if (rs.success) {
+                          $.messager.show({
+                            title : '提示',
+                            msg : rs.msg
+                          });
+                        } else {
+                          $.messager.show({
+                            title : '错误',
+                            msg : rs.msg
+                          });
+                        }
+                      },
+                      error : function(result) {
+                        var rs = $.parseJSON(result);
+                        $.messager.alter('错误', rs);
+                      }
+                    });
+                  }
+                  $.messager.show({
+                    title : '提示',
+                    msg : r.msg
+                  });
+                } catch (e) {
+                  $.messager.alert('提示', result);
+                } --%>

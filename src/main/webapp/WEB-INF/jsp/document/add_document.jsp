@@ -2,14 +2,20 @@
 	pageEncoding="UTF-8"%>
 <script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/js/jquery.uploadify.min.js"></script>
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/ckeditor/ckeditor.js"></script>
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/ckeditor/config.js"></script>
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/ckeditor/lang/zh-cn.js"></script>
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/ckeditor/styles.js"></script>
+
 <link rel="stylesheet" type="text/css"
-	href="${pageContext.request.contextPath}/resources/style/bootstrap/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css"
-	href="${pageContext.request.contextPath}/resources/style/bootstrap/bootstrap-theme.min.css" />
+	href="${pageContext.request.contextPath}/resources/ckeditor/skins/moono/editor.css" />
 <script type="text/javascript">
   $(function() {
-    var $attachment_list_grid = $("#attachment_list_grid");
-    $attachment_list_grid = $('#attachment_list_grid').datagrid(
+    $('#attachment_list_grid').datagrid(
         {
           url : '${pageContext.request.contextPath}/document/getAllTempAttachmentsByUserId',
           type : 'get',
@@ -55,7 +61,37 @@
             }
           }, '-' ]
         });
+
+    $.ajax({
+      url : "${pageContext.request.contextPath}/document/getAllDocumentTypes",
+      type : "get",
+      async : false,
+      success : function(data, textStatus) {
+        $.each(data, function(n, value) {
+          var optionString = "<option value='" + data[n] + "'>" + data[n] + "</option>";
+          $('#document_type_select').append(optionString);
+        });
+      }
+    });
+
+    $("#document_add_form").form({
+      url : '${pageContext.request.contextPath}/document/confirmCreateDocument',
+      type : "post",
+      success : function(result) {
+        var r = $.parseJSON(result);
+        //关闭模态框
+        $('#one_document_datagrid').dialog('close');
+        //重新载入List
+        $('#project_list_datagrid').reload();
+        $.messager.show({
+          title : "成功",
+          msg : "成功"
+        });
+
+      }
+    });
   })
+
   function delete_one_attachment(id) {
     $.ajax({
       url : "${pageContext.request.contextPath}/document/deleteOneTempAttachmentByAttachmentId?attachmentId=" + id,
@@ -103,7 +139,7 @@
   });
 </script>
 <div align="center">
-	<form id="project_add_addForm" method="post">
+	<form id="document_add_form" method="post">
 		<table width="98%" border="0" class="tableForm" cellpadding="2"
 			cellspacing="1" bgcolor="#D1DDAA" align="center"
 			style="margin-top: 8px">
@@ -118,62 +154,63 @@
 				style="margin-top: 8px">
 				<tr align="left" bgcolor="#FAFAF1">
 					<td width="15%">文档名称:</td>
-					<td width="35%"><input type="text" name="sprojname"
+					<td width="35%"><input type="text" name="document_name"
 						style="width: 150px;" class="easyui-validatebox"
 						data-options="required:true" />&nbsp;</td>
 					<td width="15%">文档类型:</td>
-					<td width="35%"><input type="text" name="sprojchename"
-						style="width: 150px;" class="easyui-validatebox"
-						data-options="required:true" />&nbsp;</td>
+					<td width="35%"><select id="document_type_select"
+						name="document_type" style="width: 250px;"></select></td>
 				</tr>
 				<tr align="left" bgcolor="#FAFAF1">
 					<td width="15%">描述:</td>
 					<td width="80%" colspan="3"><textarea rows="3"
-							style="width: 400px;" name="sdesc"></textarea>&nbsp;</td>
+							class="ckeditor" style="width: 600px;"
+							name="document_description"></textarea></td>
 				</tr>
 			</table>
 		</fieldset>
-		<fieldset>
-			<legend align="left">相关文档</legend>
-			</table>
-			<div>
-				<div style="float: left; width: 50%">
-					<fieldset>
-						<legend align="left">已上传文档</legend>
-						<div data-options="region:'center',border:false">
-							<table id="attachment_list_grid"></table>
-						</div>
-					</fieldset>
-				</div>
-				<div style="margin-left: 50%; width: 50%">
-					<table>
-						<tr>
-							<th><label for="Attachment_GUID">附件上传：</label></th>
-							<td>
-								<div>
-									<input class="easyui-validatebox" type="hidden"
-										id="Attachment_GUID" name="Attachment_GUID" /> <input
-										id="file_upload" type="file" multiple="multiple"> <a
-										href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
-										onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
-
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnCancelUpload"
-										data-options="plain:true,iconCls:'icon-cancel'"
-										onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
-									<div id="fileQueue" class="fileQueue"></div>
-									<div id="div_files"></div>
-									<br />
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-				<div style="clear: both"></div>
-			</div>
-		</fieldset>
 	</form>
+	<fieldset>
+		<legend align="left">相关文档</legend>
+		</table>
+		<div>
+			<div style="float: left; width: 50%">
+				<fieldset>
+					<legend align="left">已上传文档</legend>
+					<div data-options="region:'center',border:false">
+						<table id="attachment_list_grid"></table>
+					</div>
+				</fieldset>
+			</div>
+			<div style="margin-left: 50%; width: 50%">
+				<table>
+					<tr>
+						<th><label for="Attachment_GUID">附件上传：</label></th>
+						<td>
+							<div>
+								<input class="easyui-validatebox" type="hidden"
+									id="Attachment_GUID" name="Attachment_GUID" /> <input
+									id="file_upload" type="file" multiple="multiple"> <a
+									href="javascript:void(0)" class="easyui-linkbutton"
+									id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
+									onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
+
+								<a href="javascript:void(0)" class="easyui-linkbutton"
+									id="btnCancelUpload"
+									data-options="plain:true,iconCls:'icon-cancel'"
+									onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
+								<div id="fileQueue" class="fileQueue"></div>
+								<div id="div_files"></div>
+								<br />
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+	</fieldset>
+
 </div>
 </body>
 

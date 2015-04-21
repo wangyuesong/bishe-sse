@@ -11,15 +11,19 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import sse.entity.Document;
 import sse.entity.User;
+import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
-import sse.jsonmodel.DocumentModel;
+import sse.jsonmodel.DocumentFormModel;
+import sse.jsonmodel.DocumentListModel;
 import sse.pageModel.DataGrid;
 import sse.service.impl.DocumentServiceImpl;
 import sse.service.impl.DocumentServiceImpl.AttachmentInfo;
@@ -39,13 +43,14 @@ public class DocumentController {
 
     @ResponseBody
     @RequestMapping(value = "/getAllDocuments", method = { RequestMethod.GET, RequestMethod.POST })
-    public DataGrid<DocumentModel> getAllDocuments(HttpServletRequest request, HttpServletResponse response) {
+    public DataGrid<DocumentListModel> getAllDocuments(HttpServletRequest request, HttpServletResponse response) {
         int page = 1;
         int pageSize = 10;
         HttpSession session = request.getSession();
         if (session.getAttribute("USER") == null)
             return null;
-        DataGrid<DocumentModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(page, pageSize, null,
+        DataGrid<DocumentListModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(page, pageSize,
+                null,
                 null,
                 ((User) session.getAttribute("USER")).getId());
         return documents;
@@ -93,11 +98,19 @@ public class DocumentController {
         return true;
     }
 
-    @RequestMapping(value = "/confirmCreateDocument", method = { RequestMethod.POST })
-    public void confirmCreateDocument(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-        User currentUser = (User) session.getAttribute("USER");
+    @ResponseBody
+    @RequestMapping(value = "/getAllDocumentTypes", method = { RequestMethod.GET })
+    public List<String> getAllDocumentTypes() {
+        return DocumentTypeEnum.getAllTypeValues();
+    }
 
+    @ResponseBody
+    @RequestMapping(value = "/confirmCreateDocument", method = { RequestMethod.POST })
+    public boolean confirmCreateDocument(@ModelAttribute DocumentFormModel documentModel, HttpServletRequest request) {
+        User u = (User) (request.getSession().getAttribute("USER"));
+        if (u != null)
+            documentServiceImpl.confirmCreateDocumentAndAddDocumentToDB(u, documentModel);
+        return true;
     }
 
     @RequestMapping(value = "/cancelCreateDocument", method = { RequestMethod.POST })

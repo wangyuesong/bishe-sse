@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.entity.User;
 import sse.jsonmodel.BasicJson;
-import sse.jsonmodel.TeacherModel;
+import sse.jsonmodel.TeacherListModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
 import sse.service.impl.StudentServiceImpl;
@@ -30,7 +30,7 @@ public class StudentController {
 
     @ResponseBody
     @RequestMapping(value = "/getAllTeachers", method = { RequestMethod.GET, RequestMethod.POST })
-    public DataGrid<TeacherModel> getAllTeachers(HttpServletRequest request)
+    public DataGrid<TeacherListModel> getAllTeachers(HttpServletRequest request)
     {
         int page = 1;
         int pageSize = 10;

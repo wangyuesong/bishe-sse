@@ -9,7 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import sse.dao.base.GenericDao;
 import sse.entity.Teacher;
-import sse.jsonmodel.TeacherModel;
+import sse.jsonmodel.TeacherListModel;
 import sse.utils.ClassTool;
 
 @Repository
@@ -21,12 +21,12 @@ public class TeacherDaoImpl extends GenericDao<Integer, Teacher>
      * 
      * @see sse.dao.impl.ITeacherDao#findTeachersForPaging()
      */
-    public List<TeacherModel> findTeachersForPaging(int page, int pageSize, String sortCriteria, String order)
+    public List<TeacherListModel> findTeachersForPaging(int page, int pageSize, String sortCriteria, String order)
     {
         List<Teacher> teacherList = this.findForPaging("select t from Teacher t", new HashMap<String, Object>(), page,
                 pageSize, sortCriteria, order);
-        List<TeacherModel> teacherModelList = new LinkedList<TeacherModel>();
-        ClassTool<Teacher, TeacherModel> classTool = new ClassTool(Teacher.class, TeacherModel.class);
+        List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
+        ClassTool<Teacher, TeacherListModel> classTool = new ClassTool(Teacher.class, TeacherListModel.class);
         for (Teacher t : teacherList)
         {
             teacherModelList.add(classTool.convertJPAEntityToPOJO(t));
