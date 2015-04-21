@@ -19,6 +19,7 @@ import sse.jsonmodel.TeacherListModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
 import sse.service.impl.StudentServiceImpl;
+import sse.service.impl.StudentServiceImpl.TeacherDetail;
 
 @Controller
 @RequestMapping(value = "/student")
@@ -44,6 +45,14 @@ public class StudentController {
         int studentId = ((User) (request.getSession().getAttribute("USER"))).getId();
         HashMap<String, String> returnMap = studentService.findPreviousWills(studentId);
         return CollectionUtils.isEmpty(returnMap) ? new HashMap<String, String>() : returnMap;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/showOneTeacherDetail", method = { RequestMethod.GET })
+    public TeacherDetail showOneTeacherDetail(String teacherId)
+    {
+        HashMap<String, String> returnMap = new HashMap<String, String>();
+        return studentService.findOneTeacherDetailByTeacherId(Integer.parseInt(teacherId));
     }
 
     @ResponseBody

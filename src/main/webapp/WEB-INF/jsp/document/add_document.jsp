@@ -172,7 +172,6 @@
 	</form>
 	<fieldset>
 		<legend align="left">相关文档</legend>
-		</table>
 		<div>
 			<div style="float: left; width: 50%">
 				<fieldset>

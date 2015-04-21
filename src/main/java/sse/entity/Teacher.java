@@ -32,6 +32,28 @@ public class Teacher extends User {
     @Column(length = 45)
     private String degree;
 
+    @Column(length = 500)
+    private String direction;
+
+    @Column(length = 1000)
+    private String candidateTopics;
+
+    public String getCandidateTopics() {
+        return candidateTopics;
+    }
+
+    public void setCandidateTopics(String candidateTopics) {
+        this.candidateTopics = candidateTopics;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
     public List<Student> getStudents() {
         return students;
     }
