@@ -3,6 +3,10 @@ package sse.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,10 +16,13 @@ import java.util.Map;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import sse.controller.DocumentController;
 import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.DocumentDaoImpl;
 import sse.dao.impl.WillDaoImpl;
@@ -28,8 +35,13 @@ import sse.jsonmodel.DocumentModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
 
+/**
+ * @author yuesongwang
+ *
+ */
 @Service
 public class DocumentServiceImpl {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DocumentServiceImpl.class);
 
     @Autowired
     private DocumentDaoImpl documentDaoImpl;
@@ -40,13 +52,38 @@ public class DocumentServiceImpl {
     @Autowired
     private WillDaoImpl willDaoImpl;
 
-    public AttachmentInfo uploadTempAttachment(User currentUser, Map<String, MultipartFile> fileMap)
+    // FTP Server configuration
+    String serverIp = "127.0.0.1";
+    int serverPort = 21;
+    int fileType = FTP.BINARY_FILE_TYPE;
+    String ftpUserName = "sseftp";
+    String ftpPassword = "123";
+
+    // For ajax usage, only supply id and
+    public List<SimpleAttachmentInfo> getAllTempAttachmentOfAUser(User currentUser)
     {
-        String serverIp = "127.0.0.1";
-        int serverPort = 21;
-        int fileType = FTP.BINARY_FILE_TYPE;
-        String ftpUserName = "sseftp";
-        String ftpPassword = "123";
+        List<SimpleAttachmentInfo> infoList = new LinkedList<SimpleAttachmentInfo>();
+        List<Attachment> attachments = attachmentDaoImpl.findTempAttachmentsByUserId(currentUser.getId());
+        if (org.springframework.util.CollectionUtils.isEmpty(attachments))
+            return infoList;
+        else
+        {
+            for (Attachment a : attachments)
+            {
+                SimpleAttachmentInfo sai = new SimpleAttachmentInfo();
+                DateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
+                sai.setId(a.getId());
+                sai.setListName(a.getListName());
+                sai.setUploadTime(dateFormat.format(a.getCreateTime()));
+                infoList.add(sai);
+            }
+        }
+        return infoList;
+    }
+
+    public AttachmentInfo uploadTempAttachment(User currentUser, Map<String, MultipartFile> fileMap)
+            throws SSEException
+    {
         String realFileName = "";
         String listFileName = "";
         String fileLocationOnServer = "";
@@ -65,31 +102,12 @@ public class DocumentServiceImpl {
                     + realFileName;
             fileLocationOnServer = baseDir + realFileName;
             InputStream oneFileInputStream = null;
-
             try {
                 oneFileInputStream = new ByteArrayInputStream(mf.getBytes());
-                FTPClient ftpClient = new FTPClient();
-                // First connect
-                ftpClient.connect(serverIp, serverPort);
-                int reply = ftpClient.getReplyCode();
-                if (!FTPReply.isPositiveCompletion(reply))
-                {
-                    ftpClient.disconnect();
-                    throw new SSEException("FTP Server 不接受连接");
-                }
-                // Then login
-                if (!ftpClient.login(ftpUserName, ftpPassword))
-                {
-                    ftpClient.disconnect();
-                    throw new SSEException("用户名密码错误");
-                }
-                // Set file type and misc
-                ftpClient.setControlEncoding("UTF-8");
-                ftpClient.setFileType(fileType);
-                ftpClient.enterLocalPassiveMode();
+                FTPClient ftpClient = connectAndLoginFtpServer();
                 ftpClient.makeDirectory(new String(baseDir.getBytes("UTF-8"), "iso-8859-1"));
                 ftpClient.changeWorkingDirectory(baseDir);
-                ftpClient.storeFile(new String(fileLocationOnServer.getBytes("UTF-8"), "iso-8859-1"),
+                ftpClient.storeFile(convertUTF8ToISO(fileLocationOnServer),
                         oneFileInputStream);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -99,8 +117,7 @@ public class DocumentServiceImpl {
                 try {
                     oneFileInputStream.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    throw new SSEException("上传失败", e);
                 }
 
             }
@@ -111,7 +128,39 @@ public class DocumentServiceImpl {
         return info;
     }
 
-    public void createTempAttachment(AttachmentInfo info)
+    /**
+     * @Method: connectAndLoginFtpServer
+     * @Description: TODO
+     * @param @return
+     * @param @throws SocketException
+     * @param @throws IOException
+     * @return FTPClient
+     * @throws
+     */
+    private FTPClient connectAndLoginFtpServer() throws SocketException, IOException {
+        FTPClient ftpClient = new FTPClient();
+        // First connect
+        ftpClient.connect(serverIp, serverPort);
+        int reply = ftpClient.getReplyCode();
+        if (!FTPReply.isPositiveCompletion(reply))
+        {
+            ftpClient.disconnect();
+            throw new SSEException("FTP Server 不接受连接");
+        }
+        // Then login
+        if (!ftpClient.login(ftpUserName, ftpPassword))
+        {
+            ftpClient.disconnect();
+            throw new SSEException("用户名密码错误");
+        }
+        // Set file type and misc
+        ftpClient.setControlEncoding("UTF-8");
+        ftpClient.setFileType(fileType);
+        ftpClient.enterLocalPassiveMode();
+        return ftpClient;
+    }
+
+    public void createTempAttachmentEntryInDB(AttachmentInfo info)
     {
         Attachment a = new Attachment();
         a.setCreator(info.getCreator());
@@ -121,6 +170,22 @@ public class DocumentServiceImpl {
         a.setSize(info.getSize());
         a.setStatus(AttachmentStatusEnum.TEMP);
         attachmentDaoImpl.createTempAttachment(a);
+    }
+
+    public boolean deleteAttachmentOnFTPServerAndDB(User user, int attachmentId) throws SocketException, IOException
+    {
+        Attachment attachment = attachmentDaoImpl.findById(attachmentId);
+        String realName = attachment.getRealName();
+
+        // Delete file on ftp server
+        FTPClient ftpClient = connectAndLoginFtpServer();
+        String baseDir = "/Users/sseftp/" + user.getAccount() + user.getName() + "/";
+        boolean result = ftpClient.deleteFile(convertUTF8ToISO(baseDir + realName));
+        if (!result)
+            return result;
+        // Delete Attachment entry in db
+        attachmentDaoImpl.removeWithTransaction(attachment);
+        return true;
     }
 
     public DataGrid<DocumentModel> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort, String order,
@@ -154,6 +219,26 @@ public class DocumentServiceImpl {
     public void updateSelection(WillModel model, int studentId)
     {
         willDaoImpl.updateSelection(model, studentId);
+    }
+
+    private String convertUTF8ToISO(String utf8String)
+    {
+        try {
+            return new String(utf8String.getBytes("UTF-8"), "iso-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            logger.error("不支持的字符集", e);
+        }
+        return null;
+    }
+
+    private String convertListNameToRealNameByAppendingTimeStamp(String listName)
+    {
+        int posOfDot = listName.lastIndexOf('.');
+        String prefix = listName.substring(0, posOfDot);
+        String postFix = listName.substring(posOfDot, listName.length());
+        prefix += "_" + new Date();
+        prefix += postFix;
+        return prefix;
     }
 
     public static class AttachmentInfo
@@ -227,13 +312,35 @@ public class DocumentServiceImpl {
 
     }
 
-    private String convertListNameToRealNameByAppendingTimeStamp(String listName)
+    public static class SimpleAttachmentInfo
     {
-        int posOfDot = listName.lastIndexOf('.');
-        String prefix = listName.substring(0, posOfDot);
-        String postFix = listName.substring(posOfDot, listName.length());
-        prefix += "_" + new Date();
-        prefix += postFix;
-        return prefix;
+        private int id;
+        private String listName;
+        private String uploadTime;
+
+        public String getUploadTime() {
+            return uploadTime;
+        }
+
+        public void setUploadTime(String uploadTime) {
+            this.uploadTime = uploadTime;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getListName() {
+            return listName;
+        }
+
+        public void setListName(String listName) {
+            this.listName = listName;
+        }
+
     }
 }

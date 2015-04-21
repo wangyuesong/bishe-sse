@@ -86,11 +86,15 @@
       project_list_datagrid.datagrid('uncheckAll').datagrid('unselectAll').datagrid('clearSelections');
       $('<div/>').dialog({
         href : '${pageContext.request.contextPath}/dispatch/document/add_document',
+        onClose: function()
+        {
+          
+        },
         width : 900,
         height : 500,
         collapsible : true,
         modal : true,
-        title : '项目添加',
+        title : '添加新文档',
         buttons : [ {
           text : '增加',
           iconCls : 'icon-add',
