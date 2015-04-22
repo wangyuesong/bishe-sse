@@ -35,7 +35,7 @@ public class Teacher extends User {
     @Column(length = 500)
     private String direction;
 
-    @Column(length = 1000)
+    @Column(length = 1000, name = "CANDIDATE_TOPICS")
     private String candidateTopics;
 
     public String getCandidateTopics() {

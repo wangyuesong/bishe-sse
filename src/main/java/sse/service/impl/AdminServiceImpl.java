@@ -14,6 +14,7 @@ import sse.dao.impl.WillDaoImpl;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.Will;
+import sse.enums.MatchTypeEnum;
 
 @Service
 public class AdminServiceImpl {
@@ -28,7 +29,7 @@ public class AdminServiceImpl {
     @Autowired
     private StudentDaoImpl studentDaoImpl;
 
-    public void doMatch()
+    public List<MatchPair> doMatch()
     {
         List<Teacher> allTeachers = teacherDaoImpl.findAll();
         List<Teacher> teachersToBeMatch = new LinkedList<Teacher>();
@@ -51,7 +52,8 @@ public class AdminServiceImpl {
             while (preIter.hasNext())
             {
                 Teacher t = preIter.next();
-                // If for now the teacher has already get fully matched, remove the teacher from the future algorithm
+                // If after previous match, the teacher has already get fully matched, remove the teacher from the
+                // future algorithm
                 if ((t.getCapacity() - t.getStudents().size()) == findCurrentMatchCountByTeacherId(matchPairs,
                         t.getId()))
                     preIter.remove();
@@ -59,22 +61,27 @@ public class AdminServiceImpl {
 
             for (Teacher t : teachersToBeMatch)
             {
+                // 对于第i级别的志愿，从志愿表中选出所有还没有被老师拒绝的i等级志愿
                 willList = willDaoImpl.findAllNotRejectedWillsByTeacherIdAndLevel(t.getId(), i);
-                // Remove those who get matched during one level match from will list
+                // 删除这些志愿中所有已经和老师建立了关系的同学的志愿（老师已接受其第一志愿）
+                willList = removeTheWillsFromStudentsWhoAlreadyGotMatched(willList);
+                // 如果某同学在第i－1级别的匹配中已经和老师进行了匹配，则将该同学的所有will从willList中删除
                 for (MatchPair matchPair : matchPairs)
                     removeMatchedStudentsFromWillListByStudentId(matchPair.getStudentId(), willList);
-                // Teacher's capacity is bigger than level 2 student's will
+                // Teacher's capacity is bigger than level i student's will
                 if (willList.size() <= (t.getCapacity() - t.getStudents().size()))
                 {
                     for (Will w : willList)
-                        matchPairs.add(new MatchPair(w.getId().getStudentId(), w.getId().getTeacherId(), i));
+                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getId().getStudentId()), teacherDaoImpl
+                                .findById(w.getId().getTeacherId()), MatchTypeEnum.getTypeByIntLevel(i)));
                 }
-                // Teacher's capacity is smaller than level 2 student's will
+                // Teacher's capacity is smaller than level i student's will
                 else
                 {
                     List<Will> subWillList = willList.subList(0, t.getCapacity() - t.getStudents().size());
                     for (Will w : subWillList)
-                        matchPairs.add(new MatchPair(w.getId().getStudentId(), w.getId().getTeacherId(), i));
+                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getId().getStudentId()), teacherDaoImpl
+                                .findById(w.getId().getTeacherId()), MatchTypeEnum.getTypeByIntLevel(i)));
                 }
             }
 
@@ -85,7 +92,31 @@ public class AdminServiceImpl {
             System.out.println(studentDaoImpl.findById(p.getStudentId()).getName() + " match "
                     + teacherDaoImpl.findById(p.getTeacherId()).getName() + " by level " + p.getMatchLevel());
         }
+        return matchPairs;
 
+    }
+
+    /**
+     * @Method: removeTheWillsFromStudentsWhoAlreadyGotMatched
+     * @Description: 删除已经和老师建立匹配关系的学生的志愿
+     * @param @param willList
+     * @param @return
+     * @return List<Will>
+     * @throws
+     */
+    private List<Will> removeTheWillsFromStudentsWhoAlreadyGotMatched(List<Will> willList) {
+        List<Student> studentsWhoHaveATeacher = studentDaoImpl.findStudentsWhoHaveATeacher();
+        List<Integer> studentIds = new LinkedList<Integer>();
+        for (Student s : studentsWhoHaveATeacher)
+            studentIds.add(s.getId());
+        Iterator<Will> iter = willList.iterator();
+        while (iter.hasNext())
+        {
+            Will w = iter.next();
+            if (studentIds.contains(w.getId().getStudentId()))
+                iter.remove();
+        }
+        return willList;
     }
 
     /**
@@ -123,18 +154,27 @@ public class AdminServiceImpl {
 
     }
 
-    private static class MatchPair
+    public static class MatchPair
     {
 
         private int studentId;
+        private String studentAccount;
+        private String studentName;
         private int teacherId;
-        private int matchLevel;
+        private String teacherAccount;
+        private String teacherName;
 
-        public MatchPair(int studentId, int teacherId, int matchLevel) {
-            super();
-            this.studentId = studentId;
-            this.teacherId = teacherId;
-            this.matchLevel = matchLevel;
+        private MatchTypeEnum matchLevel;
+
+        public MatchPair(Student student, Teacher t, MatchTypeEnum macthLevels)
+        {
+            this.studentId = student.getId();
+            this.studentAccount = student.getAccount();
+            this.studentName = student.getName();
+            this.teacherAccount = t.getAccount();
+            this.teacherId = t.getId();
+            this.teacherName = t.getName();
+            this.matchLevel = macthLevels;
         }
 
         public int getStudentId() {
@@ -145,6 +185,22 @@ public class AdminServiceImpl {
             this.studentId = studentId;
         }
 
+        public String getStudentAccount() {
+            return studentAccount;
+        }
+
+        public void setStudentAccount(String studentAccount) {
+            this.studentAccount = studentAccount;
+        }
+
+        public String getStudentName() {
+            return studentName;
+        }
+
+        public void setStudentName(String studentName) {
+            this.studentName = studentName;
+        }
+
         public int getTeacherId() {
             return teacherId;
         }
@@ -153,11 +209,27 @@ public class AdminServiceImpl {
             this.teacherId = teacherId;
         }
 
-        public int getMatchLevel() {
+        public String getTeacherAccount() {
+            return teacherAccount;
+        }
+
+        public void setTeacherAccount(String teacherAccount) {
+            this.teacherAccount = teacherAccount;
+        }
+
+        public String getTeacherName() {
+            return teacherName;
+        }
+
+        public void setTeacherName(String teacherName) {
+            this.teacherName = teacherName;
+        }
+
+        public MatchTypeEnum getMatchLevel() {
             return matchLevel;
         }
 
-        public void setMatchLevel(int matchLevel) {
+        public void setMatchLevel(MatchTypeEnum matchLevel) {
             this.matchLevel = matchLevel;
         }
 

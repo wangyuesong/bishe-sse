@@ -11,9 +11,6 @@
 }
 </style>
 <script>
-  //Used to store the selected teacher id, will be used in one_teacher_detail.jsp
-  var selected_teacher_id;
-
   function show_one_teacher_detail(id) {
     selected_teacher_id = id;
     $('#one_teacher_datagrid').dialog({
@@ -57,30 +54,30 @@
           } ] ],
           columns : [ [
               {
-                field : 'name',
-                title : '姓名',
+                field : 'studentName',
+                title : '学生姓名',
                 width : 40,
                 formatter : function(value, rowData) {
                   return "<a href='javascript:void(0);' onclick='show_one_teacher_detail(" + rowData.id + ")'" + "'>"
                       + value + "</a>";
                 }
               }, {
-                field : 'capacity',
-                title : '可接受学生数目',
+                field : 'studentAccount',
+                title : '学号',
                 width : 40,
               }, {
-                field : 'gender',
-                title : '性别',
+                field : 'teacherName',
+                title : '教师姓名',
                 width : 20,
                 sortable : true,
               }, {
-                field : 'email',
-                title : '邮箱',
+                field : 'teacherAccount',
+                title : '工号',
                 width : 35,
                 sortable : true,
               }, {
-                field : 'phone',
-                title : '电话',
+                field : 'matchLevel',
+                title : '志愿匹配等级',
                 width : 55,
                 sortable : true
               } ] ],
@@ -90,18 +87,22 @@
             handler : function() {
               all_teachers_datagrid.datagrid('reload');
             }
-          }, '-' ]
+          }, '-', {
+            text : '系统分配',
+            iconCls : 'icon-reload',
+            handler : function() {
+              all_teachers_datagrid.datagrid('reload');
+            }
+          } ]
         });
   });
 </script>
 </head>
-<body id="shit">
+<body>
 	<!-- <div id="dd" title="My Dialog" style="width: 400px; height: 200px;">
 	Dialog Content.</div> -->
 	<div id="tab" data-options="region:'center'" style="height: 100%">
 		<table id="all_teachers_datagrid"></table>
 	</div>
-	<div id="one_teacher_datagrid">
-		<fieldset>shit!</fieldset>
-	</div>
+	<div id="one_teacher_datagrid"></div>
 </body>

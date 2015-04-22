@@ -17,6 +17,7 @@
     <class>sse.entity.DocumentComment</class>
     <class>sse.entity.Attachment</class>
     <class>sse.entity.Document</class>
+    <class>sse.entity.Administrator</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/sse?characterEncoding=utf-8"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

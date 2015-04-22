@@ -1,17 +1,22 @@
 package sse.service.impl;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
+import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.jsonmodel.TeacherListModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
+import sse.service.impl.AdminServiceImpl.MatchPair;
 
 @Service
 public class StudentServiceImpl {
@@ -19,6 +24,9 @@ public class StudentServiceImpl {
 
     @Autowired
     private TeacherDaoImpl teacherDaoImpl;
+
+    @Autowired
+    private StudentDaoImpl studentDaoImpl;
 
     @Autowired
     private WillDaoImpl willDaoImpl;
@@ -47,6 +55,24 @@ public class StudentServiceImpl {
     public void updateSelection(WillModel model, int studentId)
     {
         willDaoImpl.updateSelection(model, studentId);
+    }
+
+    /**
+     * @Method: findCurrentMatchCondition
+     * @Description: TODO
+     * @param @return
+     * @return List<MatchPair>
+     * @throws
+     */
+    public List<MatchPair> findCurrentMatchCondition() {
+        List<Student> allStudents = studentDaoImpl.findAll();
+        List<MatchPair> matchPairs = new LinkedList<MatchPair>();
+        for (Student s : allStudents)
+        {
+            if (s.getTeacher() != null)
+                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchType()));
+        }
+        return matchPairs;
     }
 
     public static class TeacherDetail

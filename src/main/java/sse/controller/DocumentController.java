@@ -1,5 +1,6 @@
 package sse.controller;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class DocumentController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/getAllTempAttachmentsByUserId", method = { RequestMethod.GET, RequestMethod.POST })
+    @RequestMapping(value = "/getAllTempAttachments", method = { RequestMethod.GET, RequestMethod.POST })
     public List<SimpleAttachmentInfo> getAllTempAttachmentsByUserId(HttpServletRequest request,
             HttpServletResponse response) {
         HttpSession session = request.getSession();
@@ -89,7 +90,7 @@ public class DocumentController {
         String attachmentId = request.getParameter("attachmentId");
         if (u != null && attachmentId != null)
             try {
-                documentServiceImpl.deleteAttachmentOnFTPServerAndDB(u, Integer.parseInt(attachmentId));
+                documentServiceImpl.deleteAttachmentOnFTPServerAndDBByAttachmentId(u, Integer.parseInt(attachmentId));
             } catch (Exception e) {
                 logger.error("删除附件出错", e);
                 e.printStackTrace();
@@ -113,7 +114,20 @@ public class DocumentController {
         return true;
     }
 
+    @ResponseBody
     @RequestMapping(value = "/cancelCreateDocument", method = { RequestMethod.POST })
-    public void cancelCreateDocument(HttpServletRequest request, HttpServletResponse response) {
+    public boolean cancelCreateDocument(HttpServletRequest request, HttpServletResponse response) throws SSEException {
+        HttpSession session = request.getSession();
+        if (session.getAttribute("USER") == null)
+        {
+            User u = (User) (request.getSession().getAttribute("USER"));
+            try {
+                documentServiceImpl.cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(u);
+            } catch (IOException e) {
+                logger.error("删除附件出错", e);
+                throw new SSEException("删除附件出错", e);
+            }
+        }
+        return true;
     }
 }

@@ -17,10 +17,10 @@
         var r = $.parseJSON(result);
         if (r.success) {
           loginDialog.dialog('close');
-          if (r.obj.role == 'Student')
-            window.location.href = "dispatch/stu_index";
-          else if (r.obj.role == 'Teacher')
-            window.location.href = "dispatch/tea_index";
+          /* if (r.obj.role == 'Student') */
+          window.location.href = "dispatch/main";
+          /*  else if (r.obj.role == 'Teacher')
+             window.location.href = "dispatch/tea_index"; */
         } else if (!r.success) {
           $.messager.show({
             title : '错误',
@@ -64,7 +64,7 @@
 							<th>密码</th>
 							<td><input name="password" type="password"
 								class="easyui-validatebox"
-								data-options="required:true,validType:'length[6,16]'" /></td>
+								data-options="required:true,validType:'length[5,16]'" /></td>
 						</tr>
 					</table>
 				</form>

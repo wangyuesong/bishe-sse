@@ -51,7 +51,6 @@ public class StudentController {
     @RequestMapping(value = "/showOneTeacherDetail", method = { RequestMethod.GET })
     public TeacherDetail showOneTeacherDetail(String teacherId)
     {
-        HashMap<String, String> returnMap = new HashMap<String, String>();
         return studentService.findOneTeacherDetailByTeacherId(Integer.parseInt(teacherId));
     }
 

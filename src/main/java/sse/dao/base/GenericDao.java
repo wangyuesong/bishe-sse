@@ -110,4 +110,20 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
                 namedQuery.setParameter(oneKey, params.get(oneKey));
         return namedQuery.getResultList().size();
     }
+
+    @SuppressWarnings("unchecked")
+    public List<E> findForList(String jql, HashMap<String, Object> params)
+    {
+
+        Query namedQuery = this.getEntityManager().createQuery(jql, entityClass);
+        if (params != null)
+            for (String oneKey : params.keySet())
+                namedQuery.setParameter(oneKey, params.get(oneKey));
+        return (List<E>) namedQuery.getResultList();
+    }
+
+    public List<E> findForList(String jql)
+    {
+        return this.findForList(jql, null);
+    }
 }

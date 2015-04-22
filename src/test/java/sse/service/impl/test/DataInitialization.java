@@ -93,15 +93,17 @@ import java.util.List;
 
 import org.junit.Test;
 
+import sse.entity.Administrator;
 import sse.entity.Menu;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.User;
 import sse.entity.Will;
 import sse.entity.WillPK;
+import sse.enums.MatchTypeEnum;
 
 public class DataInitialization extends BaseJPATest {
-    
+
     public int fbn(String name)
     {
         return ((User) (em.createQuery("select u from User u where u.name=:name").setParameter("name", name)
@@ -143,6 +145,9 @@ public class DataInitialization extends BaseJPATest {
         Teacher meihuiLi = new Teacher(11, "1252757", "李美惠", p, 2);
         em.persist(meihuiLi);
 
+        Administrator admin = new Administrator(12, "admin", "admin", "admin");
+        em.persist(admin);
+
         List<Will> willList = new ArrayList<Will>();
         // Yuesong Wang
         willList.add(new Will(new WillPK(fbn("王岳松"), fbn("刘岩")), 1));
@@ -173,6 +178,10 @@ public class DataInitialization extends BaseJPATest {
             em.persist(w);
         }
 
+        yuesongWang.setTeacher(yanLiu);
+        yuesongWang.setMatchType(MatchTypeEnum.First);
+        em.merge(yuesongWang);
+
         List<Menu> menus = new ArrayList<Menu>();
         em.persist(new Menu(1, "指导教师", null, "Student", ""));
         menus.add(new Menu(2, "所有老师", menufbn("指导教师"), "Student",
@@ -189,6 +198,15 @@ public class DataInitialization extends BaseJPATest {
         em.persist(new Menu(5, "我的文档", null, "Student", ""));
         menus.add(new Menu(6, "相关文档", menufbn("我的文档"), "Student",
                 "http://localhost:8080/sse/dispatch/document/document_list"));
+        for (Menu m : menus)
+        {
+            em.persist(m);
+        }
+
+        menus = new ArrayList<Menu>();
+        em.persist(new Menu(7, "分配志愿", null, "Administrator", ""));
+        menus.add(new Menu(8, "分配", menufbn("分配志愿"), "Administrator",
+                "http://localhost:8080/sse/dispatch/administrator/match_will"));
         for (Menu m : menus)
         {
             em.persist(m);

@@ -87,6 +87,16 @@
       $('#one_document_datagrid').dialog({
         href : '${pageContext.request.contextPath}/dispatch/document/add_document',
         onClose : function() {
+          $.ajax({
+            url : "${pageContext.request.contextPath}/document/cancelCreateDocument",
+            type : "post",
+            success : function(data, textStatus) {
+              $.each(data, function(n, value) {
+                alert(value.listName);
+              });
+            }
+          });
+          $(this).dialog('destroy');
         },
         width : $(document.body).width() * 0.9,
         height : $(document.body).height() * 0.9,
@@ -97,14 +107,10 @@
           text : '增加',
           iconCls : 'icon-add',
           handler : function() {
-            alert("hello");
             var d = $(this).closest('.window-body');
             $('#document_add_form').submit();
           }
-        } ],
-        onClose : function() {
-          $(this).dialog('destroy');
-        }
+        } ]
       });
     }
   </script>

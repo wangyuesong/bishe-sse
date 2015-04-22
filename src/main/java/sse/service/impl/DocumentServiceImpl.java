@@ -61,7 +61,6 @@ public class DocumentServiceImpl {
     String ftpUserName = "sseftp";
     String ftpPassword = "123";
 
-    // For ajax usage, only supply id and
     public List<SimpleAttachmentInfo> getAllTempAttachmentOfAUser(User currentUser)
     {
         List<SimpleAttachmentInfo> infoList = new LinkedList<SimpleAttachmentInfo>();
@@ -174,7 +173,8 @@ public class DocumentServiceImpl {
         attachmentDaoImpl.createTempAttachment(a);
     }
 
-    public boolean deleteAttachmentOnFTPServerAndDB(User user, int attachmentId) throws SocketException, IOException
+    public boolean deleteAttachmentOnFTPServerAndDBByAttachmentId(User user, int attachmentId) throws SocketException,
+            IOException
     {
         Attachment attachment = attachmentDaoImpl.findById(attachmentId);
         String realName = attachment.getRealName();
@@ -224,6 +224,18 @@ public class DocumentServiceImpl {
         }
     }
 
+    /**
+     * @Method: findDocumentsForPagingByCreatorId
+     * @Description: 列出由自己创建的所有的文档
+     * @param @param page
+     * @param @param pageSize
+     * @param @param sort
+     * @param @param order
+     * @param @param creatorId
+     * @param @return
+     * @return DataGrid<DocumentListModel>
+     * @throws
+     */
     public DataGrid<DocumentListModel> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort,
             String order,
             Integer creatorId)
@@ -246,6 +258,26 @@ public class DocumentServiceImpl {
         dg.setRows(documentModels);
         dg.setTotal(documentDaoImpl.findDocumentsForCount());
         return dg;
+    }
+
+    /**
+     * @throws IOException
+     * @Method: cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer
+     * @Description: 用户点击红叉，取消创建Document，因此要删除所有状态为Temp的附件
+     * @param @param u
+     * @return void
+     * @throws
+     */
+    public void cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(User user) throws IOException {
+        List<Attachment> attachments = attachmentDaoImpl.findTempAttachmentsByUserId(user.getId());
+        // Delete file on ftp server
+        FTPClient ftpClient = connectAndLoginFtpServer();
+        String baseDir = "/Users/sseftp/" + user.getAccount() + user.getName() + "/";
+        for (Attachment a : attachments)
+        {
+            ftpClient.deleteFile(convertUTF8ToISO(baseDir + a.getRealName()));
+            attachmentDaoImpl.removeWithTransaction(a);
+        }
     }
 
     public HashMap<String, String> findPreviousWills(int studentId)

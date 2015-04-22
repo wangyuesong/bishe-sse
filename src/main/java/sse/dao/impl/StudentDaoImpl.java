@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import sse.dao.base.GenericDao;
 import sse.entity.Student;
-import sse.entity.User;
 
 /**
  * @author yuesongwang
@@ -15,5 +14,8 @@ import sse.entity.User;
 @Repository
 public class StudentDaoImpl extends GenericDao<Integer, Student>
 {
-
+    public List<Student> findStudentsWhoHaveATeacher()
+    {
+        return this.findForList("select s from Student s where s.teacher is not NULL");
+    }
 }

@@ -17,7 +17,7 @@
   $(function() {
     $('#attachment_list_grid').datagrid(
         {
-          url : '${pageContext.request.contextPath}/document/getAllTempAttachmentsByUserId',
+          url : '${pageContext.request.contextPath}/document/getAllTempAttachments',
           type : 'get',
           fitColumns : true,
           border : false,
@@ -107,7 +107,7 @@
 
   function show_up_files() {
     $.ajax({
-      url : "${pageContext.request.contextPath}/document/getAllTempAttachmentsByUserId",
+      url : "${pageContext.request.contextPath}/document/getAllTempAttachments",
       type : "get",
       success : function(data, textStatus) {
         $("#attachment_list_grid").datagrid('reload');
