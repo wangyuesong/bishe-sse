@@ -17,6 +17,7 @@ import sse.jsonmodel.TeacherListModel;
 import sse.pageModel.DataGrid;
 import sse.pageModel.WillModel;
 import sse.service.impl.AdminServiceImpl.MatchPair;
+import sse.utils.ClassTool;
 
 @Service
 public class StudentServiceImpl {
@@ -34,7 +35,14 @@ public class StudentServiceImpl {
     public DataGrid<TeacherListModel> findTeachersForPaging(int pageSize, int page, String sortCriteria, String order)
     {
         DataGrid<TeacherListModel> dg = new DataGrid<>();
-        dg.setRows(teacherDaoImpl.findTeachersForPaging(pageSize, page, sortCriteria, order));
+        List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(page, pageSize, sortCriteria, order);
+        List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
+        ClassTool<Teacher, TeacherListModel> classTool = new ClassTool(Teacher.class, TeacherListModel.class);
+        for (Teacher t : teacherList)
+        {
+            teacherModelList.add(classTool.convertJPAEntityToPOJO(t));
+        }
+        dg.setRows(teacherModelList);
         dg.setTotal(teacherDaoImpl.findTeachersForCount());
         return dg;
     }
@@ -71,6 +79,8 @@ public class StudentServiceImpl {
         {
             if (s.getTeacher() != null)
                 matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchType()));
+            else
+                matchPairs.add(new MatchPair(s, null, null));
         }
         return matchPairs;
     }

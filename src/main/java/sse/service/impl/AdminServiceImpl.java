@@ -15,6 +15,9 @@ import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.MatchTypeEnum;
+import sse.jsonmodel.TeacherListModel;
+import sse.jsonmodel.TeacherSelectModel;
+import sse.utils.ClassTool;
 
 @Service
 public class AdminServiceImpl {
@@ -28,6 +31,18 @@ public class AdminServiceImpl {
 
     @Autowired
     private StudentDaoImpl studentDaoImpl;
+
+    public List<TeacherSelectModel> findAllTeachersForSelect()
+    {
+        List<Teacher> teacherList = teacherDaoImpl.findAll();
+        List<TeacherSelectModel> teacherSelectModels = new LinkedList<TeacherSelectModel>();
+        for (Teacher t : teacherList)
+        {
+            TeacherSelectModel ts = new TeacherSelectModel(t.getId(), t.getAccount(), t.getName(), t.getCapacity());
+            teacherSelectModels.add(ts);
+        }
+        return teacherSelectModels;
+    }
 
     public List<MatchPair> doMatch()
     {
@@ -84,9 +99,7 @@ public class AdminServiceImpl {
                                 .findById(w.getId().getTeacherId()), MatchTypeEnum.getTypeByIntLevel(i)));
                 }
             }
-
         }
-
         for (MatchPair p : matchPairs)
         {
             System.out.println(studentDaoImpl.findById(p.getStudentId()).getName() + " match "
@@ -151,7 +164,6 @@ public class AdminServiceImpl {
             if (willList.get(i).getId().getStudentId() == studentId)
                 willList.remove(i);
         }
-
     }
 
     public static class MatchPair
@@ -163,7 +175,6 @@ public class AdminServiceImpl {
         private int teacherId;
         private String teacherAccount;
         private String teacherName;
-
         private MatchTypeEnum matchLevel;
 
         public MatchPair(Student student, Teacher t, MatchTypeEnum macthLevels)
@@ -171,9 +182,12 @@ public class AdminServiceImpl {
             this.studentId = student.getId();
             this.studentAccount = student.getAccount();
             this.studentName = student.getName();
-            this.teacherAccount = t.getAccount();
-            this.teacherId = t.getId();
-            this.teacherName = t.getName();
+            if (t != null)
+            {
+                this.teacherAccount = t.getAccount();
+                this.teacherId = t.getId();
+                this.teacherName = t.getName();
+            }
             this.matchLevel = macthLevels;
         }
 

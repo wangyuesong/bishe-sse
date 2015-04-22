@@ -7,7 +7,7 @@ package sse.enums;
  */
 public enum MatchTypeEnum {
 
-    First("第一志愿"), Second("第二志愿"), Third("第三志愿"), Manual("管理员分配"), UNKNOWN("Unknown");
+    第一志愿("第一志愿"), 第二志愿("第二志愿"), 第三志愿("第三志愿"), 管理员分配("管理员分配"), UNKNOWN("Unknown");
 
     private final String value;
 
@@ -36,13 +36,13 @@ public enum MatchTypeEnum {
 
     public static MatchTypeEnum getTypeByIntLevel(int level) {
         if (level == 1)
-            return First;
+            return 第一志愿;
         if (level == 2)
-            return Second;
+            return 第二志愿;
         if (level == 3)
-            return Third;
+            return 第三志愿;
         if (level == 0)
-            return Manual;
+            return 管理员分配;
         else
             return UNKNOWN;
     }

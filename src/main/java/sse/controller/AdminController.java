@@ -11,9 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import sse.entity.Teacher;
+import sse.jsonmodel.TeacherListModel;
+import sse.jsonmodel.TeacherSelectModel;
+import sse.pageModel.DataGrid;
 import sse.service.impl.AdminServiceImpl;
-import sse.service.impl.StudentServiceImpl;
 import sse.service.impl.AdminServiceImpl.MatchPair;
+import sse.service.impl.StudentServiceImpl;
 
 /**
  * @author yuesongwang
@@ -30,7 +34,7 @@ public class AdminController {
     private StudentServiceImpl studentServiceImpl;
 
     @ResponseBody
-    @RequestMapping(value = "/getCurrentMatchCondition", method = { RequestMethod.GET })
+    @RequestMapping(value = "/getCurrentMatchCondition", method = { RequestMethod.GET, RequestMethod.POST })
     public List<MatchPair> getCurrentMatchCondition(HttpServletRequest request, HttpServletResponse response) {
         return studentServiceImpl.findCurrentMatchCondition();
     }
@@ -41,4 +45,10 @@ public class AdminController {
         List<MatchPair> matchPairs = adminServiceImpl.doMatch();
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/getAllTeachers", method = { RequestMethod.GET, RequestMethod.POST })
+    public List<TeacherSelectModel> getAllTeachers(HttpServletRequest request)
+    {
+        return adminServiceImpl.findAllTeachersForSelect();
+    }
 }

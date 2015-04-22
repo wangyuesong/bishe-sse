@@ -21,17 +21,11 @@ public class TeacherDaoImpl extends GenericDao<Integer, Teacher>
      * 
      * @see sse.dao.impl.ITeacherDao#findTeachersForPaging()
      */
-    public List<TeacherListModel> findTeachersForPaging(int page, int pageSize, String sortCriteria, String order)
+    public List<Teacher> findTeachersForPaging(int page, int pageSize, String sortCriteria, String order)
     {
         List<Teacher> teacherList = this.findForPaging("select t from Teacher t", new HashMap<String, Object>(), page,
                 pageSize, sortCriteria, order);
-        List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
-        ClassTool<Teacher, TeacherListModel> classTool = new ClassTool(Teacher.class, TeacherListModel.class);
-        for (Teacher t : teacherList)
-        {
-            teacherModelList.add(classTool.convertJPAEntityToPOJO(t));
-        }
-        return teacherModelList;
+        return teacherList;
     }
 
     /*

@@ -38,6 +38,7 @@ public class Teacher extends User {
     @Column(length = 1000, name = "CANDIDATE_TOPICS")
     private String candidateTopics;
 
+
     public String getCandidateTopics() {
         return candidateTopics;
     }

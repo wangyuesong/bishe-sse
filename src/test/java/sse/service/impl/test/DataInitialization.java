@@ -179,7 +179,7 @@ public class DataInitialization extends BaseJPATest {
         }
 
         yuesongWang.setTeacher(yanLiu);
-        yuesongWang.setMatchType(MatchTypeEnum.First);
+        yuesongWang.setMatchType(MatchTypeEnum.第一志愿);
         em.merge(yuesongWang);
 
         List<Menu> menus = new ArrayList<Menu>();
