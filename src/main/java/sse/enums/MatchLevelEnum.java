@@ -7,7 +7,7 @@ package sse.enums;
  */
 public enum MatchLevelEnum {
 
-    第一志愿("第一志愿"), 第二志愿("第二志愿"), 第三志愿("第三志愿"), 管理员分配("管理员分配"), UNKNOWN("Unknown");
+    第一志愿("第一志愿"), 第二志愿("第二志愿"), 第三志愿("第三志愿"), 调剂("调剂"), UNKNOWN("Unknown");
 
     private final String value;
 
@@ -42,7 +42,7 @@ public enum MatchLevelEnum {
         if (level == 3)
             return 第三志愿;
         if (level == 0)
-            return 管理员分配;
+            return 调剂;
         else
             return UNKNOWN;
     }

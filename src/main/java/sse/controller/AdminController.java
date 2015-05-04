@@ -77,7 +77,7 @@ public class AdminController {
         // for (MatchPair matchPair : matchPairs)
         // studentServiceImpl.createNewRelationshipBetweenStudentAndTeacher(matchPair.getStudentId(),
         // matchPair.getTeacherId());
-        return new BasicJson();
+        return new BasicJson(true, "更新成功", null);
     }
 
     @ResponseBody
@@ -85,6 +85,13 @@ public class AdminController {
     public List<TeacherSelectModel> getAllTeachers(HttpServletRequest request)
     {
         return adminServiceImpl.findAllTeachersInSelectModelList();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/systemAssign", method = { RequestMethod.GET, RequestMethod.POST })
+    public List<MatchPair> systemAssign(HttpServletRequest request, HttpServletResponse response) {
+        List<MatchPair> matchPairs = adminServiceImpl.doMatch();
+        return matchPairs;
     }
 
     /**

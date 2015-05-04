@@ -35,7 +35,8 @@ public class StudentServiceImpl {
     @Autowired
     private WillDaoImpl willDaoImpl;
 
-    public GenericDataGrid<TeacherListModel> findTeachersForPagingInGenericDataGrid(int pageSize, int page, String sortCriteria,
+    public GenericDataGrid<TeacherListModel> findTeachersForPagingInGenericDataGrid(int pageSize, int page,
+            String sortCriteria,
             String order)
     {
         GenericDataGrid<TeacherListModel> dg = new GenericDataGrid<>();
@@ -94,9 +95,9 @@ public class StudentServiceImpl {
         for (Student s : allStudents)
         {
             if (s.getTeacher() != null)
-                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel()));
+                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel(), s.getMatchType()));
             else
-                matchPairs.add(new MatchPair(s, null, null));
+                matchPairs.add(new MatchPair(s, null, null, null));
         }
         return matchPairs;
     }

@@ -16,6 +16,7 @@ import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.MatchLevelEnum;
+import sse.enums.MatchTypeEnum;
 import sse.pageModel.TeacherSelectModel;
 
 @Service
@@ -57,7 +58,7 @@ public class AdminServiceImpl {
 
         List<Will> studentWills = willDaoImpl.findWillsByStudentId(Integer.parseInt(studentId));
 
-        MatchLevelEnum matchLevel = MatchLevelEnum.管理员分配;
+        MatchLevelEnum matchLevel = MatchLevelEnum.调剂;
         // 如果不是取消分配，则找一下这个匹配是第几志愿匹配
         if (t != null)
             for (Will w : studentWills)
@@ -83,6 +84,13 @@ public class AdminServiceImpl {
 
     }
 
+    /** 
+     * @Method: doMatch 
+     * @Description: TODO
+     * @param @return
+     * @return List<MatchPair>
+     * @throws 
+     */
     public List<MatchPair> doMatch()
     {
         List<Teacher> allTeachers = teacherDaoImpl.findAll();
@@ -127,7 +135,8 @@ public class AdminServiceImpl {
                 {
                     for (Will w : willList)
                         matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getId().getStudentId()), teacherDaoImpl
-                                .findById(w.getId().getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i)));
+                                .findById(w.getId().getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
+                                MatchTypeEnum.系统分配));
                 }
                 // Teacher's capacity is smaller than level i student's will
                 else
@@ -135,7 +144,8 @@ public class AdminServiceImpl {
                     List<Will> subWillList = willList.subList(0, t.getCapacity() - t.getStudents().size());
                     for (Will w : subWillList)
                         matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getId().getStudentId()), teacherDaoImpl
-                                .findById(w.getId().getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i)));
+                                .findById(w.getId().getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
+                                MatchTypeEnum.系统分配));
                 }
             }
         }

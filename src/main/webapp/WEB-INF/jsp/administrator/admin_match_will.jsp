@@ -82,6 +82,7 @@
           options : {
             panelWidth : 450,
             idField : 'id',
+            fitColumns : true,
             textField : 'name',
             url : '${pageContext.request.contextPath}/admin/getAllTeachers',
             columns : [ [ {
@@ -104,6 +105,11 @@
         title : '匹配等级',
         name : '匹配等级',
         width : 150,
+      }, {
+        field : 'matchType',
+        title : '匹配方式',
+        name : '匹配方式',
+        width : 150,
       } ] ]
     });
 
@@ -120,15 +126,19 @@
         var teacher_name = $(ed.target).combobox('getText');
         var teacher_id = $(ed.target).combobox('getValue');
         //更改绑定的数据
-        $('#dg').datagrid('getRows')[editIndex]['teacherName'] = teacher_name;
-        $('#dg').datagrid('getRows')[editIndex]['teacherId'] = teacher_id;
+        var one_row_data = $('#dg').datagrid('getRows')[editIndex];
+        one_row_data['teacherName'] = teacher_name;
+        one_row_data['teacherId'] = teacher_id;
+        one_row_data['matchLevel'] = "";
+        one_row_data['matchType'] = '手工分配';
+        $('#dg').datagrid('endEdit', editIndex);
         $.ajax({
           url : "${pageContext.request.contextPath}/admin/doCapacityCheck",
           type : "post",
           async : false,
           dataType : 'json',
           contentType : 'application/json',
-          data : JSON.stringify($('#dg').datagrid('getRows')),
+          data : JSON.stringify($('#dg').datagrid('getChanges')),
           success : function(data, textStatus) {
             if (!data.success) {
               $.messager.show({
@@ -138,7 +148,6 @@
             }
           }
         });
-        $('#dg').datagrid('endEdit', editIndex);
         editIndex = undefined;
         return true;
       } else {
@@ -179,20 +188,27 @@
     function accept() {
       if (endEditing()) {
         /*  $('#dg').datagrid('acceptChanges'); */
-        var rows = $('#dg').datagrid('getChanges');
-        alert(rows);
+        var changed_rows = $('#dg').datagrid('getChanges');
         $.ajax({
           //发送请求改变学生和老师的匹配
           url : "${pageContext.request.contextPath}/admin/updateMatchPairs",
           dataType : 'json',
           contentType : 'application/json',
-          data : JSON.stringify(rows),
+          data : JSON.stringify(changed_rows),
           type : "post",
           success : function(data, textStatus) {
-            /* $.each(data, function(n, value) {
-              alert(value.listName);
-            }); */
-            $('#dg').datagrid("reload");
+            if (!data.success) {
+              $.messager.show({
+                title : '错误',
+                msg : data.msg
+              });
+            } else {
+              $.messager.show({
+                title : '成功',
+                msg : data.msg
+              });
+            }
+            $('#dg').datagrid('reload');
           }
         });
       }
@@ -209,7 +225,36 @@
       alert(rows.length + ' rows are changed!');
     }
     function systemAssign() {
-      alert("System assign");
+      $.ajax({
+        //发送请求改变学生和老师的匹配
+        url : "${pageContext.request.contextPath}/admin/systemAssign",
+        dataType : 'json',
+        contentType : 'application/json',
+        type : "post",
+        success : function(data, textStatus) {
+          alert(JSON.stringify(data));
+          data_length = $('#dg').datagrid('getRows').length;
+          $.each(data, function(index, value) {
+            for (i = 0; i < data_length; i++) {
+              if ($.trim($('#dg').datagrid('getRows')[i]['studentId']) + "" == $.trim(value.studentId) + "") {
+                var one_row_data = $('#dg').datagrid('getRows')[i];
+                $('#dg').datagrid('selectRow', i).datagrid('beginEdit', i);
+                one_row_data['teacherName'] = value.teacherName;
+                one_row_data['teacherId'] = value.teacherId;
+                one_row_data['matchLevel'] = value.matchLevel;
+                one_row_data['matchType'] = value.matchType;
+                $('#dg').datagrid('endEdit', i);
+              }
+            }
+          });
+           $.messager.show({
+                title : '提示',
+                msg : "系统分配完毕，请保存"
+              });
+
+        }
+      });
+      
     }
   </script>
 </body>

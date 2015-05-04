@@ -3,6 +3,7 @@ package sse.commandmodel;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.enums.MatchLevelEnum;
+import sse.enums.MatchTypeEnum;
 
 public class MatchPair
 {
@@ -14,8 +15,9 @@ public class MatchPair
     private String teacherAccount;
     private String teacherName;
     private MatchLevelEnum matchLevel;
+    private MatchTypeEnum matchType;
 
-    public MatchPair(Student student, Teacher t, MatchLevelEnum macthLevels)
+    public MatchPair(Student student, Teacher t, MatchLevelEnum macthLevels, MatchTypeEnum matchType)
     {
         this.studentId = student.getId() + "";
         this.studentAccount = student.getAccount();
@@ -26,7 +28,16 @@ public class MatchPair
             this.teacherId = t.getId() + "";
             this.teacherName = t.getName();
         }
+        this.matchType = matchType;
         this.matchLevel = macthLevels;
+    }
+
+    public MatchTypeEnum getMatchType() {
+        return matchType;
+    }
+
+    public void setMatchType(MatchTypeEnum matchType) {
+        this.matchType = matchType;
     }
 
     public String getStudentId() {
