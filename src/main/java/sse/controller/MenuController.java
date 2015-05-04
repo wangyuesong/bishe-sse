@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.entity.User;
-import sse.pageModel.TreeModel;
+import sse.pageModel.MenuTreeModel;
 import sse.service.impl.MenuServiceImpl;
 
 
@@ -26,7 +26,7 @@ public class MenuController {
    
    @ResponseBody
    @RequestMapping(value = "/getMenuList", method = {RequestMethod.GET,RequestMethod.POST})
-   public List<TreeModel>  getMenuList(HttpServletRequest request)
+   public List<MenuTreeModel>  getMenuList(HttpServletRequest request)
    {
       return menuService.getMenu(null, (User) request.getSession().getAttribute("USER"));
    }

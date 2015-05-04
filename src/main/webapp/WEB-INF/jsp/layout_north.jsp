@@ -7,6 +7,6 @@
 <title>Insert title here</title>
 
 </head>
-<body>FUCK! ${sessionScope.USER.name}
+<body>欢迎您，${sessionScope.USER.name}
 </body>
 </html>

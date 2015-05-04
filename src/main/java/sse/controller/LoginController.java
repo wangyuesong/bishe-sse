@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import sse.commandmodel.LoginForm;
-import sse.jsonmodel.BasicJson;
+import sse.commandmodel.BasicJson;
+import sse.commandmodel.UserLoginForm;
 import sse.service.impl.UserServiceImpl;
 
 @Controller
@@ -24,9 +24,8 @@ public class LoginController {
 
     @ResponseBody
     @RequestMapping(value = "/login", method = { RequestMethod.POST })
-    public BasicJson login(HttpServletRequest request, HttpServletResponse response, LoginForm command) {
-        return userService.doLogin(command, request);
-
+    public BasicJson login(HttpServletRequest request, HttpServletResponse response, UserLoginForm command) {
+           return userService.doLogin(command, request);
     }
 
 }

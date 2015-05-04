@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import sse.commandmodel.BasicJson;
+import sse.commandmodel.WillModel;
 import sse.entity.User;
-import sse.jsonmodel.BasicJson;
-import sse.jsonmodel.TeacherListModel;
-import sse.pageModel.DataGrid;
-import sse.pageModel.WillModel;
+import sse.pageModel.GenericDataGrid;
+import sse.pageModel.TeacherListModel;
 import sse.service.impl.StudentServiceImpl;
 import sse.service.impl.StudentServiceImpl.TeacherDetail;
 
@@ -31,11 +31,11 @@ public class StudentController {
 
     @ResponseBody
     @RequestMapping(value = "/getAllTeachers", method = { RequestMethod.GET, RequestMethod.POST })
-    public DataGrid<TeacherListModel> getAllTeachers(HttpServletRequest request)
+    public GenericDataGrid<TeacherListModel> getAllTeachers(HttpServletRequest request)
     {
         int page = 1;
         int pageSize = 10;
-        return studentService.findTeachersForPaging(page, pageSize, null, "ASC");
+        return studentService.findTeachersForPagingInGenericDataGrid(page, pageSize, null, "ASC");
     }
 
     @ResponseBody
@@ -43,7 +43,7 @@ public class StudentController {
     public HashMap<String, String> getPreviousSelection(HttpServletRequest request)
     {
         int studentId = ((User) (request.getSession().getAttribute("USER"))).getId();
-        HashMap<String, String> returnMap = studentService.findPreviousWills(studentId);
+        HashMap<String, String> returnMap = studentService.findPreviousWillsInHashMap(studentId);
         return CollectionUtils.isEmpty(returnMap) ? new HashMap<String, String>() : returnMap;
     }
 
@@ -51,7 +51,7 @@ public class StudentController {
     @RequestMapping(value = "/showOneTeacherDetail", method = { RequestMethod.GET })
     public TeacherDetail showOneTeacherDetail(String teacherId)
     {
-        return studentService.findOneTeacherDetailByTeacherId(Integer.parseInt(teacherId));
+        return studentService.findOneTeacherDetailByTeacherIdInTeacherDetail(Integer.parseInt(teacherId));
     }
 
     @ResponseBody

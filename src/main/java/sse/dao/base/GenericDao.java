@@ -102,7 +102,6 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
     }
 
     // FIND FOR COUNT
-
     public long findForCount(String jql, HashMap<String, Object> params) {
         Query namedQuery = this.getEntityManager().createQuery(jql);
         if (params != null)

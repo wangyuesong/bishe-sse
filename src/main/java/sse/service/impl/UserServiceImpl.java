@@ -6,10 +6,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import sse.commandmodel.LoginForm;
+import sse.commandmodel.BasicJson;
+import sse.commandmodel.UserLoginForm;
 import sse.dao.impl.UserDaoImpl;
 import sse.entity.User;
-import sse.jsonmodel.BasicJson;
 
 @Service
 public class UserServiceImpl {
@@ -23,7 +23,7 @@ public class UserServiceImpl {
      * 
      * @see sse.service.impl.IUserService#doLogin(sse.commandmodel.LoginForm)
      */
-    public BasicJson doLogin(LoginForm command, HttpServletRequest request)
+    public BasicJson doLogin(UserLoginForm command, HttpServletRequest request)
     {
         BasicJson json = new BasicJson();
         User user = userDaoImpl.findUserByAccount(command.getAccount());

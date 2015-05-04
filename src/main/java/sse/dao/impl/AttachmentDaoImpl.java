@@ -34,20 +34,4 @@ public class AttachmentDaoImpl extends GenericDao<Integer, Attachment>
         return attachments;
     }
 
-    // public List<Document> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort, String order,
-    // Integer creatorId)
-    // {
-    // HashMap<String, Object> paramMap = new HashMap<String, Object>();
-    // paramMap.put("creatorId", creatorId);
-    // return this.findForPaging("select t from Document t where t.creator.id=:creatorId", paramMap, page,
-    // pageSize, sort,
-    // order);
-    // }
-    //
-    // public long findDocumentsForCount()
-    // {
-    // return this.findForCount("select t from Document t", null);
-    // }
-    //
-
 }

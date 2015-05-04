@@ -28,6 +28,17 @@ public class TimeNode extends BaseModel implements Serializable {
     @Column(nullable = false, length = 500)
     private String description;
 
+    public TimeNode() {
+
+    }
+
+    public TimeNode(String name, Date timeDate, String description)
+    {
+        this.name = name;
+        this.time = timeDate;
+        this.description = description;
+    }
+
     public int getId() {
         return id;
     }

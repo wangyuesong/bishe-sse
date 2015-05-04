@@ -18,24 +18,26 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import sse.controller.DocumentController;
+import sse.commandmodel.DocumentFormModel;
+import sse.commandmodel.WillModel;
 import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.DocumentDaoImpl;
+import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
 import sse.entity.Attachment;
 import sse.entity.Document;
+import sse.entity.Teacher;
 import sse.entity.User;
+import sse.entity.Will;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
-import sse.jsonmodel.DocumentFormModel;
-import sse.jsonmodel.DocumentListModel;
-import sse.pageModel.DataGrid;
-import sse.pageModel.WillModel;
+import sse.pageModel.DocumentListModel;
+import sse.pageModel.GenericDataGrid;
 
 /**
  * @author yuesongwang
@@ -50,6 +52,13 @@ public class DocumentServiceImpl {
 
     @Autowired
     private AttachmentDaoImpl attachmentDaoImpl;
+
+    @Autowired
+    private TeacherDaoImpl teacherDaoImpl;
+
+    public DocumentServiceImpl() {
+        // TODO Auto-generated constructor stub
+    }
 
     @Autowired
     private WillDaoImpl willDaoImpl;
@@ -192,7 +201,7 @@ public class DocumentServiceImpl {
 
     /**
      * @Method: confirmCreateDocumentAndAddDocumentToDB
-     * @Description: TODO
+     * @Description: 创建新的Document，并且将所有状态为Temp的属于该用户的附件都变为Forever，与新创建的Document建立关系
      * @param @param u
      * @param @param documentModel
      * @return void
@@ -236,11 +245,11 @@ public class DocumentServiceImpl {
      * @return DataGrid<DocumentListModel>
      * @throws
      */
-    public DataGrid<DocumentListModel> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort,
+    public GenericDataGrid<DocumentListModel> findDocumentsForPagingByCreatorId(int page, int pageSize, String sort,
             String order,
             Integer creatorId)
     {
-        DataGrid<DocumentListModel> dg = new DataGrid<>();
+        GenericDataGrid<DocumentListModel> dg = new GenericDataGrid<>();
         List<Document> documents = documentDaoImpl.findDocumentsForPagingByCreatorId(page, pageSize, sort, order,
                 creatorId);
         List<DocumentListModel> documentModels = new LinkedList<DocumentListModel>();
@@ -282,7 +291,19 @@ public class DocumentServiceImpl {
 
     public HashMap<String, String> findPreviousWills(int studentId)
     {
-        return willDaoImpl.findPreviousSelectionByStudentId(studentId);
+        List<Will> wills = willDaoImpl.findPreviousSelectionsByStudentId(studentId);
+        if (!CollectionUtils.isEmpty(wills))
+        {
+            HashMap<String, String> returnMap = new HashMap<String, String>();
+            for (Will w : wills)
+            {
+                Teacher t = teacherDaoImpl.findById(w.getId().getTeacherId());
+                returnMap.put("" + w.getLevel(), t.getAccount());
+            }
+            return returnMap;
+        }
+        else
+            return null;
     }
 
     public void updateSelection(WillModel model, int studentId)

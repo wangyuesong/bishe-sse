@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import sse.commandmodel.DocumentFormModel;
 import sse.entity.Document;
 import sse.entity.User;
 import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
-import sse.jsonmodel.DocumentFormModel;
-import sse.jsonmodel.DocumentListModel;
-import sse.pageModel.DataGrid;
+import sse.pageModel.GenericDataGrid;
+import sse.pageModel.DocumentListModel;
 import sse.service.impl.DocumentServiceImpl;
 import sse.service.impl.DocumentServiceImpl.AttachmentInfo;
 import sse.service.impl.DocumentServiceImpl.SimpleAttachmentInfo;
@@ -44,13 +44,13 @@ public class DocumentController {
 
     @ResponseBody
     @RequestMapping(value = "/getAllDocuments", method = { RequestMethod.GET, RequestMethod.POST })
-    public DataGrid<DocumentListModel> getAllDocuments(HttpServletRequest request, HttpServletResponse response) {
+    public GenericDataGrid<DocumentListModel> getAllDocuments(HttpServletRequest request, HttpServletResponse response) {
         int page = 1;
         int pageSize = 10;
         HttpSession session = request.getSession();
         if (session.getAttribute("USER") == null)
             return null;
-        DataGrid<DocumentListModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(page, pageSize,
+        GenericDataGrid<DocumentListModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(page, pageSize,
                 null,
                 null,
                 ((User) session.getAttribute("USER")).getId());

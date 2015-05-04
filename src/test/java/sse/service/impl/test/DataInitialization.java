@@ -89,6 +89,7 @@
 package sse.service.impl.test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -97,10 +98,11 @@ import sse.entity.Administrator;
 import sse.entity.Menu;
 import sse.entity.Student;
 import sse.entity.Teacher;
+import sse.entity.TimeNode;
 import sse.entity.User;
 import sse.entity.Will;
 import sse.entity.WillPK;
-import sse.enums.MatchTypeEnum;
+import sse.enums.MatchLevelEnum;
 
 public class DataInitialization extends BaseJPATest {
 
@@ -179,15 +181,15 @@ public class DataInitialization extends BaseJPATest {
         }
 
         yuesongWang.setTeacher(yanLiu);
-        yuesongWang.setMatchType(MatchTypeEnum.第一志愿);
+        yuesongWang.setMatchType(MatchLevelEnum.第一志愿);
         em.merge(yuesongWang);
 
         List<Menu> menus = new ArrayList<Menu>();
         em.persist(new Menu(1, "指导教师", null, "Student", ""));
         menus.add(new Menu(2, "所有老师", menufbn("指导教师"), "Student",
-                "http://localhost:8080/sse/dispatch/student/all_teachers"));
+                "http://localhost:8080/sse/dispatch/student/student_all_teachers"));
         menus.add(new Menu(3, "填报志愿", menufbn("指导教师"), "Student",
-                "http://localhost:8080/sse/dispatch/student/select_will"));
+                "http://localhost:8080/sse/dispatch/student/student_select_will"));
         menus.add(new Menu(4, "我的老师", menufbn("指导教师"), "Student", ""));
 
         for (Menu m : menus)
@@ -206,11 +208,14 @@ public class DataInitialization extends BaseJPATest {
         menus = new ArrayList<Menu>();
         em.persist(new Menu(7, "分配志愿", null, "Administrator", ""));
         menus.add(new Menu(8, "分配", menufbn("分配志愿"), "Administrator",
-                "http://localhost:8080/sse/dispatch/administrator/match_will"));
+                "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
             em.persist(m);
         }
+
+        TimeNode tm = new TimeNode("测试事件", new Date(), "这是一个测试事件");
+        em.persist(tm);
         commitTransaction();
         System.out.println("Finished");
     }

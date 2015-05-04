@@ -84,8 +84,8 @@
 
     function project_list_addFun() {
       project_list_datagrid.datagrid('uncheckAll').datagrid('unselectAll').datagrid('clearSelections');
-      $('#one_document_datagrid').dialog({
-        href : '${pageContext.request.contextPath}/dispatch/document/add_document',
+      $('<div class="temp_dialog"></div>').dialog({
+        href : '${pageContext.request.contextPath}/dispatch/document/document_add_document',
         onClose : function() {
           $.ajax({
             url : "${pageContext.request.contextPath}/document/cancelCreateDocument",
@@ -109,6 +109,7 @@
           handler : function() {
             var d = $(this).closest('.window-body');
             $('#document_add_form').submit();
+            $(".temp_dialog").datagrid('destroy');
           }
         } ]
       });
@@ -120,16 +121,12 @@
 			<form id="project_list_searchForm">
 				<table class="tableForm">
 					<tr>
-						<th style="width: 170px;">项目英文名称</th>
-						<td><input name="sprojname" /></td>
-						<th style="width: 170px;">项目中文名称</th>
+						<th style="width: 170px;">文档名称</th>
 						<td><input name="sprojchename" /></td>
 					</tr>
 					<tr>
 						<th>创建人</th>
 						<td><input name="susercode" /></td>
-						<th>数据库类型</th>
-						<td><input name="sdbtype" /></td>
 					</tr>
 					<tr>
 						<th>添加日期</th>
@@ -150,7 +147,6 @@
 		<div data-options="region:'center',border:false">
 			<table id="project_list_datagrid"></table>
 		</div>
-		<div id="one_document_datagrid" />
 	</div>
 </body>
 

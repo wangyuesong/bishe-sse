@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import sse.entity.Teacher;
-import sse.jsonmodel.TeacherListModel;
+import sse.pageModel.TeacherListModel;
 
 /**
  * @author yuesongwang

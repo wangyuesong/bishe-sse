@@ -7,16 +7,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import sse.commandmodel.MatchPair;
+import sse.commandmodel.WillModel;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
 import sse.entity.Student;
 import sse.entity.Teacher;
-import sse.jsonmodel.TeacherListModel;
-import sse.pageModel.DataGrid;
-import sse.pageModel.WillModel;
-import sse.service.impl.AdminServiceImpl.MatchPair;
+import sse.entity.Will;
+import sse.enums.MatchLevelEnum;
+import sse.pageModel.GenericDataGrid;
+import sse.pageModel.TeacherListModel;
 import sse.utils.ClassTool;
 
 @Service
@@ -32,10 +35,11 @@ public class StudentServiceImpl {
     @Autowired
     private WillDaoImpl willDaoImpl;
 
-    public DataGrid<TeacherListModel> findTeachersForPaging(int pageSize, int page, String sortCriteria, String order)
+    public GenericDataGrid<TeacherListModel> findTeachersForPagingInGenericDataGrid(int pageSize, int page, String sortCriteria,
+            String order)
     {
-        DataGrid<TeacherListModel> dg = new DataGrid<>();
-        List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(page, pageSize, sortCriteria, order);
+        GenericDataGrid<TeacherListModel> dg = new GenericDataGrid<>();
+        List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(pageSize, page, sortCriteria, order);
         List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
         ClassTool<Teacher, TeacherListModel> classTool = new ClassTool(Teacher.class, TeacherListModel.class);
         for (Teacher t : teacherList)
@@ -47,7 +51,7 @@ public class StudentServiceImpl {
         return dg;
     }
 
-    public TeacherDetail findOneTeacherDetailByTeacherId(int teacherId)
+    public TeacherDetail findOneTeacherDetailByTeacherIdInTeacherDetail(int teacherId)
     {
         Teacher t = teacherDaoImpl.findById(teacherId);
         TeacherDetail td = new TeacherDetail(t.getName(), t.getEmail(), t.getGender(), t.getPhone(), t.getCapacity()
@@ -55,9 +59,21 @@ public class StudentServiceImpl {
         return td;
     }
 
-    public HashMap<String, String> findPreviousWills(int studentId)
+    public HashMap<String, String> findPreviousWillsInHashMap(int studentId)
     {
-        return willDaoImpl.findPreviousSelectionByStudentId(studentId);
+        List<Will> wills = willDaoImpl.findPreviousSelectionsByStudentId(studentId);
+        if (!CollectionUtils.isEmpty(wills))
+        {
+            HashMap<String, String> returnMap = new HashMap<String, String>();
+            for (Will w : wills)
+            {
+                Teacher t = teacherDaoImpl.findById(w.getId().getTeacherId());
+                returnMap.put("" + w.getLevel(), t.getAccount());
+            }
+            return returnMap;
+        }
+        else
+            return null;
     }
 
     public void updateSelection(WillModel model, int studentId)
@@ -72,13 +88,13 @@ public class StudentServiceImpl {
      * @return List<MatchPair>
      * @throws
      */
-    public List<MatchPair> findCurrentMatchCondition() {
+    public List<MatchPair> findCurrentMatchConditions() {
         List<Student> allStudents = studentDaoImpl.findAll();
         List<MatchPair> matchPairs = new LinkedList<MatchPair>();
         for (Student s : allStudents)
         {
             if (s.getTeacher() != null)
-                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchType()));
+                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel()));
             else
                 matchPairs.add(new MatchPair(s, null, null));
         }

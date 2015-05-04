@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import sse.dao.impl.MenuDaoImpl;
 import sse.entity.Menu;
 import sse.entity.User;
-import sse.pageModel.TreeModel;
+import sse.pageModel.MenuTreeModel;
 
 @Service
 public class MenuServiceImpl {
@@ -25,16 +25,16 @@ public class MenuServiceImpl {
      * 
      * @see sse.service.impl.IMenuService#getMenu(sse.pageModel.TreeModel, sse.entitymodel.User)
      */
-    public List<TreeModel> getMenu(TreeModel tree, User user) {
+    public List<MenuTreeModel> getMenu(MenuTreeModel tree, User user) {
         List<Menu> menus = null;
-        List<TreeModel> treelist = new ArrayList<TreeModel>();
+        List<MenuTreeModel> treelist = new ArrayList<MenuTreeModel>();
         if (tree == null || tree.getId() == null)
             menus = menuDao.findTopMenusByRole(user.getRole());
         else
             menus = menuDao.findChildMenusByRoleAndMenuId(tree.getId(), user.getRole());
         for (Menu m : menus)
         {
-            TreeModel model = new TreeModel();
+            MenuTreeModel model = new MenuTreeModel();
             model.setText(m.getName());
             model.setId(m.getId());
             Map<String, String> attributes = new HashMap<String, String>();

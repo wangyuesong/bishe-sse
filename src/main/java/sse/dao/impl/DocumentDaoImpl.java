@@ -30,17 +30,4 @@ public class DocumentDaoImpl extends GenericDao<Integer, Document>
     {
         return this.findForCount("select t from Document t", null);
     }
-
-    // public int getTeacherIdByAccount(String account)
-    // {
-    // String queryStr = "select t from Document t where t.account = :account";
-    // List<Teacher> teachers = this.getEntityManager()
-    // .createQuery(queryStr, Teacher.class)
-    // .setParameter("account", account).getResultList();
-    // if (!CollectionUtils.isEmpty(teachers))
-    // return teachers.get(0).getId();
-    // else
-    // return -1;
-    // }
-
 }

@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 
 @Entity
@@ -25,8 +26,20 @@ public class Student extends User {
 
     // Record how this student got matched with teacher
     @Enumerated(EnumType.STRING)
+    @Column(length = 30, name = "MATCH_LEVEL")
+    private MatchLevelEnum matchLevel;
+
+    @Enumerated(EnumType.STRING)
     @Column(length = 30, name = "MATCH_TYPE")
     private MatchTypeEnum matchType;
+
+    public MatchLevelEnum getMatchLevel() {
+        return matchLevel;
+    }
+
+    public void setMatchLevel(MatchLevelEnum matchLevel) {
+        this.matchLevel = matchLevel;
+    }
 
     public MatchTypeEnum getMatchType() {
         return matchType;

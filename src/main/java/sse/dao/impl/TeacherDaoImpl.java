@@ -9,7 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import sse.dao.base.GenericDao;
 import sse.entity.Teacher;
-import sse.jsonmodel.TeacherListModel;
+import sse.pageModel.TeacherListModel;
 import sse.utils.ClassTool;
 
 @Repository

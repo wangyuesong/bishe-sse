@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import sse.commandmodel.WillModel;
 import sse.dao.base.GenericDao;
 import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.entity.WillPK;
 import sse.enums.WillStatusEnum;
-import sse.pageModel.WillModel;
 
 /**
  * @author yuesongwang
@@ -26,22 +26,11 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
     @Autowired
     TeacherDaoImpl teacherDaoImpl;
 
-    public HashMap<String, String> findPreviousSelectionByStudentId(int studentId)
+    public List<Will>findPreviousSelectionsByStudentId(int studentId)
     {
         List<Will> wills = this.getEntityManager().createNamedQuery("Will.findAllWillByStudentId", Will.class)
                 .setParameter("studentId", studentId).getResultList();
-        if (!CollectionUtils.isEmpty(wills))
-        {
-            HashMap<String, String> returnMap = new HashMap<String, String>();
-            for (Will w : wills)
-            {
-                Teacher t = teacherDaoImpl.findById(w.getId().getTeacherId());
-                returnMap.put("" + w.getLevel(), t.getAccount());
-            }
-            return returnMap;
-        }
-        else
-            return null;
+        return wills;
     }
 
     private void deleteStudentWillByLevel(int studentId, int level)
@@ -81,7 +70,14 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
 
     }
 
-    public List<Will> findAllWillsByTeacherId(int teacherId)
+    public List<Will> findWillsByStudentId(int studentId)
+    {
+        String queryStr = "select w from Will w where w.id.studentId= :studentId";
+        return this.getEntityManager().createQuery(queryStr, Will.class)
+                .setParameter("studentId", studentId).getResultList();
+    }
+
+    public List<Will> findWillsByTeacherId(int teacherId)
     {
         String queryStr = "select w from Will w where w.id.teacherId= :teacherId";
         return this.getEntityManager().createQuery(queryStr, Will.class)

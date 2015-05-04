@@ -8,6 +8,5 @@
 
 </head>
 <body>
-FUCK!
 </body>
 </html>

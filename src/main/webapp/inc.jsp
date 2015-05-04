@@ -7,7 +7,7 @@
 <link rel="stylesheet" type="text/css"
 	href="${pageContext.request.contextPath}/resources/easyui/themes/icon.css">
 <script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/easyui/jquery-1.8.0.min.js"></script>
+	src="${pageContext.request.contextPath}/resources/easyui/jquery.min.js"></script>
 <script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/easyui/jquery.easyui.min.js"></script>
 <script type="text/javascript"
