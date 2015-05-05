@@ -12,7 +12,7 @@
 
     //Data initialization
     $.ajax({
-      url : "${pageContext.request.contextPath}/student/getPreviousSelection",
+      url : "${pageContext.request.contextPath}/student/will/getPreviousSelection",
       type : "get",
       async : false,
       success : function(data, textStatus) {
@@ -32,7 +32,7 @@
     });
 
     $("#willForm").form({
-      url : '${pageContext.request.contextPath}/student/saveSelection',
+      url : '${pageContext.request.contextPath}/student/will/saveSelection',
       type : "post",
       onSubmit : function() {
         var first = $('#firstWill').combogrid('getValue');
@@ -67,7 +67,7 @@
       panelWidth : 450,
       idField : 'id',
       textField : 'name',
-      url : '${pageContext.request.contextPath}/student/getAllTeachers',
+      url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
       columns : [ [ {
         field : 'id',
         title : 'id',
@@ -87,7 +87,7 @@
       panelWidth : 450,
       idField : 'id',
       textField : 'name',
-      url : '${pageContext.request.contextPath}/student/getAllTeachers',
+      url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
       columns : [ [ {
         field : 'id',
         title : 'id',
@@ -107,7 +107,7 @@
       panelWidth : 450,
       idField : 'id',
       textField : 'name',
-      url : '${pageContext.request.contextPath}/student/getAllTeachers',
+      url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
       columns : [ [ {
         field : 'id',
         title : 'id',

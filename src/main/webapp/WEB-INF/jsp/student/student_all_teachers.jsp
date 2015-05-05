@@ -25,15 +25,6 @@
       collapsible : true,
       modal : true,
       title : '教师详细信息',
-      /*   buttons : [ {
-          text : '增加',
-          iconCls : 'icon-add',
-          handler : function() {
-            alert("hello");
-            var d = $(this).closest('.window-body');
-            $('#document_add_form').submit();
-          }
-        } ], */
       onClose : function() {
         $(this).dialog('destroy');
       }
@@ -43,7 +34,7 @@
   $(function() {
     all_teachers_datagrid = $('#all_teachers_datagrid').datagrid(
         {
-          url : '${pageContext.request.contextPath}/student/getAllTeachers',
+          url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
           fitColumns : true,
           border : false,
           nowrap : false,

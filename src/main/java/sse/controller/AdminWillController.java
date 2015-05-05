@@ -19,7 +19,7 @@ import sse.commandmodel.WillModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
 import sse.service.impl.AdminWillServiceImpl;
-import sse.service.impl.StudentServiceImpl;
+import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.TeacherServiceImpl;
 import sse.utils.PaginationAndSortModel;
 
@@ -38,7 +38,7 @@ public class AdminWillController {
     private TeacherServiceImpl teacherServiceImpl;
 
     @Autowired
-    private StudentServiceImpl studentServiceImpl;
+    private StudentWillServiceImpl studentServiceImpl;
 
     @ResponseBody
     @RequestMapping(value = "/getCurrentMatchCondition", method = { RequestMethod.GET, RequestMethod.POST })

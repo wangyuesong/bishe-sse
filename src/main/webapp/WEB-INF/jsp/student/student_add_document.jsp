@@ -20,7 +20,7 @@
   $(function() {
     $('#attachment_list_grid').datagrid(
         {
-          url : '${pageContext.request.contextPath}/document/getAllTempAttachments',
+          url : '${pageContext.request.contextPath}/student/document/getAllTempAttachments',
           type : 'get',
           fitColumns : true,
           border : false,
@@ -66,7 +66,7 @@
         });
 
     $.ajax({
-      url : "${pageContext.request.contextPath}/document/getAllDocumentTypes",
+      url : "${pageContext.request.contextPath}/student/document/getAllDocumentTypes",
       type : "get",
       async : false,
       success : function(data, textStatus) {
@@ -78,7 +78,7 @@
     });
 
     $("#document_add_form").form({
-      url : '${pageContext.request.contextPath}/document/confirmCreateDocument',
+      url : '${pageContext.request.contextPath}/student/document/confirmCreateDocument',
       type : "post",
       success : function(result) {
         var r = $.parseJSON(result);
@@ -97,7 +97,7 @@
 
   function delete_one_attachment(id) {
     $.ajax({
-      url : "${pageContext.request.contextPath}/document/deleteOneTempAttachmentByAttachmentId?attachmentId=" + id,
+      url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId=" + id,
       type : "get",
       success : function(data, textStatus) {
         $("#attachment_list_grid").datagrid('reload');
@@ -110,7 +110,7 @@
 
   function show_up_files() {
     $.ajax({
-      url : "${pageContext.request.contextPath}/document/getAllTempAttachments",
+      url : "${pageContext.request.contextPath}/student/document/getAllTempAttachments",
       type : "get",
       success : function(data, textStatus) {
         $("#attachment_list_grid").datagrid('reload');
@@ -121,7 +121,7 @@
   $("#file_upload").uploadify({
     'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
     'buttonText' : '浏览',
-    'uploader' : '${pageContext.request.contextPath}/document/uploadAttachements',
+    'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
     'removeCompleted' : true,
     'fileSizeLimit' : '3MB',
     'fileTypeExts' : '*.doc; *.pdf; *.docx;',
@@ -167,18 +167,18 @@
 				<tr align="left" bgcolor="#FAFAF1">
 					<td width="15%">描述:</td>
 					<td width="80%" colspan="3"><textarea rows="3"
-							class="ckeditor" style="width: 600px;"
+							 style="width: 600px; height:300px"
 							name="document_description"></textarea></td>
 				</tr>
 			</table>
 		</fieldset>
 	</form>
 	<fieldset>
-		<legend align="left">相关文档</legend>
+		<legend align="left">相关附件</legend>
 		<div>
 			<div style="float: left; width: 50%">
 				<fieldset>
-					<legend align="left">已上传文档</legend>
+					<legend align="left">已上传附件</legend>
 					<div data-options="region:'center',border:false">
 						<table id="attachment_list_grid"></table>
 					</div>

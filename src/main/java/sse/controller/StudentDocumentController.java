@@ -20,27 +20,26 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import sse.commandmodel.DocumentFormModel;
-import sse.entity.Document;
 import sse.entity.User;
 import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
-import sse.pageModel.GenericDataGrid;
 import sse.pageModel.DocumentListModel;
-import sse.service.impl.DocumentServiceImpl;
-import sse.service.impl.DocumentServiceImpl.AttachmentInfo;
-import sse.service.impl.DocumentServiceImpl.SimpleAttachmentInfo;
+import sse.pageModel.GenericDataGrid;
+import sse.service.impl.StudentDocumentServiceImpl;
+import sse.service.impl.StudentDocumentServiceImpl.AttachmentInfo;
+import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
 
 /**
  * @author yuesongwang
  *
  */
 @Controller
-@RequestMapping(value = "/document")
-public class DocumentController {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DocumentController.class);
+@RequestMapping(value = "/student/document")
+public class StudentDocumentController {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentDocumentController.class);
 
     @Autowired
-    public DocumentServiceImpl documentServiceImpl;
+    public StudentDocumentServiceImpl studentDocumentServiceImpl;
 
     @ResponseBody
     @RequestMapping(value = "/getAllDocuments", method = { RequestMethod.GET, RequestMethod.POST })
@@ -50,7 +49,8 @@ public class DocumentController {
         HttpSession session = request.getSession();
         if (session.getAttribute("USER") == null)
             return null;
-        GenericDataGrid<DocumentListModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(page, pageSize,
+        GenericDataGrid<DocumentListModel> documents = studentDocumentServiceImpl.findDocumentsForPagingByCreatorId(
+                page, pageSize,
                 null,
                 null,
                 ((User) session.getAttribute("USER")).getId());
@@ -65,9 +65,9 @@ public class DocumentController {
         User currentUser = (User) session.getAttribute("USER");
 
         // Upload temporary doucments to ftp server
-        AttachmentInfo info = documentServiceImpl.uploadTempAttachment(currentUser, fileMap);
+        AttachmentInfo info = studentDocumentServiceImpl.uploadTempAttachment(currentUser, fileMap);
         // Create temp entry in DB Attachment table
-        documentServiceImpl.createTempAttachmentEntryInDB(info);
+        studentDocumentServiceImpl.createTempAttachmentEntryInDB(info);
     }
 
     @ResponseBody
@@ -78,7 +78,7 @@ public class DocumentController {
         if (session.getAttribute("USER") == null)
             return new LinkedList<SimpleAttachmentInfo>();
         else
-            return documentServiceImpl.getAllTempAttachmentOfAUser((User) session.getAttribute("USER"));
+            return studentDocumentServiceImpl.getAllTempAttachmentOfAUser((User) session.getAttribute("USER"));
     }
 
     // Ajax
@@ -90,7 +90,8 @@ public class DocumentController {
         String attachmentId = request.getParameter("attachmentId");
         if (u != null && attachmentId != null)
             try {
-                documentServiceImpl.deleteAttachmentOnFTPServerAndDBByAttachmentId(u, Integer.parseInt(attachmentId));
+                studentDocumentServiceImpl.deleteAttachmentOnFTPServerAndDBByAttachmentId(u,
+                        Integer.parseInt(attachmentId));
             } catch (Exception e) {
                 logger.error("删除附件出错", e);
                 e.printStackTrace();
@@ -110,7 +111,7 @@ public class DocumentController {
     public boolean confirmCreateDocument(@ModelAttribute DocumentFormModel documentModel, HttpServletRequest request) {
         User u = (User) (request.getSession().getAttribute("USER"));
         if (u != null)
-            documentServiceImpl.confirmCreateDocumentAndAddDocumentToDB(u, documentModel);
+            studentDocumentServiceImpl.confirmCreateDocumentAndAddDocumentToDB(u, documentModel);
         return true;
     }
 
@@ -122,12 +123,21 @@ public class DocumentController {
         {
             User u = (User) (request.getSession().getAttribute("USER"));
             try {
-                documentServiceImpl.cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(u);
+                studentDocumentServiceImpl.cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(u);
             } catch (IOException e) {
                 logger.error("删除附件出错", e);
                 throw new SSEException("删除附件出错", e);
             }
         }
         return true;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/checkIfHasSuchDocument", method = { RequestMethod.POST })
+    public boolean checkIfStudentHasSuchDocument(HttpServletRequest request)
+    {
+        String type = request.getParameter("type");
+        User student = ((User) (request.getSession().getAttribute("USER")));
+        return studentDocumentServiceImpl.checkIfStudentHasSuchDocument(student.getId(), type);
     }
 }

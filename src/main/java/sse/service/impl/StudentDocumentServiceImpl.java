@@ -26,10 +26,12 @@ import sse.commandmodel.DocumentFormModel;
 import sse.commandmodel.WillModel;
 import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.DocumentDaoImpl;
+import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
 import sse.entity.Attachment;
 import sse.entity.Document;
+import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.User;
 import sse.entity.Will;
@@ -44,8 +46,8 @@ import sse.pageModel.GenericDataGrid;
  *
  */
 @Service
-public class DocumentServiceImpl {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DocumentServiceImpl.class);
+public class StudentDocumentServiceImpl {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentDocumentServiceImpl.class);
 
     @Autowired
     private DocumentDaoImpl documentDaoImpl;
@@ -56,7 +58,10 @@ public class DocumentServiceImpl {
     @Autowired
     private TeacherDaoImpl teacherDaoImpl;
 
-    public DocumentServiceImpl() {
+    @Autowired
+    private StudentDaoImpl studentDaoImpl;
+
+    public StudentDocumentServiceImpl() {
         // TODO Auto-generated constructor stub
     }
 
@@ -434,4 +439,22 @@ public class DocumentServiceImpl {
 
     }
 
+    /**
+     * @Method: checkIfStudentHasSuchDocument
+     * @Description: 检查该学生是否已经创建了这样的文档
+     * @param @param id
+     * @param @param type
+     * @return void
+     * @throws
+     */
+    public boolean checkIfStudentHasSuchDocument(int id, String type) {
+        Student s = studentDaoImpl.findById(id);
+        List<Document> documents = s.getDocuments();
+        for (Document d : documents)
+        {
+            if (DocumentTypeEnum.getType(type) != DocumentTypeEnum.UNKNOWN)
+                return true;
+        }
+        return false;
+    }
 }

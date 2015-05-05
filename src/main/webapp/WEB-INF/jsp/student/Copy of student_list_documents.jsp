@@ -13,11 +13,13 @@
 </head>
 <body>
 	<script>
+    var project_list_datagrid;
     $(function() {
       project_list_datagrid = $('#project_list_datagrid')
           .datagrid(
               {
                 url : '${pageContext.request.contextPath}/document/getAllDocuments',
+                type : 'get',
                 fit : true,
                 fitColumns : true,
                 border : false,
@@ -31,71 +33,33 @@
                 selectOnCheck : false,
                 nowrap : false,
                 frozenColumns : [ [ {
-                  title : '文档类别',
-                  field : 'sprojcode',
-                  width : 50,
-                  checkbox : true
-                }, {
-                  field : 'sprojname',
+                  field : 'name',
                   title : '文档名称',
-                  width : 70
+                  width : 200
                 }, {
-                  field : 'sprojchename',
-                  title : '文档描述',
+                  title : '文档类别',
+                  field : 'documentType',
+                  width : 100,
+                }, {
+                  field : 'creator',
+                  title : '创建者',
                   width : 120
                 }, {
-                  field : 'sdesc',
+                  field : 'lastModifiedBy',
                   title : '最后修改人',
                   width : 120
                 } ] ],
-                columns : [ [
-                    {
-                      field : 'sdbtype',
-                      title : '数据库类型',
-                      width : 50
-                    },
-                    {
-                      field : 'sdbschema',
-                      title : '数据库SCHEMA',
-                      width : 50
-                    },
-                    {
-                      field : 'sdbname',
-                      title : '数据库用户名',
-                      width : 50
-                    },
-                    {
-                      field : 'sdbpwd',
-                      title : '数据库密码',
-                      width : 50,
-                      hidden : true
-                    },
-                    {
-                      field : 'sdburl',
-                      title : '数据库地址',
-                      width : 80
-                    },
-                    {
-                      field : 'susercode',
-                      title : '添加人',
-                      width : 80
-                    },
-                    {
-                      field : 'tsadddate',
-                      title : '添加时间',
-                      width : 80
-                    },
-                    {
-                      field : 'action',
-                      title : '动作',
-                      width : 50,
-                      formatter : function(value, row, index) {
-                        return formatString(
-                            '<img onclick="project_list_editFun(\'{0}\');" src="{1}"/>&nbsp;<img onclick="project_list_deleteFun(\'{2}\');" src="{3}"/>',
-                            row.sprojcode, '${pageContext.request.contextPath}/js/icons/pencil.png', row.sprojcode,
-                            '${pageContext.request.contextPath}/js/icons/cancel.png');
-                      }
-                    } ] ],
+                columns : [ [ {
+                  field : 'action',
+                  title : '动作',
+                  width : 50,
+                  formatter : function(value, row, index) {
+                    return formatString(
+                        '<img onclick="project_list_editFun(\'{0}\');" src="{1}"/>&nbsp;<img onclick="project_list_deleteFun(\'{2}\');" src="{3}"/>',
+                        row.sprojcode, '${pageContext.request.contextPath}/js/icons/pencil.png', row.sprojcode,
+                        '${pageContext.request.contextPath}/js/icons/cancel.png');
+                  }
+                } ] ],
                 toolbar : [ {
                   text : '增加',
                   iconCls : 'icon-add',
@@ -117,6 +81,39 @@
                 }, '-' ]
               });
     });
+
+    function project_list_addFun() {
+      project_list_datagrid.datagrid('uncheckAll').datagrid('unselectAll').datagrid('clearSelections');
+      $('<div class="temp_dialog"></div>').dialog({
+        href : '${pageContext.request.contextPath}/dispatch/student/student_add_document',
+        onClose : function() {
+          $.ajax({
+            url : "${pageContext.request.contextPath}/document/cancelCreateDocument",
+            type : "post",
+            success : function(data, textStatus) {
+              $.each(data, function(n, value) {
+                alert(value.listName);
+              });
+            }
+          });
+          $(this).dialog('destroy');
+        },
+        width : $(document.body).width() * 0.9,
+        height : $(document.body).height() * 0.9,
+        collapsible : true,
+        modal : true,
+        title : '添加新文档',
+        buttons : [ {
+          text : '增加',
+          iconCls : 'icon-add',
+          handler : function() {
+            var d = $(this).closest('.window-body');
+            $('#document_add_form').submit();
+            $(".temp_dialog").datagrid('destroy');
+          }
+        } ]
+      });
+    }
   </script>
 	<div class="easyui-layout" data-options="fit : true,border : false">
 		<div data-options="region:'north',title:'查询条件',border:false"
@@ -124,16 +121,12 @@
 			<form id="project_list_searchForm">
 				<table class="tableForm">
 					<tr>
-						<th style="width: 170px;">项目英文名称</th>
-						<td><input name="sprojname" /></td>
-						<th style="width: 170px;">项目中文名称</th>
+						<th style="width: 170px;">文档名称</th>
 						<td><input name="sprojchename" /></td>
 					</tr>
 					<tr>
 						<th>创建人</th>
 						<td><input name="susercode" /></td>
-						<th>数据库类型</th>
-						<td><input name="sdbtype" /></td>
 					</tr>
 					<tr>
 						<th>添加日期</th>
@@ -156,3 +149,4 @@
 		</div>
 	</div>
 </body>
+

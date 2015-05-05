@@ -18,16 +18,20 @@ import sse.commandmodel.WillModel;
 import sse.entity.User;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherListModel;
-import sse.service.impl.StudentServiceImpl;
-import sse.service.impl.StudentServiceImpl.TeacherDetail;
+import sse.service.impl.StudentDocumentServiceImpl;
+import sse.service.impl.StudentWillServiceImpl;
+import sse.service.impl.StudentWillServiceImpl.TeacherDetail;
 
 @Controller
-@RequestMapping(value = "/student")
-public class StudentController {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentController.class);
+@RequestMapping(value = "/student/will")
+public class StudentWillController {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentWillController.class);
 
     @Autowired
-    private StudentServiceImpl studentService;
+    private StudentWillServiceImpl studentWillService;
+
+    @Autowired
+    private StudentDocumentServiceImpl sutdentDocumentService;
 
     @ResponseBody
     @RequestMapping(value = "/getAllTeachers", method = { RequestMethod.GET, RequestMethod.POST })
@@ -35,7 +39,7 @@ public class StudentController {
     {
         int page = 1;
         int pageSize = 10;
-        return studentService.findTeachersForPagingInGenericDataGrid(page, pageSize, null, "ASC");
+        return studentWillService.findTeachersForPagingInGenericDataGrid(page, pageSize, null, "ASC");
     }
 
     @ResponseBody
@@ -43,7 +47,7 @@ public class StudentController {
     public HashMap<String, String> getPreviousSelection(HttpServletRequest request)
     {
         int studentId = ((User) (request.getSession().getAttribute("USER"))).getId();
-        HashMap<String, String> returnMap = studentService.findPreviousWillsInHashMap(studentId);
+        HashMap<String, String> returnMap = studentWillService.findPreviousWillsInHashMap(studentId);
         return CollectionUtils.isEmpty(returnMap) ? new HashMap<String, String>() : returnMap;
     }
 
@@ -51,7 +55,7 @@ public class StudentController {
     @RequestMapping(value = "/showOneTeacherDetail", method = { RequestMethod.GET })
     public TeacherDetail showOneTeacherDetail(String teacherId)
     {
-        return studentService.findOneTeacherDetailByTeacherIdInTeacherDetail(Integer.parseInt(teacherId));
+        return studentWillService.findOneTeacherDetailByTeacherIdInTeacherDetail(Integer.parseInt(teacherId));
     }
 
     @ResponseBody
@@ -62,7 +66,8 @@ public class StudentController {
         willModel.setStudentAccount(student.getAccount());
         willModel.setStudentId(student.getId() + "");
         willModel.setStudentName(student.getName());
-        studentService.updateSelection(willModel);
+        studentWillService.updateSelection(willModel);
         return new BasicJson(true, "已经更新您的志愿", null);
     }
+
 }

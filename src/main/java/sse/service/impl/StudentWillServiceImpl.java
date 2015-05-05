@@ -24,8 +24,8 @@ import sse.utils.ClassTool;
 import sse.utils.PaginationAndSortModel;
 
 @Service
-public class StudentServiceImpl {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentServiceImpl.class);
+public class StudentWillServiceImpl {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentWillServiceImpl.class);
 
     @Autowired
     private TeacherDaoImpl teacherDaoImpl;
