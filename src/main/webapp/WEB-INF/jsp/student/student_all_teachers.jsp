@@ -17,7 +17,7 @@
   function show_one_teacher_detail(id) {
     selected_teacher_id = id;
     $('#one_teacher_datagrid').dialog({
-      href : '${pageContext.request.contextPath}/dispatch/student/one_teacher_detail',
+      href : '${pageContext.request.contextPath}/dispatch/student/student_one_teacher_detail',
       onClose : function() {
       },
       width : $(document.body).width() * 0.9,

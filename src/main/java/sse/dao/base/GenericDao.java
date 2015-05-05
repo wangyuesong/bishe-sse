@@ -91,7 +91,7 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
     @SuppressWarnings("unchecked")
     public List<E> findForPaging(String jql, HashMap<String, Object> params, int page, int pageSize,
             String sortCriteria, String order) {
-        jql += (sortCriteria == null ? "" : " order by " + sortCriteria + " " + order);
+        jql += ((sortCriteria == null || order == null) ? "" : " order by " + sortCriteria + " " + order);
         Query namedQuery = this.getEntityManager().createQuery(jql, entityClass);
         if (params != null)
             for (String oneKey : params.keySet())

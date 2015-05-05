@@ -1,5 +1,6 @@
 package sse.service.impl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sse.commandmodel.MatchPair;
+import sse.commandmodel.WillModel;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
@@ -17,11 +19,12 @@ import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
+import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
 
 @Service
-public class AdminServiceImpl {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AdminServiceImpl.class);
+public class AdminWillServiceImpl {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AdminWillServiceImpl.class);
 
     @Autowired
     private WillDaoImpl willDaoImpl;
@@ -49,47 +52,12 @@ public class AdminServiceImpl {
         return teacherDaoImpl.findById(id).getAccount();
     }
 
-    public void createNewRelationshipBetweenStudentAndTeacher(String studentId, String teacherId)
-    {
-        Teacher t = null;
-        Student student = studentDaoImpl.findById(Integer.parseInt(studentId));
-        if (teacherId != "")
-            t = teacherDaoImpl.findById(Integer.parseInt(teacherId));
-
-        List<Will> studentWills = willDaoImpl.findWillsByStudentId(Integer.parseInt(studentId));
-
-        MatchLevelEnum matchLevel = MatchLevelEnum.调剂;
-        // 如果不是取消分配，则找一下这个匹配是第几志愿匹配
-        if (t != null)
-            for (Will w : studentWills)
-            {
-                if (t.getId() == w.getId().getTeacherId())
-                {
-                    matchLevel = MatchLevelEnum.getTypeByIntLevel(w.getLevel());
-                    break;
-                }
-            }
-
-        // 如果是取消分配t=null
-        if (t == null)
-        {
-            student.setTeacher(null);
-            student.setMatchType(null);
-            studentDaoImpl.mergeWithTransaction(student);
-        }
-    }
-
-    public void reestablishRelationshipBetweenStudentAndTeacher(Student s, Teacher t)
-    {
-
-    }
-
-    /** 
-     * @Method: doMatch 
+    /**
+     * @Method: doMatch
      * @Description: TODO
      * @param @return
      * @return List<MatchPair>
-     * @throws 
+     * @throws
      */
     public List<MatchPair> doMatch()
     {
@@ -216,4 +184,69 @@ public class AdminServiceImpl {
         }
     }
 
+    /**
+     * @Method: getWillList
+     * @Description: 获取志愿表
+     * @param @return
+     * @return List<MatchPair>
+     * @throws
+     */
+    public GenericDataGrid<WillModel> getWillList(int page, int pageSize) {
+        List<Will> willList = willDaoImpl.findForList("select w from Will w order by w.id.studentId,w.level ASC");
+        // 转换Will为一种可以在页面上展示的WillModel
+        List<WillModel> willModelList = new ArrayList<WillModel>();
+        Will preWill = null;
+        WillModel tempModel = null;
+        for (Will w : willList)
+        {
+            if (preWill == null)
+            {
+                tempModel = new WillModel();
+                preWill = w;
+            }
+            if (preWill.getId().getStudentId() != w.getId().getStudentId()) {
+                willModelList.add(tempModel);
+                tempModel = new WillModel();
+            }
+            Student s = studentDaoImpl.findById(w.getId().getStudentId());
+            tempModel.setStudentId(s.getId() + "");
+            tempModel.setStudentAccount(s.getAccount());
+            tempModel.setStudentName(s.getName());
+            tempModel.setWillByLevel(w.getLevel(), w.getId().getTeacherId() + "");
+            tempModel
+                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getId().getTeacherId()).getName());
+            preWill = w;
+        }
+        if (tempModel.getStudentId() != null)
+            willModelList.add(tempModel);
+        GenericDataGrid<WillModel> willDataGrid = new GenericDataGrid<WillModel>();
+        // 分页
+        List<WillModel> subWillModelList = willModelList.subList((page - 1) * pageSize,
+                page * pageSize > willModelList.size() ? willModelList.size() : page * pageSize);
+        willDataGrid.setRows(subWillModelList);
+        willDataGrid.setTotal((long) willModelList.size());
+        return willDataGrid;
+    }
+
+    /**
+     * @Method: updateWills
+     * @Description: 更新志愿表
+     * @param @param wills
+     * @return void
+     * @throws
+     */
+    public void updateWills(ArrayList<WillModel> willModels) {
+        for (WillModel wm : willModels)
+        {
+            for (int i = 1; i < 4; i++)
+            {
+                String levelWill = wm.getWillByLevel(i);
+                if (levelWill == null)
+                    willDaoImpl.deleteStudentWillByLevelWithoutTransaction(Integer.parseInt(wm.getStudentId()), i);
+                else
+                    willDaoImpl.updateStudentWillByLevel(Integer.parseInt(wm.getStudentId()), i,
+                            Integer.parseInt(wm.getWillByLevel(i)));
+            }
+        }
+    }
 }

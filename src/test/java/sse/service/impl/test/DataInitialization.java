@@ -201,7 +201,7 @@ public class DataInitialization extends BaseJPATest {
         menus = new ArrayList<Menu>();
         em.persist(new Menu(5, "我的文档", null, "Student", ""));
         menus.add(new Menu(6, "相关文档", menufbn("我的文档"), "Student",
-                "http://localhost:8080/sse/dispatch/document/student_document_list"));
+                "http://localhost:8080/sse/dispatch/document/document_list"));
         for (Menu m : menus)
         {
             em.persist(m);

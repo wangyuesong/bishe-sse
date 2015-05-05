@@ -21,6 +21,7 @@ import sse.enums.MatchLevelEnum;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherListModel;
 import sse.utils.ClassTool;
+import sse.utils.PaginationAndSortModel;
 
 @Service
 public class StudentServiceImpl {
@@ -68,8 +69,7 @@ public class StudentServiceImpl {
             HashMap<String, String> returnMap = new HashMap<String, String>();
             for (Will w : wills)
             {
-                Teacher t = teacherDaoImpl.findById(w.getId().getTeacherId());
-                returnMap.put("" + w.getLevel(), t.getAccount());
+                returnMap.put("" + w.getLevel(), w.getId().getTeacherId() + "");
             }
             return returnMap;
         }
@@ -77,9 +77,9 @@ public class StudentServiceImpl {
             return null;
     }
 
-    public void updateSelection(WillModel model, int studentId)
+    public void updateSelection(WillModel model)
     {
-        willDaoImpl.updateSelection(model, studentId);
+        willDaoImpl.updateSelection(model);
     }
 
     /**
@@ -89,8 +89,12 @@ public class StudentServiceImpl {
      * @return List<MatchPair>
      * @throws
      */
-    public List<MatchPair> findCurrentMatchConditions() {
-        List<Student> allStudents = studentDaoImpl.findAll();
+    public GenericDataGrid<MatchPair> findCurrentMatchConditions(PaginationAndSortModel pam) {
+        List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, pam.getPage(),
+                pam.getRows(),
+                "s.account", pam.getOrder());
+        long total = studentDaoImpl.findForCount("select s from Student s", null);
+
         List<MatchPair> matchPairs = new LinkedList<MatchPair>();
         for (Student s : allStudents)
         {
@@ -99,7 +103,10 @@ public class StudentServiceImpl {
             else
                 matchPairs.add(new MatchPair(s, null, null, null));
         }
-        return matchPairs;
+        GenericDataGrid<MatchPair> genericDataGrid = new GenericDataGrid<MatchPair>();
+        genericDataGrid.setRows(matchPairs);
+        genericDataGrid.setTotal(total);
+        return genericDataGrid;
     }
 
     public static class TeacherDetail

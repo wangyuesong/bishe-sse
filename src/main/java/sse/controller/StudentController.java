@@ -58,8 +58,11 @@ public class StudentController {
     @RequestMapping(value = "/saveSelection", method = { RequestMethod.POST })
     public BasicJson saveSelection(@ModelAttribute WillModel willModel, HttpServletRequest request)
     {
-        int studentId = ((User) (request.getSession().getAttribute("USER"))).getId();
-        studentService.updateSelection(willModel, studentId);
+        User student = ((User) (request.getSession().getAttribute("USER")));
+        willModel.setStudentAccount(student.getAccount());
+        willModel.setStudentId(student.getId() + "");
+        willModel.setStudentName(student.getName());
+        studentService.updateSelection(willModel);
         return new BasicJson(true, "已经更新您的志愿", null);
     }
 }

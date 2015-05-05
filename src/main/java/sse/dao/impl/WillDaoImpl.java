@@ -21,42 +21,33 @@ import sse.enums.WillStatusEnum;
  *
  */
 @Repository
-public class WillDaoImpl extends GenericDao<Integer, Will> {
+public class WillDaoImpl extends GenericDao<WillPK, Will> {
 
     @Autowired
     TeacherDaoImpl teacherDaoImpl;
 
-    public List<Will>findPreviousSelectionsByStudentId(int studentId)
+    public List<Will> findPreviousSelectionsByStudentId(int studentId)
     {
         List<Will> wills = this.getEntityManager().createNamedQuery("Will.findAllWillByStudentId", Will.class)
                 .setParameter("studentId", studentId).getResultList();
         return wills;
     }
 
-    private void deleteStudentWillByLevel(int studentId, int level)
+    public void updateSelection(WillModel willModel)
     {
-        String queryStr = "select w from Will w where w.level=:level and w.id.studentId= :studentId";
-        List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
-                .setParameter("studentId", studentId).setParameter("level", level).getResultList();
-        if (!CollectionUtils.isEmpty(wills))
-            super.remove(wills.get(0));
-    }
-
-    public void updateSelection(WillModel willModel, int studentId)
-    {
+        int studentId = Integer.parseInt(willModel.getStudentId());
         List<Will> willList = new ArrayList<Will>();
         beginTransaction();
         for (int i = 1; i <= 3; i++)
         {
             // Remove those empty wills first
             if (StringUtils.isEmpty(willModel.getWillByLevel(i)))
-                deleteStudentWillByLevel(studentId, i);
+                deleteStudentWillByLevelWithoutTransaction(studentId, i);
             else
             {
                 // Keep those wills that needed to be updated or created
-                String account = willModel.getWillByLevel(i);
-                int teacherId = teacherDaoImpl.getTeacherIdByAccount(account);
-                willList.add(new Will(new WillPK(studentId, teacherId), i));
+                String teacherId = willModel.getWillByLevel(i);
+                willList.add(new Will(new WillPK(studentId, Integer.parseInt(teacherId)), i));
             }
         }
 
@@ -100,5 +91,52 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
                 .setParameter("status", WillStatusEnum.REJECTED)
                 .setParameter("level", level)
                 .getResultList();
+    }
+
+    /**
+     * @Method: deleteStudentWillByLevel
+     * @Description: 删除id为studentId的志愿登记为level的志愿,没有transaction
+     * @param @param studentId
+     * @param @param level
+     * @return void
+     * @throws
+     */
+    public void deleteStudentWillByLevelWithoutTransaction(int studentId, int level)
+    {
+        String queryStr = "select w from Will w where w.level=:level and w.id.studentId= :studentId";
+        List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
+                .setParameter("studentId", studentId).setParameter("level", level).getResultList();
+        if (!CollectionUtils.isEmpty(wills))
+            super.remove(wills.get(0));
+    }
+
+    /**
+     * @Method: updateStudentWillByLevel
+     * @Description: 创建或更新id为studentId的学生的志愿等级为i的志愿为willByLevel,没有transaction
+     * @param @param studentId
+     * @param @param i
+     * @param @param teacherId
+     * @return void
+     * @throws
+     */
+    public void updateStudentWillByLevel(int studentId, int i, int teacherId) {
+        String queryStr = "select w from Will w where w.level=:level and w.id.studentId= :studentId";
+        List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
+                .setParameter("studentId", studentId).setParameter("level", i).getResultList();
+        // 如果之前有这个level的will
+        if (!CollectionUtils.isEmpty(wills))
+        {
+            Will w = wills.get(0);
+            //如果这个will和新的will不一致，则更新一下，由于是WillPk是主键，不能更新，需要删除后添加
+            if (w.getId().getStudentId() != studentId || w.getId().getTeacherId() != teacherId)
+            {
+                super.removeWithTransaction(w);
+                super.persistWithTransaction(new Will(new WillPK(studentId, teacherId), i));
+            }
+        }
+        // 如果没有这个level的will，直接创建
+        else {
+            super.persistWithTransaction(new Will(new WillPK(studentId, teacherId), i));
+        }
     }
 }

@@ -306,9 +306,9 @@ public class DocumentServiceImpl {
             return null;
     }
 
-    public void updateSelection(WillModel model, int studentId)
+    public void updateSelection(WillModel model)
     {
-        willDaoImpl.updateSelection(model, studentId);
+        willDaoImpl.updateSelection(model);
     }
 
     private String convertUTF8ToISO(String utf8String)

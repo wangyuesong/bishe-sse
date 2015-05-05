@@ -15,21 +15,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.MatchPair;
+import sse.commandmodel.WillModel;
+import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
-import sse.service.impl.AdminServiceImpl;
+import sse.service.impl.AdminWillServiceImpl;
 import sse.service.impl.StudentServiceImpl;
 import sse.service.impl.TeacherServiceImpl;
+import sse.utils.PaginationAndSortModel;
 
 /**
  * @author yuesongwang
  *
  */
 @Controller
-@RequestMapping(value = "/admin")
-public class AdminController {
+@RequestMapping(value = "/admin/will/")
+public class AdminWillController {
 
     @Autowired
-    public AdminServiceImpl adminServiceImpl;
+    public AdminWillServiceImpl adminWillServiceImpl;
 
     @Autowired
     private TeacherServiceImpl teacherServiceImpl;
@@ -39,20 +42,29 @@ public class AdminController {
 
     @ResponseBody
     @RequestMapping(value = "/getCurrentMatchCondition", method = { RequestMethod.GET, RequestMethod.POST })
-    public List<MatchPair> getCurrentMatchCondition(HttpServletRequest request, HttpServletResponse response) {
-        return studentServiceImpl.findCurrentMatchConditions();
+    public GenericDataGrid<MatchPair> getCurrentMatchCondition(HttpServletRequest request, HttpServletResponse response) {
+        PaginationAndSortModel pam = new PaginationAndSortModel(request);
+        return studentServiceImpl.findCurrentMatchConditions(pam);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getWillList", method = { RequestMethod.GET, RequestMethod.POST })
+    public GenericDataGrid<WillModel> getWillList(HttpServletRequest request, HttpServletResponse response) {
+        String page = request.getParameter("page");
+        String rows = request.getParameter("rows");
+        return adminWillServiceImpl.getWillList(Integer.parseInt(page), Integer.parseInt(rows));
     }
 
     @ResponseBody
     @RequestMapping(value = "/findTeacherAccountById", method = { RequestMethod.GET })
     public String findTeacherAccountById(HttpServletRequest request, HttpServletResponse response) {
-        return adminServiceImpl.findTeacherAccountById(Integer.parseInt(request.getParameter("teacherId")));
+        return adminWillServiceImpl.findTeacherAccountById(Integer.parseInt(request.getParameter("teacherId")));
     }
 
     @ResponseBody
     @RequestMapping(value = "/doMatch", method = { RequestMethod.GET })
     public void doMatch(HttpServletRequest request, HttpServletResponse response) {
-        List<MatchPair> matchPairs = adminServiceImpl.doMatch();
+        List<MatchPair> matchPairs = adminWillServiceImpl.doMatch();
     }
 
     /**
@@ -84,14 +96,22 @@ public class AdminController {
     @RequestMapping(value = "/getAllTeachers", method = { RequestMethod.GET, RequestMethod.POST })
     public List<TeacherSelectModel> getAllTeachers(HttpServletRequest request)
     {
-        return adminServiceImpl.findAllTeachersInSelectModelList();
+        return adminWillServiceImpl.findAllTeachersInSelectModelList();
     }
 
     @ResponseBody
     @RequestMapping(value = "/systemAssign", method = { RequestMethod.GET, RequestMethod.POST })
     public List<MatchPair> systemAssign(HttpServletRequest request, HttpServletResponse response) {
-        List<MatchPair> matchPairs = adminServiceImpl.doMatch();
+        List<MatchPair> matchPairs = adminWillServiceImpl.doMatch();
         return matchPairs;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/updateWills", method = { RequestMethod.GET, RequestMethod.POST })
+    public BasicJson updateWills(@RequestBody ArrayList<WillModel> wills) {
+
+        adminWillServiceImpl.updateWills(wills);
+        return new BasicJson(true, "更新成功", null);
     }
 
     /**

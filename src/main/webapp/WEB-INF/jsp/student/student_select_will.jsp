@@ -65,10 +65,15 @@
 
     $('#firstWill').combogrid({
       panelWidth : 450,
-      idField : 'account',
+      idField : 'id',
       textField : 'name',
       url : '${pageContext.request.contextPath}/student/getAllTeachers',
       columns : [ [ {
+        field : 'id',
+        title : 'id',
+        hidden : true,
+        width : 60
+      }, {
         field : 'account',
         title : '工号',
         width : 60
@@ -80,10 +85,15 @@
     });
     $('#secondWill').combogrid({
       panelWidth : 450,
-      idField : 'account',
+      idField : 'id',
       textField : 'name',
       url : '${pageContext.request.contextPath}/student/getAllTeachers',
       columns : [ [ {
+        field : 'id',
+        title : 'id',
+        hidden : true,
+        width : 60
+      }, {
         field : 'account',
         title : '工号',
         width : 60
@@ -95,10 +105,15 @@
     });
     $('#thirdWill').combogrid({
       panelWidth : 450,
-      idField : 'account',
+      idField : 'id',
       textField : 'name',
       url : '${pageContext.request.contextPath}/student/getAllTeachers',
       columns : [ [ {
+        field : 'id',
+        title : 'id',
+        hidden : true,
+        width : 60
+      }, {
         field : 'account',
         title : '工号',
         width : 60
