@@ -95,6 +95,8 @@ import java.util.List;
 import org.junit.Test;
 
 import sse.entity.Administrator;
+import sse.entity.Document;
+import sse.entity.DocumentComment;
 import sse.entity.Menu;
 import sse.entity.Student;
 import sse.entity.Teacher;
@@ -102,6 +104,7 @@ import sse.entity.TimeNode;
 import sse.entity.User;
 import sse.entity.Will;
 import sse.entity.WillPK;
+import sse.enums.DocumentTypeEnum;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 
@@ -244,6 +247,13 @@ public class DataInitialization extends BaseJPATest {
             em.persist(m);
         }
 
+        // Document and comments
+        Document d = new Document(1, "王岳松的开题报告", "测试文字", DocumentTypeEnum.开题报告, yuesongWang, yuesongWang);
+        em.persist(d);
+        DocumentComment dc = new DocumentComment(1, "测试评论", pingSun, d);
+        em.persist(dc);
+
+        // Time nodes
         TimeNode tm = new TimeNode("测试事件", new Date(), "这是一个测试事件");
         em.persist(tm);
         commitTransaction();

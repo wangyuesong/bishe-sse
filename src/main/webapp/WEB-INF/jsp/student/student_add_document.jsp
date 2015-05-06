@@ -18,6 +18,7 @@
 	href="${pageContext.request.contextPath}/resources/ckeditor/skins/moono/editor.css" />
 <script type="text/javascript">
   $(function() {
+    //初始化Attachment的列表
     $('#attachment_list_grid').datagrid(
         {
           url : '${pageContext.request.contextPath}/student/document/getAllTempAttachments',
@@ -35,7 +36,7 @@
           }, {
             field : 'listName',
             title : '名称',
-            width : 200,
+            width : 100,
           } ] ],
           columns : [ [
               {
@@ -65,18 +66,7 @@
           }, '-' ]
         });
 
-    $.ajax({
-      url : "${pageContext.request.contextPath}/student/document/getAllDocumentTypes",
-      type : "get",
-      async : false,
-      success : function(data, textStatus) {
-        $.each(data, function(n, value) {
-          var optionString = "<option value='" + data[n] + "'>" + data[n] + "</option>";
-          $('#document_type_select').append(optionString);
-        });
-      }
-    });
-
+    //确认创建这个Document后，数据库增加Document记录，Attachment变为永久
     $("#document_add_form").form({
       url : '${pageContext.request.contextPath}/student/document/confirmCreateDocument',
       type : "post",
@@ -97,7 +87,8 @@
 
   function delete_one_attachment(id) {
     $.ajax({
-      url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId=" + id,
+      url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId="
+          + id,
       type : "get",
       success : function(data, textStatus) {
         $("#attachment_list_grid").datagrid('reload');
@@ -147,31 +138,23 @@
 			cellspacing="1" bgcolor="#D1DDAA" align="center"
 			style="margin-top: 8px">
 			<tr bgcolor="#E7E7E7">
-				<td height="24">新增项目</td>
+				<td height="24" style="align: center">${sessionScope.USER.name}的开题报告</td>
 			</tr>
 		</table>
-		<fieldset>
-			<legend align="left">添加文档</legend>
-			<table width="98%" border="0" cellpadding="2" class="tableForm"
-				cellspacing="1" bgcolor="#D1DDAA" align="center"
-				style="margin-top: 8px">
-				<tr align="left" bgcolor="#FAFAF1">
-					<td width="15%">文档名称:</td>
-					<td width="35%"><input type="text" name="document_name"
-						style="width: 150px;" class="easyui-validatebox"
-						data-options="required:true" />&nbsp;</td>
-					<td width="15%">文档类型:</td>
-					<td width="35%"><select id="document_type_select"
-						name="document_type" style="width: 250px;"></select></td>
-				</tr>
-				<tr align="left" bgcolor="#FAFAF1">
-					<td width="15%">描述:</td>
-					<td width="80%" colspan="3"><textarea rows="3"
-							 style="width: 600px; height:300px"
-							name="document_description"></textarea></td>
-				</tr>
-			</table>
-		</fieldset>
+		<table width="98%" border="0" cellpadding="2" class="tableForm"
+			cellspacing="1" bgcolor="#D1DDAA" align="center"
+			style="margin-top: 8px">
+			<tr align="left" bgcolor="#FAFAF1">
+				<td width="15%">描述:</td>
+				<td width="80%" colspan="3"><textarea rows="3"
+						style="width: 600px; height: 300px" name="document_description"></textarea></td>
+			</tr>
+			<tr>
+				<td><input type="hidden" name="document_type" value="开题报告"></input></td>
+				<td><input type="hidden" name="document_name"
+					value="${sessionScope.USER.name}的开题报告"></input></td>
+			</tr>
+		</table>
 	</form>
 	<fieldset>
 		<legend align="left">相关附件</legend>

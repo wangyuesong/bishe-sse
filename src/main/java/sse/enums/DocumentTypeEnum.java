@@ -5,7 +5,7 @@ import java.util.List;
 
 public enum DocumentTypeEnum {
 
-    RenWuShu("任务书"), OpenDefense("开题报告"), MiddleDefense("中期自查"), FinalDefense("最终答辩"), UNKNOWN("Unknown");
+    任务书("任务书"), 开题报告("开题报告"), 中期自查("中期自查"), 最终论文("最终论文"), UNKNOWN("Unknown");
 
     private final String value;
 

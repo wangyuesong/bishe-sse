@@ -2,6 +2,7 @@ package sse.entity;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -21,7 +22,7 @@ public class Teacher extends User {
     private static final long serialVersionUID = 400018318739519613L;
 
     // bi-directional many-to-one association to User
-    @OneToMany(mappedBy = "teacher")
+    @OneToMany(mappedBy = "teacher", cascade = { CascadeType.REFRESH })
     private List<Student> students;
 
     @Column(length = 45)
@@ -37,7 +38,6 @@ public class Teacher extends User {
 
     @Column(length = 1000, name = "CANDIDATE_TOPICS")
     private String candidateTopics;
-
 
     public String getCandidateTopics() {
         return candidateTopics;

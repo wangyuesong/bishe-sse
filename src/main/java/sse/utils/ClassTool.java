@@ -73,15 +73,15 @@ public class ClassTool<J, P> {
         return pojo;
     }
 
-    public static void main(String args[])
-    {
-        ClassTool<Teacher, TeacherListModel> classConverter = new ClassTool<Teacher, TeacherListModel>(Teacher.class, TeacherListModel.class);
-        Teacher t = new Teacher();
-        t.setName("Shabi");
-        t.setCapacity(10);
-
-        TeacherListModel tm = new TeacherListModel();
-        tm = classConverter.convertJPAEntityToPOJO(t);
-        System.out.println(tm.getName() + " " + tm.getCapacity());
-    }
+//    public static void main(String args[])
+//    {
+//        ClassTool<Teacher, TeacherListModel> classConverter = new ClassTool<Teacher, TeacherListModel>(Teacher.class, TeacherListModel.class);
+//        Teacher t = new Teacher();
+//        t.setName("Shabi");
+//        t.setCapacity(10);
+//
+//        TeacherListModel tm = new TeacherListModel();
+//        tm = classConverter.convertJPAEntityToPOJO(t);
+//        System.out.println(tm.getName() + " " + tm.getCapacity());
+//    }
 }

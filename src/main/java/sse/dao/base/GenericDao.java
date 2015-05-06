@@ -26,6 +26,7 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
     {
         if (!this.getEntityManager().getTransaction().isActive())
             this.getEntityManager().getTransaction().begin();
+
     }
 
     public void commitTransaction() {
@@ -48,6 +49,11 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         beginTransaction();
         this.getEntityManager().persist(entity);
         commitTransaction();
+    }
+
+    public void refresh(E entity)
+    {
+        this.getEntityManager().refresh(entity);
     }
 
     public void mergeWithTransaction(E entity)

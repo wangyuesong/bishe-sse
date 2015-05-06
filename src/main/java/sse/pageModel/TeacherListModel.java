@@ -12,25 +12,33 @@
  */
 package sse.pageModel;
 
-import sse.entity.User;
-
 /**
  * @author yuesongwang
  *
  */
-public class TeacherListModel extends User {
-    private String title;
+public class TeacherListModel {
 
+    private String name;
+    private String account;
     private int capacity;
+    private String gender;
+    private String email;
+    private String phone;
 
-    private String degree;
-
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public int getCapacity() {
@@ -41,12 +49,38 @@ public class TeacherListModel extends User {
         this.capacity = capacity;
     }
 
-    public String getDegree() {
-        return degree;
+    public String getGender() {
+        return gender;
     }
 
-    public void setDegree(String degree) {
-        this.degree = degree;
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public TeacherListModel(String name, String account, int capacity, String gender, String email, String phone) {
+        super();
+        this.name = name;
+        this.account = account;
+        this.capacity = capacity;
+        this.gender = gender;
+        this.email = email;
+        this.phone = phone;
     }
 
 }

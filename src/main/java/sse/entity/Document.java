@@ -29,7 +29,7 @@ import sse.enums.DocumentTypeEnum;
 public class Document extends BaseModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private int id;
@@ -62,6 +62,21 @@ public class Document extends BaseModel implements Serializable {
     {
         a.setDocument(this);
         documentAttachments.add(a);
+    }
+
+    public Document() {
+        super();
+    }
+
+    public Document(int id, String name, String content, DocumentTypeEnum documenttype, User lastModifiedBy,
+            User creator) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.content = content;
+        this.documenttype = documenttype;
+        this.lastModifiedBy = lastModifiedBy;
+        this.creator = creator;
     }
 
     public List<Attachment> getDocumentAttachments() {

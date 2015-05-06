@@ -32,15 +32,8 @@ public class DocumentComment extends BaseModel implements Serializable {
     @Column(unique = true, nullable = false)
     private int id;
 
-    @Column(length = 100)
-    private String title;
-
     @Column(length = 2000)
     private String content;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private RatingEnum rating;
 
     @ManyToOne
     @JoinColumn(name = "USER", nullable = false)
@@ -58,28 +51,12 @@ public class DocumentComment extends BaseModel implements Serializable {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getContent() {
         return content;
     }
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public RatingEnum getRating() {
-        return rating;
-    }
-
-    public void setRating(RatingEnum rating) {
-        this.rating = rating;
     }
 
     public User getUser() {
@@ -96,6 +73,18 @@ public class DocumentComment extends BaseModel implements Serializable {
 
     public void setDocument(Document document) {
         this.document = document;
+    }
+
+    public DocumentComment(int id, String content, User user, Document document) {
+        super();
+        this.id = id;
+        this.content = content;
+        this.user = user;
+        this.document = document;
+    }
+
+    public DocumentComment() {
+        super();
     }
 
 }

@@ -39,7 +39,9 @@ public class StudentWillController {
     {
         int page = 1;
         int pageSize = 10;
-        return studentWillService.findTeachersForPagingInGenericDataGrid(page, pageSize, null, "ASC");
+        GenericDataGrid<TeacherListModel> s = studentWillService.findTeachersForPagingInGenericDataGrid(page, pageSize,
+                null, "ASC");
+        return s;
     }
 
     @ResponseBody

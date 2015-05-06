@@ -7,12 +7,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
@@ -28,9 +31,11 @@ import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.DocumentDaoImpl;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
+import sse.dao.impl.UserDaoImpl;
 import sse.dao.impl.WillDaoImpl;
 import sse.entity.Attachment;
 import sse.entity.Document;
+import sse.entity.DocumentComment;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.User;
@@ -38,6 +43,7 @@ import sse.entity.Will;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
+import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.DocumentListModel;
 import sse.pageModel.GenericDataGrid;
 
@@ -57,6 +63,9 @@ public class StudentDocumentServiceImpl {
 
     @Autowired
     private TeacherDaoImpl teacherDaoImpl;
+
+    @Autowired
+    private UserDaoImpl userDaoImpl;
 
     @Autowired
     private StudentDaoImpl studentDaoImpl;
@@ -235,6 +244,7 @@ public class StudentDocumentServiceImpl {
                         document.setDocumentAttachments(new LinkedList<Attachment>());
                     attachmentDaoImpl.mergeWithTransaction(attachment);
                 }
+            studentDaoImpl.refresh(studentDaoImpl.findById(u.getId()));
         }
     }
 
@@ -440,21 +450,121 @@ public class StudentDocumentServiceImpl {
     }
 
     /**
-     * @Method: checkIfStudentHasSuchDocument
-     * @Description: 检查该学生是否已经创建了这样的文档
+     * @Method: getDocumentInfoByStudentIdAndDocumentType
+     * @Description: 检查该学生是否已经创建了这样的文档,是的话返回该文档的相关信息用于页面显示，否的话返回空
      * @param @param id
      * @param @param type
      * @return void
      * @throws
      */
-    public boolean checkIfStudentHasSuchDocument(int id, String type) {
+    public DocumentInfo getDocumentInfoByStudentIdAndDocumentType(int id, String type) {
         Student s = studentDaoImpl.findById(id);
         List<Document> documents = s.getDocuments();
         for (Document d : documents)
         {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             if (DocumentTypeEnum.getType(type) != DocumentTypeEnum.UNKNOWN)
-                return true;
+                return new DocumentInfo(d.getContent(), sdf.format(d.getCreateTime()), sdf.format(d.getUpdateTime()));
+        }
+        return null;
+    }
+
+    /**
+     * @Method: updateDocumentDescription
+     * @Description: 改变Document的Description
+     * @param @param id
+     * @param @param document_type
+     * @param @param document_description
+     * @param @return
+     * @return boolean
+     * @throws
+     */
+    public boolean updateDocumentDescription(int id, String document_type, String document_description) {
+        List<Document> documents = studentDaoImpl.findById(id).getDocuments();
+        for (Document document : documents)
+        {
+            if (StringUtils.equals(document_type, document.getDocumenttype().getValue()))
+            {
+                document.setContent(document_description);
+                documentDaoImpl.mergeWithTransaction(document);
+                studentDaoImpl.refresh(studentDaoImpl.findById(id));
+            }
         }
         return false;
     }
+
+    /**
+     * @Method: findDocumentComments
+     * @Description: 根据学生id和请求的Document类型获取Document的所有DocumentComments,并且包装成Model
+     * @param @param id
+     * @param @param type
+     * @param @return
+     * @return List<DocumentsCommentListModel>
+     * @throws
+     */
+    @SuppressWarnings("unchecked")
+    public List<DocumentCommentListModel> findDocumentComments(int id, String type) {
+        List<Document> documents = studentDaoImpl.findById(id).getDocuments();
+        List<DocumentCommentListModel> documentCommentModels = new ArrayList<DocumentCommentListModel>();
+        Document d = null;
+        for (Document document : documents)
+        {
+            if (StringUtils.equals(document.getDocumenttype().getValue(), type))
+                d = document;
+        }
+        if (d == null)
+            return null;
+        else
+        {
+            for (DocumentComment documentComment : d.getDocumentComments())
+            {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                DocumentCommentListModel dclm = new DocumentCommentListModel(documentComment.getContent(),
+                        sdf.format(documentComment.getCreateTime()), documentComment.getUser().getName());
+                documentCommentModels.add(dclm);
+            }
+        }
+        Collections.sort(documentCommentModels);
+        return documentCommentModels;
+    }
+
+    public static class DocumentInfo
+    {
+        String content;
+        String create_time;
+        String update_time;
+
+        public DocumentInfo(String content, String create_time, String update_time) {
+            super();
+            this.content = content;
+            this.create_time = create_time;
+            this.update_time = update_time;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public String getCreate_time() {
+            return create_time;
+        }
+
+        public void setCreate_time(String create_time) {
+            this.create_time = create_time;
+        }
+
+        public String getUpdate_time() {
+            return update_time;
+        }
+
+        public void setUpdate_time(String update_time) {
+            this.update_time = update_time;
+        }
+
+    }
+
 }

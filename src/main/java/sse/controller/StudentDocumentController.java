@@ -19,14 +19,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import sse.commandmodel.BasicJson;
 import sse.commandmodel.DocumentFormModel;
+import sse.entity.DocumentComment;
 import sse.entity.User;
-import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
+import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.DocumentListModel;
 import sse.pageModel.GenericDataGrid;
 import sse.service.impl.StudentDocumentServiceImpl;
 import sse.service.impl.StudentDocumentServiceImpl.AttachmentInfo;
+import sse.service.impl.StudentDocumentServiceImpl.DocumentInfo;
 import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
 
 /**
@@ -101,12 +104,6 @@ public class StudentDocumentController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/getAllDocumentTypes", method = { RequestMethod.GET })
-    public List<String> getAllDocumentTypes() {
-        return DocumentTypeEnum.getAllTypeValues();
-    }
-
-    @ResponseBody
     @RequestMapping(value = "/confirmCreateDocument", method = { RequestMethod.POST })
     public boolean confirmCreateDocument(@ModelAttribute DocumentFormModel documentModel, HttpServletRequest request) {
         User u = (User) (request.getSession().getAttribute("USER"));
@@ -134,10 +131,30 @@ public class StudentDocumentController {
 
     @ResponseBody
     @RequestMapping(value = "/checkIfHasSuchDocument", method = { RequestMethod.POST })
-    public boolean checkIfStudentHasSuchDocument(HttpServletRequest request)
+    public DocumentInfo checkIfStudentHasSuchDocument(HttpServletRequest request)
     {
         String type = request.getParameter("type");
         User student = ((User) (request.getSession().getAttribute("USER")));
-        return studentDocumentServiceImpl.checkIfStudentHasSuchDocument(student.getId(), type);
+        return studentDocumentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(student.getId(), type);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/updateDocumentDescription", method = { RequestMethod.POST })
+    public BasicJson updateDocumentDescription(String document_type, String document_description,
+            HttpServletRequest request)
+    {
+        User student = ((User) (request.getSession().getAttribute("USER")));
+        studentDocumentServiceImpl.updateDocumentDescription(student.getId(), document_type,
+                document_description);
+        return new BasicJson(true, "更新成功", null);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getDocumentComments", method = { RequestMethod.POST })
+    public List<DocumentCommentListModel> getDocumentComments(String type, HttpServletRequest request)
+    {
+        User student = ((User) (request.getSession().getAttribute("USER")));
+        return studentDocumentServiceImpl.findDocumentComments(student.getId(), type);
+
     }
 }

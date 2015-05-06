@@ -3,6 +3,7 @@ package sse.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -63,13 +64,13 @@ public abstract class User extends BaseModel implements Serializable {
     // // bi-directional many-to-one association to Document
     // @OneToMany(mappedBy = "user")
     // private List<Document> documents;
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", cascade = { CascadeType.REFRESH })
     private List<Attachment> attachments;
 
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", cascade = { CascadeType.REFRESH })
     private List<Document> documents;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = { CascadeType.REFRESH })
     private List<DocumentComment> documentComments;
 
     public User() {

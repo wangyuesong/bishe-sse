@@ -43,10 +43,12 @@ public class StudentWillServiceImpl {
         GenericDataGrid<TeacherListModel> dg = new GenericDataGrid<>();
         List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(pageSize, page, sortCriteria, order);
         List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
-        ClassTool<Teacher, TeacherListModel> classTool = new ClassTool(Teacher.class, TeacherListModel.class);
         for (Teacher t : teacherList)
         {
-            teacherModelList.add(classTool.convertJPAEntityToPOJO(t));
+            TeacherListModel tl = new TeacherListModel(t.getName(), t.getAccount(), t.getCapacity(), t.getGender(),
+                    t.getEmail(),
+                    t.getPhone());
+            teacherModelList.add(tl);
         }
         dg.setRows(teacherModelList);
         dg.setTotal(teacherDaoImpl.findTeachersForCount());
