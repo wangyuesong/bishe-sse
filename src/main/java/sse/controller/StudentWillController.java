@@ -1,6 +1,7 @@
 package sse.controller;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,11 +17,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.WillModel;
 import sse.entity.User;
+import sse.pageModel.ActionEventModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherListModel;
 import sse.service.impl.StudentDocumentServiceImpl;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.StudentWillServiceImpl.TeacherDetail;
+import sse.utils.PaginationAndSortModel;
 
 @Controller
 @RequestMapping(value = "/student/will")
@@ -34,14 +37,31 @@ public class StudentWillController {
     private StudentDocumentServiceImpl sutdentDocumentService;
 
     @ResponseBody
-    @RequestMapping(value = "/getAllTeachers", method = { RequestMethod.GET, RequestMethod.POST })
-    public GenericDataGrid<TeacherListModel> getAllTeachers(HttpServletRequest request)
+    @RequestMapping(value = "/getTeachersInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
+    public GenericDataGrid<TeacherListModel> getTeachersInDatagrid(HttpServletRequest request)
     {
-        int page = 1;
-        int pageSize = 10;
-        GenericDataGrid<TeacherListModel> s = studentWillService.findTeachersForPagingInGenericDataGrid(page, pageSize,
-                null, "ASC");
+        PaginationAndSortModel pam = new PaginationAndSortModel(request);
+        GenericDataGrid<TeacherListModel> s = studentWillService.findTeachersForPagingInGenericDataGrid(pam);
         return s;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getTeacherActionEventsInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
+    public GenericDataGrid<ActionEventModel> getTeacherActionEventsInDatagrid(String studentId,
+            HttpServletRequest request)
+    {
+        PaginationAndSortModel pam = new PaginationAndSortModel(request);
+        GenericDataGrid<ActionEventModel> s = studentWillService.findTeachersActionEventsForPagingInGenericDataGrid(
+                Integer.parseInt(studentId),
+                pam);
+        return s;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getAllTeachersForSelect", method = { RequestMethod.GET, RequestMethod.POST })
+    public List<TeacherListModel> getAllTeachersForSelect(HttpServletRequest request)
+    {
+        return studentWillService.findTeachersForList();
     }
 
     @ResponseBody

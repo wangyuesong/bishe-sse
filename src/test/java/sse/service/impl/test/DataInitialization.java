@@ -88,7 +88,9 @@
 
 package sse.service.impl.test;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -107,6 +109,7 @@ import sse.entity.WillPK;
 import sse.enums.DocumentTypeEnum;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
+import sse.enums.TimeNodeEnum;
 
 public class DataInitialization extends BaseJPATest {
 
@@ -195,7 +198,7 @@ public class DataInitialization extends BaseJPATest {
                 "http://localhost:8080/sse/dispatch/student/student_all_teachers"));
         menus.add(new Menu(3, "填报志愿", menufbn("指导教师"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_select_will"));
-        menus.add(new Menu(4, "我的老师", menufbn("指导教师"), "Student", ""));
+        menus.add(new Menu(4, "我的老师", menufbn("指导教师"), "Student", "http://localhost:8080/sse/dispatch/student/student_my_teacher"));
 
         for (Menu m : menus)
         {
@@ -247,6 +250,17 @@ public class DataInitialization extends BaseJPATest {
             em.persist(m);
         }
 
+        menus = new ArrayList<Menu>();
+        em.persist(new Menu(18, "学生", null, "Teacher", ""));
+        menus.add(new Menu(19, "选择学生", menufbn("学生"), "Teacher",
+                "http://localhost:8080/sse/dispatch/teacher/teacher_select_student"));
+        menus.add(new Menu(20, "我的学生", menufbn("学生"), "Teacher",
+                "http://localhost:8080/sse/dispatch/teacher/admin_my_student"));
+        for (Menu m : menus)
+        {
+            em.persist(m);
+        }
+
         // Document and comments
         Document d = new Document(1, "王岳松的开题报告", "测试文字", DocumentTypeEnum.开题报告, yuesongWang, yuesongWang);
         em.persist(d);
@@ -254,10 +268,25 @@ public class DataInitialization extends BaseJPATest {
         em.persist(dc);
 
         // Time nodes
-        TimeNode tm = new TimeNode("测试事件", new Date(), "这是一个测试事件");
-        em.persist(tm);
+        List<TimeNode> timeNodes = new ArrayList<TimeNode>();
+        timeNodes.add(new TimeNode(1, TimeNodeEnum.getType("填报志愿"), new Date(), "志愿填报时间"));
+        timeNodes.add(new TimeNode(2, TimeNodeEnum.getType("课题申报"), addTime(new Date(), 1), "课题申报时间"));
+        timeNodes.add(new TimeNode(3, TimeNodeEnum.getType("毕设进行"), addTime(new Date(), 2), "毕设进行时间"));
+        timeNodes.add(new TimeNode(3, TimeNodeEnum.getType("答辩申请"), addTime(new Date(), 3), "答辩申请时间"));
+        for (TimeNode m : timeNodes)
+        {
+            em.persist(m);
+        }
+
         commitTransaction();
         System.out.println("Finished");
     }
 
+    public static Date addTime(Date date, int minute)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.MINUTE, minute);
+        return cal.getTime();
+    }
 }

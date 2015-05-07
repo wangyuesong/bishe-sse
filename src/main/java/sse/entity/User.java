@@ -61,9 +61,6 @@ public abstract class User extends BaseModel implements Serializable {
     @Column(name = "SELF_DESCRIPTION", length = 1000)
     private String selfDescription;
 
-    // // bi-directional many-to-one association to Document
-    // @OneToMany(mappedBy = "user")
-    // private List<Document> documents;
     @OneToMany(mappedBy = "creator", cascade = { CascadeType.REFRESH })
     private List<Attachment> attachments;
 
@@ -73,7 +70,29 @@ public abstract class User extends BaseModel implements Serializable {
     @OneToMany(mappedBy = "user", cascade = { CascadeType.REFRESH })
     private List<DocumentComment> documentComments;
 
+    @OneToMany(mappedBy = "listener", cascade = { CascadeType.REFRESH })
+    private List<ActionEvent> actionsAsListener;
+
+    @OneToMany(mappedBy = "actor", cascade = { CascadeType.REFRESH })
+    private List<ActionEvent> actionsAsActor;
+
     public User() {
+    }
+
+    public List<ActionEvent> getActionsAsListener() {
+        return actionsAsListener;
+    }
+
+    public void setActionsAsListener(List<ActionEvent> actionsAsListener) {
+        this.actionsAsListener = actionsAsListener;
+    }
+
+    public List<ActionEvent> getActionsAsActor() {
+        return actionsAsActor;
+    }
+
+    public void setActionsAsActor(List<ActionEvent> actionsAsActor) {
+        this.actionsAsActor = actionsAsActor;
     }
 
     public List<Document> getDocuments() {

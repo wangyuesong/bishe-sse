@@ -1,5 +1,6 @@
 package sse.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,18 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import sse.commandmodel.MatchPair;
 import sse.commandmodel.WillModel;
+import sse.dao.impl.ActionEventDaoImpl;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
-import sse.entity.Student;
+import sse.entity.ActionEvent;
 import sse.entity.Teacher;
 import sse.entity.Will;
-import sse.enums.MatchLevelEnum;
+import sse.pageModel.ActionEventModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherListModel;
-import sse.utils.ClassTool;
 import sse.utils.PaginationAndSortModel;
 
 @Service
@@ -34,18 +34,21 @@ public class StudentWillServiceImpl {
     private StudentDaoImpl studentDaoImpl;
 
     @Autowired
+    private ActionEventDaoImpl actionEventDaoImpl;
+
+    @Autowired
     private WillDaoImpl willDaoImpl;
 
-    public GenericDataGrid<TeacherListModel> findTeachersForPagingInGenericDataGrid(int pageSize, int page,
-            String sortCriteria,
-            String order)
+    public GenericDataGrid<TeacherListModel> findTeachersForPagingInGenericDataGrid(PaginationAndSortModel pam)
     {
         GenericDataGrid<TeacherListModel> dg = new GenericDataGrid<>();
-        List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(pageSize, page, sortCriteria, order);
+        List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(pam.getRows(), pam.getPage(), pam.getSort(),
+                pam.getOrder());
         List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
         for (Teacher t : teacherList)
         {
-            TeacherListModel tl = new TeacherListModel(t.getName(), t.getAccount(), t.getCapacity(), t.getGender(),
+            TeacherListModel tl = new TeacherListModel(t.getId(), t.getName(), t.getAccount(), t.getCapacity(),
+                    t.getGender(),
                     t.getEmail(),
                     t.getPhone());
             teacherModelList.add(tl);
@@ -53,6 +56,21 @@ public class StudentWillServiceImpl {
         dg.setRows(teacherModelList);
         dg.setTotal(teacherDaoImpl.findTeachersForCount());
         return dg;
+    }
+
+    public List<TeacherListModel> findTeachersForList()
+    {
+        List<Teacher> teacherList = teacherDaoImpl.findAll();
+        List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
+        for (Teacher t : teacherList)
+        {
+            TeacherListModel tl = new TeacherListModel(t.getId(), t.getName(), t.getAccount(), t.getCapacity(),
+                    t.getGender(),
+                    t.getEmail(),
+                    t.getPhone());
+            teacherModelList.add(tl);
+        }
+        return teacherModelList;
     }
 
     public TeacherDetail findOneTeacherDetailByTeacherIdInTeacherDetail(int teacherId)
@@ -85,35 +103,35 @@ public class StudentWillServiceImpl {
     }
 
     /**
-     * @Method: findCurrentMatchCondition
+     * @Method: findTeachersActionEventsForPagingInGenericDataGrid
      * @Description: TODO
+     * @param @param pam
      * @param @return
-     * @return List<MatchPair>
+     * @return GenericDataGrid<ActionEventModel>
      * @throws
      */
-    public GenericDataGrid<MatchPair> findCurrentMatchConditions(PaginationAndSortModel pam) {
-        List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, pam.getPage(),
-                pam.getRows(),
-                "s.account", pam.getOrder());
-        long total = studentDaoImpl.findForCount("select s from Student s", null);
-
-        List<MatchPair> matchPairs = new LinkedList<MatchPair>();
-        for (Student s : allStudents)
+    public GenericDataGrid<ActionEventModel> findTeachersActionEventsForPagingInGenericDataGrid(int teacherId,
+            PaginationAndSortModel pam) {
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("actor", teacherId + "");
+        List<ActionEvent> actionEvents = actionEventDaoImpl.findForPaging(
+                "select a from ActionEvent a where a.actor=:actor", params, pam.getPage(), pam.getRows(),
+                pam.getSort(), pam.getOrder());
+        List<ActionEventModel> actionEventModels = new ArrayList<ActionEventModel>();
+        for (ActionEvent e : actionEvents)
         {
-            if (s.getTeacher() != null)
-                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel(), s.getMatchType()));
-            else
-                matchPairs.add(new MatchPair(s, null, null, null));
+            ActionEventModel aem = new ActionEventModel(e.getActor().toString(), e.getActor().getCreateTime()
+                    .toString(), e.getDescription());
+            actionEventModels.add(aem);
         }
-        GenericDataGrid<MatchPair> genericDataGrid = new GenericDataGrid<MatchPair>();
-        genericDataGrid.setRows(matchPairs);
-        genericDataGrid.setTotal(total);
-        return genericDataGrid;
+        GenericDataGrid<ActionEventModel> dataGrid = new GenericDataGrid<ActionEventModel>();
+        dataGrid.setRows(actionEventModels);
+        dataGrid.setTotal(actionEventDaoImpl.findForCount("select a from ActionEvent a where a.actor=:actor", params));
+        return dataGrid;
     }
 
     public static class TeacherDetail
     {
-
         private String name;
         private String email;
         private String gender;

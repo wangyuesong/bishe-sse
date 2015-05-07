@@ -3,7 +3,15 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <jsp:include page="/inc.jsp"></jsp:include>
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/col.css"
+	rel="stylesheet">
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/2cols.css"
+	rel="stylesheet">
+
 <script>
   $(function() {
     var firstWill;
@@ -67,7 +75,18 @@
       panelWidth : 450,
       idField : 'id',
       textField : 'name',
-      url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
+      onChange : function(newValue, oldValue) {
+        $.ajax({
+          url : "${pageContext.request.contextPath}/student/will/showOneTeacherDetail?teacherId=" + newValue,
+          type : "get",
+          success : function(data, textStatus) {
+            $.each(data, function(key, value) {
+              $('#' + key + "1").html(value);
+            });
+          }
+        });
+      },
+      url : '${pageContext.request.contextPath}/student/will/getAllTeachersForSelect',
       columns : [ [ {
         field : 'id',
         title : 'id',
@@ -87,7 +106,18 @@
       panelWidth : 450,
       idField : 'id',
       textField : 'name',
-      url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
+      url : '${pageContext.request.contextPath}/student/will/getAllTeachersForSelect',
+      onChange : function(newValue, oldValue) {
+        $.ajax({
+          url : "${pageContext.request.contextPath}/student/will/showOneTeacherDetail?teacherId=" + newValue,
+          type : "get",
+          success : function(data, textStatus) {
+            $.each(data, function(key, value) {
+              $('#' + key + "2").html(value);
+            });
+          }
+        });
+      },
       columns : [ [ {
         field : 'id',
         title : 'id',
@@ -107,7 +137,18 @@
       panelWidth : 450,
       idField : 'id',
       textField : 'name',
-      url : '${pageContext.request.contextPath}/student/will/getAllTeachers',
+      onChange : function(newValue, oldValue) {
+        $.ajax({
+          url : "${pageContext.request.contextPath}/student/will/showOneTeacherDetail?teacherId=" + newValue,
+          type : "get",
+          success : function(data, textStatus) {
+            $.each(data, function(key, value) {
+              $('#' + key + "3").html(value);
+            });
+          }
+        });
+      },
+      url : '${pageContext.request.contextPath}/student/will/getAllTeachersForSelect',
       columns : [ [ {
         field : 'id',
         title : 'id',
@@ -153,22 +194,132 @@
 <fieldset>
 	<legend align="center">志愿填报</legend>
 	<form method="post" id="willForm">
-		<p align="center">
-			<tr bgcolor="#FAFAF1">
-				<th>第一志愿</th>
-				<td><select id="firstWill" name="firstWill"
-					style="width: 250px;"></select></td>
-				<th>第二志愿</th>
-				<td><select id="secondWill" name="secondWill"
-					style="width: 250px;"></select></td>
-				<th>第三志愿</th>
-				<td><select id="thirdWill" name="thirdWill"
-					style="width: 250px;"></select></td>
-				<td><a href="javascript:void(0);" class="easyui-linkbutton"
-					data-options="iconCls:'icon-search',plain:true"
-					id="updateWillButton">更新</a></td>
-			</tr>
-		</p>
+		<!-- <div class="container"> -->
+		<!-- <div class="grid-4">第一志愿</div>
+			<div class="grid-8"> -->
+		<div class="section group">
+			<div class="col span_1_of_2">
+				第一志愿 <select id="firstWill" name="firstWill" style="width: 250px;"></select>
+			</div>
+			<div class="col span_1_of_2" id="firstWillDetail">
+				<table width="98%" border="0" cellpadding="2" class="tableForm"
+					cellspacing="1" bgcolor="#D1DDAA" align="center"
+					style="margin-top: 8px">
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">姓名:</td>
+						<td id="name1" width="35%"></td>
+						<td width="15%">职称:</td>
+						<td id="title1" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">邮箱:</td>
+						<td id="email1" width="35%"></td>
+						<td width="15%">电话:</td>
+						<td id="phone1" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">学历:</td>
+						<td id="degree1" width="35%"></td>
+						<td width="15%">计划指导人数:</td>
+						<td id="capacity1" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">方向:</td>
+						<td id="direction1" width="35%"></td>
+						<td width="15%">备选题目:</td>
+						<td id="candidateTopics1" width="35%"></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="section group">
+			<div class="col span_1_of_2">
+				第二志愿 <select id="secondWill" name="secondWill" style="width: 250px;"></select>
+			</div>
+			<div class="col span_1_of_2" id="secondWillDetail">
+				<table width="98%" border="0" cellpadding="2" class="tableForm"
+					cellspacing="1" bgcolor="#D1DDAA" align="center"
+					style="margin-top: 8px">
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">姓名:</td>
+						<td id="name2" width="35%"></td>
+						<td width="15%">职称:</td>
+						<td id="title2" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">邮箱:</td>
+						<td id="email2" width="35%"></td>
+						<td width="15%">电话:</td>
+						<td id="phone2" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">学历:</td>
+						<td id="degree2" width="35%"></td>
+						<td width="15%">计划指导人数:</td>
+						<td id="capacity2" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">方向:</td>
+						<td id="direction2" width="35%"></td>
+						<td width="15%">备选题目:</td>
+						<td id="candidateTopics2" width="35%"></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="section group">
+			<div class="col span_1_of_2">
+				第三志愿 <select id="thirdWill" name="thirdWill" style="width: 250px;"></select>
+			</div>
+			<div class="col span_1_of_2" id="thirdWillDetail">
+				<table width="98%" border="0" cellpadding="2" class="tableForm"
+					cellspacing="1" bgcolor="#D1DDAA" align="center"
+					style="margin-top: 8px">
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">姓名:</td>
+						<td id="name3" width="35%"></td>
+						<td width="15%">职称:</td>
+						<td id="title3" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">邮箱:</td>
+						<td id="email3" width="35%"></td>
+						<td width="15%">电话:</td>
+						<td id="phone3" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">学历:</td>
+						<td id="degree3" width="35%"></td>
+						<td width="15%">计划指导人数:</td>
+						<td id="capacity3" width="35%"></td>
+					</tr>
+					<tr bgcolor="#FAFAF1">
+						<td width="15%">方向:</td>
+						<td id="direction3" width="35%"></td>
+						<td width="15%">备选题目:</td>
+						<td id="candidateTopics3" width="35%"></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="section group">
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				data-options="iconCls:'icon-search',plain:true"
+				id="updateWillButton">更新</a>
+		</div>
+		<!-- </div> -->
+		<!-- <th>第二志愿</th>
+			<td><select id="secondWill" name="secondWill"
+				style="width: 250px;"></select></td>
+			<th>第三志愿</th>
+			<td><select id="thirdWill" name="thirdWill"
+				style="width: 250px;"></select></td>
+			<td><a href="javascript:void(0);" class="easyui-linkbutton"
+				data-options="iconCls:'icon-search',plain:true"
+				id="updateWillButton">更新</a></td> -->
+		<!-- </div> -->
 	</form>
 </fieldset>
+
+
 </body>

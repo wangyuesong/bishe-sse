@@ -2,4 +2,5 @@ eclipse.preferences.version=1
 encoding//src/main/java/sse/entity/Administrator.java=UTF-8
 encoding//src/main/java/sse/entity/Student.java=UTF-8
 encoding//src/main/java/sse/interceptor/LoginInterceptor.java=UTF-8
+encoding//src/main/webapp/WEB-INF/jsp/student/student_add_document.jsp=UTF-8
 encoding//src/main/webapp/index.jsp=UTF-8

@@ -41,18 +41,19 @@ public class AdminWillController {
     private StudentWillServiceImpl studentServiceImpl;
 
     @ResponseBody
-    @RequestMapping(value = "/getCurrentMatchCondition", method = { RequestMethod.GET, RequestMethod.POST })
-    public GenericDataGrid<MatchPair> getCurrentMatchCondition(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/getCurrentMatchConditionInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
+    public GenericDataGrid<MatchPair> getCurrentMatchConditionInDatagrid(HttpServletRequest request,
+            HttpServletResponse response) {
         PaginationAndSortModel pam = new PaginationAndSortModel(request);
-        return studentServiceImpl.findCurrentMatchConditions(pam);
+        return adminWillServiceImpl.findCurrentMatchConditionsForDatagrid(pam);
     }
 
     @ResponseBody
-    @RequestMapping(value = "/getWillList", method = { RequestMethod.GET, RequestMethod.POST })
-    public GenericDataGrid<WillModel> getWillList(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/getWillListInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
+    public GenericDataGrid<WillModel> getWillListInDatagrid(HttpServletRequest request, HttpServletResponse response) {
         String page = request.getParameter("page");
         String rows = request.getParameter("rows");
-        return adminWillServiceImpl.getWillList(Integer.parseInt(page), Integer.parseInt(rows));
+        return adminWillServiceImpl.getWillListForDatagrid(Integer.parseInt(page), Integer.parseInt(rows));
     }
 
     @ResponseBody

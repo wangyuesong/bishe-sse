@@ -1,7 +1,12 @@
 package sse.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
+import sse.enums.DocumentTypeEnum;
+import sse.enums.TimeNodeEnum;
+
 import java.util.Date;
 
 /**
@@ -19,8 +24,9 @@ public class TimeNode extends BaseModel implements Serializable {
     @Column(unique = true, nullable = false)
     private int id;
 
-    @Column(nullable = false, length = 45)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30, nullable = false)
+    private TimeNodeEnum name;
 
     @Column(nullable = false)
     private Date time;
@@ -32,11 +38,20 @@ public class TimeNode extends BaseModel implements Serializable {
 
     }
 
-    public TimeNode(String name, Date timeDate, String description)
-    {
+    public TimeNode(int id, TimeNodeEnum name, Date time, String description) {
+        super();
+        this.id = id;
         this.name = name;
-        this.time = timeDate;
+        this.time = time;
         this.description = description;
+    }
+
+    public TimeNodeEnum getName() {
+        return name;
+    }
+
+    public void setName(TimeNodeEnum name) {
+        this.name = name;
     }
 
     public int getId() {
@@ -45,14 +60,6 @@ public class TimeNode extends BaseModel implements Serializable {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Date getTime() {

@@ -1,21 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<script type="text/javascript">
-  var CKEDITOR_BASEPATH = '${pageContext.request.contextPath}/resources/ckeditor/';
-</script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/js/jquery.uploadify.min.js"></script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/ckeditor/ckeditor.js"></script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/ckeditor/config.js"></script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/ckeditor/lang/zh-cn.js"></script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/ckeditor/styles.js"></script>
 
-<link rel="stylesheet" type="text/css"
-	href="${pageContext.request.contextPath}/resources/ckeditor/skins/moono/editor.css" />
 <script type="text/javascript">
   $(function() {
     //初始化Attachment的列表
@@ -83,6 +68,30 @@
 
       }
     });
+
+    $("#file_upload_2").uploadify({
+      'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
+      'buttonText' : '浏览',
+      'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+      'removeCompleted' : true,
+      'fileSizeLimit' : '3MB',
+      'fileTypeExts' : '*.doc; *.pdf; *.docx;',
+      'queueID' : 'fileQueue',
+      'auto' : false,
+      'multi' : true,
+      'simUploadLimit' : 2,
+      'onQueueComplete' : function(event, data) {
+        show_up_files();
+      },
+      'onFallback' : function() {
+        $.messager.alert("提示", "检测到您的浏览器不支持Flash，请安装Flash插件");
+      },
+      'onUploadError' : function(file, errorCode, errorMsg, errorString) {
+        $.message.alert("错误", '上传出错，请联系管理员');
+      }
+
+    });
+
   })
 
   function delete_one_attachment(id) {
@@ -108,29 +117,6 @@
       }
     });
   };
-
-  $("#file_upload").uploadify({
-    'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
-    'buttonText' : '浏览',
-    'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
-    'removeCompleted' : true,
-    'fileSizeLimit' : '3MB',
-    'fileTypeExts' : '*.doc; *.pdf; *.docx;',
-    'queueID' : 'fileQueue',
-    'auto' : false,
-    'multi' : true,
-    'simUploadLimit' : 2,
-    'onQueueComplete' : function(event, data) {
-      show_up_files();
-    },
-    'onFallback' : function() {
-      $.messager.alert("提示", "检测到您的浏览器不支持Flash，请安装Flash插件");
-    },
-    'onUploadError' : function(file, errorCode, errorMsg, errorString) {
-      $.message.alert("错误", '上传出错，请联系管理员');
-    }
-
-  });
 </script>
 <div align="center">
 	<form id="document_add_form" method="post">
@@ -175,15 +161,15 @@
 							<div>
 								<input class="easyui-validatebox" type="hidden"
 									id="Attachment_GUID" name="Attachment_GUID" /> <input
-									id="file_upload" type="file" multiple="multiple"> <a
+									id="file_upload_2" type="file" multiple="multiple"> <a
 									href="javascript:void(0)" class="easyui-linkbutton"
 									id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
-									onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
+									onclick="javascript: $('#file_upload_2').uploadify('upload', '*')">上传</a>
 
 								<a href="javascript:void(0)" class="easyui-linkbutton"
 									id="btnCancelUpload"
 									data-options="plain:true,iconCls:'icon-cancel'"
-									onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
+									onclick="javascript: $('#file_upload_2').uploadify('cancel', '*')">取消</a>
 								<div id="fileQueue" class="fileQueue"></div>
 								<div id="div_files"></div>
 								<br />

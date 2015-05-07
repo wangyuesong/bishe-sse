@@ -19,9 +19,6 @@
 <link
 	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/6cols.css"
 	rel="stylesheet">
-<link
-	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/5cols.css"
-	rel="stylesheet">
 <style>
 .input {
 	width: 170px;
@@ -200,7 +197,7 @@
       });
     }
   </script>
-	<div style="height: 800px">
+	<div style="height: 700px">
 		<div class="easyui-accordion" style="width: 100%; height: 80%;">
 			<div title="开题报告" style="padding: 10px">
 				<div id="kaitibaogao-container"></div>
@@ -208,70 +205,83 @@
 		</div>
 	</div>
 	<div id="kaitibaogao-template" style="display: none;">
+		<table width="98%" border="0" class="tableForm" cellpadding="2"
+			cellspacing="1" bgcolor="#D1DDAA" align="center"
+			style="margin-top: 8px">
+			<tr bgcolor="#E7E7E7">
+				<td height="24">${sessionScope.USER.name}的开题报告</td>
+			</tr>
+		</table>
 		<div class="section group">
-			<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
+			<div class="span_1_of_6">创建时间:</div>
+			<div class="span_2_of_6" id="create_time"></div>
+			<div class="span_1_of_6">修改时间:</div>
+			<div class="span_2_of_6" id="update_time"></div>
 		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">创建时间:</div>
-			<div class="col span_2_of_6" id="create_time"></div>
-			<div class="col span_1_of_6">修改时间:</div>
-			<div class="col span_2_of_6" id="update_time"></div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">
-				<p>描述:</p><a href="javascript:void(0);"
+		<table width="98%" border="0" cellpadding="2" class="tableForm"
+			cellspacing="1" bgcolor="#FAFAF1" align="center"
+			style="margin-top: 8px">
+			<tr bgcolor="#FAFAF1">
+				<td width="20%">创建时间:</td>
+				<td width="30%" id="create_time"></td>
+				<td width="20%">修改时间:</td>
+				<td width="25%" id="update_time"></td>
+			</tr>
+
+			<tr align="left" bgcolor="#FAFAF1">
+				<td width="20%">描述:</td>
+				<td width="75%" colspan="3"><a href="javascript:void(0);"
 					onclick='enable_edit_document_description()'>编辑</a> <a
 					href="javascript:void(0);" onclick='submit_document_description()'>保存</a>
-			</div>
-			<div class="col span_4_of_6">
-				<textarea id="document_description" class="easyui-validatebox"
-					style="width: 500px; height: 300px" name="document_description"></textarea>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">反馈:</div>
-			<div class="col span_5_of_6">
-				<div id="feedback-area"></div>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">附件:</div>
-			<div class="col span_5_of_6">
-				<div class="col span_3_of_5">
-					<fieldset>
-						<legend align="left">已上传附件</legend>
-						<div>
-							<table id="attachment_list_grid"></table>
-						</div>
-					</fieldset>
-				</div>
-				<div class="col span_1_of_5">
-					<table>
-						<tr>
-							<th><label for="Attachment_GUID">附件上传：</label></th>
-							<td>
+					<textarea id="document_description" class="easyui-validatebox"
+						style="width: 700px; height: 300px" name="document_description"></textarea></td>
+			</tr>
+			<tr align="left" bgcolor="#FAFAF1">
+				<td width="20%">反馈:</td>
+				<td width="75%" colspan="3"><div id="feedback-area"></div></td>
+			</tr>
+			<tr bgcolor="#FAFAF1">
+				<td width="20%">附件:</td>
+				<td width="75%">
+					<div class="section group">
+						<div class="col span_1_of_2">
+							<fieldset>
+								<legend align="left">已上传附件</legend>
 								<div>
-									<input class="easyui-validatebox" type="hidden"
-										id="Attachment_GUID" name="Attachment_GUID" /> <input
-										id="file_upload" type="file" multiple="multiple"> <a
-										href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
-										onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
-
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnCancelUpload"
-										data-options="plain:true,iconCls:'icon-cancel'"
-										onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
-									<div id="fileQueue" class="fileQueue"></div>
-									<div id="div_files"></div>
-									<br />
+									<table id="attachment_list_grid"></table>
 								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-		</div>
+							</fieldset>
+						</div>
+						<div class="col span_1_of_2">
+							<table>
+								<tr>
+									<th><label for="Attachment_GUID">附件上传：</label></th>
+									<td>
+										<div>
+											<input class="easyui-validatebox" type="hidden"
+												id="Attachment_GUID" name="Attachment_GUID" /> <input
+												id="file_upload" type="file" multiple="multiple"> <a
+												href="javascript:void(0)" class="easyui-linkbutton"
+												id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
+												onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
+
+											<a href="javascript:void(0)" class="easyui-linkbutton"
+												id="btnCancelUpload"
+												data-options="plain:true,iconCls:'icon-cancel'"
+												onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
+											<div id="fileQueue" class="fileQueue"></div>
+											<div id="div_files"></div>
+											<br />
+										</div>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</td>
+
+			</tr>
+		</table>
 	</div>
 	<div id="create-kaitibaogao-template" style="display: none;">
 		<h3 style="color: #0099FF;">您尚未创建您的开题报告</h3>

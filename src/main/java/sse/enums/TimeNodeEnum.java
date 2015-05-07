@@ -1,12 +1,12 @@
 package sse.enums;
 
-public enum RatingEnum {
+public enum TimeNodeEnum {
 
-    GOOD("Good"), NEEDREVISE("NeedRevise"), BAD("Bad"), UNKNOWN("Unknown");
+    填报志愿("填报志愿"), 课题申报("申报课题"), 毕设进行("毕设进行"), 答辩申请("答辩申请"), UNKNOWN("UNKNOWN");
 
     private final String value;
 
-    private RatingEnum(String value) {
+    private TimeNodeEnum(String value) {
         this.value = value;
     }
 
@@ -19,8 +19,8 @@ public enum RatingEnum {
         return this.value;
     }
 
-    public static RatingEnum getType(String value) {
-        for (RatingEnum type : RatingEnum.values()) {
+    public static TimeNodeEnum getType(String value) {
+        for (TimeNodeEnum type : TimeNodeEnum.values()) {
             if (type.value.equalsIgnoreCase(value)) {
                 return type;
             }

@@ -23,7 +23,3 @@
 <link rel="stylesheet" type="text/css"
 	href="${pageContext.request.contextPath}/resources/style/eventCalendar.css" />
 
-<!-- Uploadify -->
-<link
-	href="${pageContext.request.contextPath}/resources/style/uploadify.css"
-	rel="stylesheet" type="text/css" />

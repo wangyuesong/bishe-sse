@@ -21,6 +21,7 @@ import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
+import sse.utils.PaginationAndSortModel;
 
 @Service
 public class AdminWillServiceImpl {
@@ -54,7 +55,7 @@ public class AdminWillServiceImpl {
 
     /**
      * @Method: doMatch
-     * @Description: TODO
+     * @Description: 匹配算法
      * @param @return
      * @return List<MatchPair>
      * @throws
@@ -185,13 +186,63 @@ public class AdminWillServiceImpl {
     }
 
     /**
-     * @Method: getWillList
-     * @Description: 获取志愿表
+     * @Method: updateWills
+     * @Description: 更新志愿表
+     * @param @param wills
+     * @return void
+     * @throws
+     */
+    public void updateWills(ArrayList<WillModel> willModels) {
+        for (WillModel wm : willModels)
+        {
+            for (int i = 1; i < 4; i++)
+            {
+                String levelWill = wm.getWillByLevel(i);
+                if (levelWill == null)
+                    willDaoImpl.deleteStudentWillByLevelWithoutTransaction(Integer.parseInt(wm.getStudentId()), i);
+                else
+                    willDaoImpl.updateStudentWillByLevel(Integer.parseInt(wm.getStudentId()), i,
+                            Integer.parseInt(wm.getWillByLevel(i)));
+            }
+        }
+    }
+
+    /**
+     * @Method: findCurrentMatchCondition
+     * @Description: 把当前的匹配状态作为Datagrid返回，Entity:Will Model:MatchPair
      * @param @return
      * @return List<MatchPair>
      * @throws
      */
-    public GenericDataGrid<WillModel> getWillList(int page, int pageSize) {
+    public GenericDataGrid<MatchPair> findCurrentMatchConditionsForDatagrid(PaginationAndSortModel pam) {
+        // 目前还仅支持用学排序，因为Model和Entity中的字段名不一致
+        List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, pam.getPage(),
+                pam.getRows(),
+                "s.account", pam.getOrder());
+        long total = studentDaoImpl.findForCount("select s from Student s", null);
+
+        List<MatchPair> matchPairs = new LinkedList<MatchPair>();
+        for (Student s : allStudents)
+        {
+            if (s.getTeacher() != null)
+                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel(), s.getMatchType()));
+            else
+                matchPairs.add(new MatchPair(s, null, null, null));
+        }
+        GenericDataGrid<MatchPair> genericDataGrid = new GenericDataGrid<MatchPair>();
+        genericDataGrid.setRows(matchPairs);
+        genericDataGrid.setTotal(total);
+        return genericDataGrid;
+    }
+
+    /**
+     * @Method: getWillList
+     * @Description: 获取志愿表作为Datagrid返回，要做一些格式的转换，将一个学生的三个志愿合并成一条WillModel Entity:Will Model:WillModel
+     * @param @return
+     * @return List<MatchPair>
+     * @throws
+     */
+    public GenericDataGrid<WillModel> getWillListForDatagrid(int page, int pageSize) {
         List<Will> willList = willDaoImpl.findForList("select w from Will w order by w.id.studentId,w.level ASC");
         // 转换Will为一种可以在页面上展示的WillModel
         List<WillModel> willModelList = new ArrayList<WillModel>();
@@ -226,27 +277,5 @@ public class AdminWillServiceImpl {
         willDataGrid.setRows(subWillModelList);
         willDataGrid.setTotal((long) willModelList.size());
         return willDataGrid;
-    }
-
-    /**
-     * @Method: updateWills
-     * @Description: 更新志愿表
-     * @param @param wills
-     * @return void
-     * @throws
-     */
-    public void updateWills(ArrayList<WillModel> willModels) {
-        for (WillModel wm : willModels)
-        {
-            for (int i = 1; i < 4; i++)
-            {
-                String levelWill = wm.getWillByLevel(i);
-                if (levelWill == null)
-                    willDaoImpl.deleteStudentWillByLevelWithoutTransaction(Integer.parseInt(wm.getStudentId()), i);
-                else
-                    willDaoImpl.updateStudentWillByLevel(Integer.parseInt(wm.getStudentId()), i,
-                            Integer.parseInt(wm.getWillByLevel(i)));
-            }
-        }
     }
 }

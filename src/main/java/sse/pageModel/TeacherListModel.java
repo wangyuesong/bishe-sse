@@ -18,12 +18,32 @@ package sse.pageModel;
  */
 public class TeacherListModel {
 
+    private int id;
     private String name;
     private String account;
     private int capacity;
     private String gender;
     private String email;
     private String phone;
+
+    public TeacherListModel(int id, String name, String account, int capacity, String gender, String email, String phone) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.account = account;
+        this.capacity = capacity;
+        this.gender = gender;
+        this.email = email;
+        this.phone = phone;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -70,16 +90,6 @@ public class TeacherListModel {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public TeacherListModel(String name, String account, int capacity, String gender, String email, String phone) {
-        super();
-        this.name = name;
-        this.account = account;
-        this.capacity = capacity;
-        this.gender = gender;
-        this.email = email;
         this.phone = phone;
     }
 

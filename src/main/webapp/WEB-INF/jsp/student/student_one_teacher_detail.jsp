@@ -5,7 +5,7 @@
 <script>
   $.ajax({
     //selected_teacher_id in all_teachers.jsp
-    url : "${pageContext.request.contextPath}/student/showOneTeacherDetail?teacherId=" + selected_teacher_id,
+    url : "${pageContext.request.contextPath}/student/will/showOneTeacherDetail?teacherId=" + selected_teacher_id,
     type : "get",
     success : function(data, textStatus) {
       $.each(data, function(key, value) {
