@@ -280,7 +280,7 @@ public class StudentDocumentServiceImpl {
             documentModels.add(dm);
         }
         dg.setRows(documentModels);
-        dg.setTotal(documentDaoImpl.findDocumentsForCount());
+        dg.setTotal(documentDaoImpl.findAllForCount());
         return dg;
     }
 

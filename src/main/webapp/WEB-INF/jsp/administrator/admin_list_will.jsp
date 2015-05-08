@@ -52,7 +52,7 @@
         handler : reject
       }, '-' ],
       idField : 'teacherAccount',
-      url : '${pageContext.request.contextPath}/admin/will/getWillList',
+      url : '${pageContext.request.contextPath}/admin/will/getWillListInDatagrid',
       columns : [ [ {
         field : 'studentAccount',
         title : '学号',

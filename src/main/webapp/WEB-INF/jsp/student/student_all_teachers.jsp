@@ -32,9 +32,9 @@
   }
   var all_teachers_datagrid = null;
   $(function() {
-    all_teachers_datagrid = $('#all_teachers_datagrid').datagrid(
+    $('#all_teachers_datagrid').datagrid(
         {
-          url : '${pageContext.request.contextPath}/student/will/getAllTeachersForList',
+          url : '${pageContext.request.contextPath}/student/will/getTeachersInDatagrid',
           fitColumns : true,
           border : false,
           nowrap : false,
@@ -83,6 +83,14 @@
             }
           }, '-' ]
         });
+    var p = $('#all_teachers_datagrid').datagrid('getPager');
+    $(p).pagination({
+      pageSize : 10,
+      pageList : [ 5, 10, 15 ],
+      beforePageText : "第",
+      afterPageText : "页,共{pages}页"
+    });
+
   });
 </script>
 </head>

@@ -16,6 +16,6 @@ public class StudentDaoImpl extends GenericDao<Integer, Student>
 {
     public List<Student> findStudentsWhoHaveATeacher()
     {
-        return this.findForList("select s from Student s where s.teacher is not NULL");
+        return this.findForPaging("select s from Student s where s.teacher is not NULL");
     }
 }

@@ -47,12 +47,13 @@ public class StudentWillController {
 
     @ResponseBody
     @RequestMapping(value = "/getTeacherActionEventsInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
-    public GenericDataGrid<ActionEventModel> getTeacherActionEventsInDatagrid(String studentId,
+    public GenericDataGrid<ActionEventModel> getTeacherActionEventsInDatagrid(String teacherId,
             HttpServletRequest request)
     {
         PaginationAndSortModel pam = new PaginationAndSortModel(request);
         GenericDataGrid<ActionEventModel> s = studentWillService.findTeachersActionEventsForPagingInGenericDataGrid(
-                Integer.parseInt(studentId),
+                Integer.parseInt(teacherId),
+                ((User) request.getSession().getAttribute("USER")).getId(),
                 pam);
         return s;
     }

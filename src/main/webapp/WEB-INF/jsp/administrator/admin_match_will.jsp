@@ -60,7 +60,7 @@
         handler : systemAssign
       }, '-' ],
       idField : 'teacherAccount',
-      url : '${pageContext.request.contextPath}/admin/will/getCurrentMatchCondition',
+      url : '${pageContext.request.contextPath}/admin/will/getCurrentMatchConditionInDatagrid',
       columns : [ [ {
         field : 'studentAccount',
         title : '学号',

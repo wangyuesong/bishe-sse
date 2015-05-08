@@ -16,27 +16,6 @@ import sse.utils.ClassTool;
 public class TeacherDaoImpl extends GenericDao<Integer, Teacher>
 {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sse.dao.impl.ITeacherDao#findTeachersForPaging()
-     */
-    public List<Teacher> findTeachersForPaging(int page, int pageSize, String sortCriteria, String order)
-    {
-        List<Teacher> teacherList = this.findForPaging("select t from Teacher t", new HashMap<String, Object>(), page,
-                pageSize, sortCriteria, order);
-        return teacherList;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sse.dao.impl.ITeacherDao#findTeachersForCount()
-     */
-    public long findTeachersForCount()
-    {
-        return this.findForCount("select t from Teacher t", null);
-    }
 
     public int getTeacherIdByAccount(String account)
     {

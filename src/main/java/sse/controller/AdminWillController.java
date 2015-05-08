@@ -49,6 +49,13 @@ public class AdminWillController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/exportCurrentMatchConditionInExcel", method = { RequestMethod.GET, RequestMethod.POST })
+    public void exportCurrentMatchConditionInExcel(HttpServletRequest request,
+            HttpServletResponse response) {
+        adminWillServiceImpl.exportCurrentMatchConditionInExcel();
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/getWillListInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
     public GenericDataGrid<WillModel> getWillListInDatagrid(HttpServletRequest request, HttpServletResponse response) {
         String page = request.getParameter("page");

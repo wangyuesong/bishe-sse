@@ -1,10 +1,16 @@
 package sse.service.impl;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +29,15 @@ import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
 import sse.utils.PaginationAndSortModel;
 
+/**
+ * @Project: sse
+ * @Title: AdminWillServiceImpl.java
+ * @Package sse.service.impl
+ * @Description: TODO
+ * @author YuesongWang
+ * @date 2015年5月8日 上午11:16:22
+ * @version V1.0
+ */
 @Service
 public class AdminWillServiceImpl {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AdminWillServiceImpl.class);
@@ -54,11 +69,10 @@ public class AdminWillServiceImpl {
     }
 
     /**
-     * @Method: doMatch
-     * @Description: 匹配算法
-     * @param @return
-     * @return List<MatchPair>
-     * @throws
+     * Description: 匹配算法
+     * 
+     * @return
+     *         List<MatchPair>
      */
     public List<MatchPair> doMatch()
     {
@@ -129,12 +143,11 @@ public class AdminWillServiceImpl {
     }
 
     /**
-     * @Method: removeTheWillsFromStudentsWhoAlreadyGotMatched
-     * @Description: 删除已经和老师建立匹配关系的学生的志愿
-     * @param @param willList
-     * @param @return
-     * @return List<Will>
-     * @throws
+     * Description: 删除已经和老师建立匹配关系的学生的志愿
+     * 
+     * @param willList
+     * @return
+     *         List<Will>
      */
     private List<Will> removeTheWillsFromStudentsWhoAlreadyGotMatched(List<Will> willList) {
         List<Student> studentsWhoHaveATeacher = studentDaoImpl.findStudentsWhoHaveATeacher();
@@ -152,14 +165,13 @@ public class AdminWillServiceImpl {
     }
 
     /**
-     * @Method: findCurrentMatchCountByTeacherId
-     * @Description: Find current match count by teacher's id. IF current match count + teachers current students count
-     *               >= capacity, remove this teacher from future algorithm
-     * @param @param matchs
-     * @param @param teacherId
-     * @param @return
-     * @return int
-     * @throws
+     * Description: Find current match count by teacher's id. IF current match count + teachers current students count
+     * >= capacity, remove this teacher from future algorithm
+     * 
+     * @param matchs
+     * @param teacherId
+     * @return
+     *         int
      */
     private int findCurrentMatchCountByTeacherId(List<MatchPair> matchs, int teacherId)
     {
@@ -167,6 +179,50 @@ public class AdminWillServiceImpl {
         for (MatchPair matchPair : matchs)
             count += (Integer.parseInt(matchPair.getTeacherId()) == teacherId) ? 1 : 0;
         return count;
+    }
+
+    public void exportCurrentMatchConditionInExcel()
+    {
+
+        List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, "s.account", "ASC");
+        List<MatchPair> matchPairs = new LinkedList<MatchPair>();
+        for (Student s : allStudents)
+        {
+            if (s.getTeacher() != null)
+                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel(), s.getMatchType()));
+            else
+                matchPairs.add(new MatchPair(s, null, null, null));
+        }
+        int count = matchPairs.size();
+        Workbook wb = new HSSFWorkbook();
+        Sheet sheet = wb.createSheet("匹配情况");
+        short rowNum = 0;
+        short colNum = 0;
+        Row row;
+        for (rowNum = 0; rowNum < count; rowNum++)
+        {
+            MatchPair currentMatchPair = matchPairs.get(rowNum);
+            row = sheet.createRow(rowNum);
+            row.createCell(colNum++).setCellValue(currentMatchPair.getStudentAccount());
+            row.createCell(colNum++).setCellValue(currentMatchPair.getStudentName());
+            row.createCell(colNum++).setCellValue(currentMatchPair.getTeacherAccount());
+            row.createCell(colNum++).setCellValue(currentMatchPair.getTeacherName());
+            row.createCell(colNum++).setCellValue(
+                    currentMatchPair.getMatchLevel() == null ? "" : currentMatchPair.getMatchLevel().getValue());
+            row.createCell(colNum++).setCellValue(
+                    currentMatchPair.getMatchType() == null ? "" : currentMatchPair.getMatchType().getValue());
+            colNum = 0;
+        }
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream("/Users/yuesongwang/Desktop/Try.xlsx");
+            wb.write(fileOut);
+            fileOut.close();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -219,7 +275,7 @@ public class AdminWillServiceImpl {
         List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, pam.getPage(),
                 pam.getRows(),
                 "s.account", pam.getOrder());
-        long total = studentDaoImpl.findForCount("select s from Student s", null);
+        int total = studentDaoImpl.findForCount("select s from Student s", null);
 
         List<MatchPair> matchPairs = new LinkedList<MatchPair>();
         for (Student s : allStudents)
@@ -243,7 +299,7 @@ public class AdminWillServiceImpl {
      * @throws
      */
     public GenericDataGrid<WillModel> getWillListForDatagrid(int page, int pageSize) {
-        List<Will> willList = willDaoImpl.findForList("select w from Will w order by w.id.studentId,w.level ASC");
+        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.id.studentId,w.level ASC");
         // 转换Will为一种可以在页面上展示的WillModel
         List<WillModel> willModelList = new ArrayList<WillModel>();
         Will preWill = null;
@@ -275,7 +331,7 @@ public class AdminWillServiceImpl {
         List<WillModel> subWillModelList = willModelList.subList((page - 1) * pageSize,
                 page * pageSize > willModelList.size() ? willModelList.size() : page * pageSize);
         willDataGrid.setRows(subWillModelList);
-        willDataGrid.setTotal((long) willModelList.size());
+        willDataGrid.setTotal(willModelList.size());
         return willDataGrid;
     }
 }

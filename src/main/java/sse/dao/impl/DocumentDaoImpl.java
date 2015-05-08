@@ -26,8 +26,4 @@ public class DocumentDaoImpl extends GenericDao<Integer, Document>
                 order);
     }
 
-    public long findDocumentsForCount()
-    {
-        return this.findForCount("select t from Document t", null);
-    }
 }

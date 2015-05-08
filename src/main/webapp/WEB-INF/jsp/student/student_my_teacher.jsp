@@ -33,58 +33,44 @@
             });
           }
         });
-    
-    teacher_actions_datagrid = $('#teacher_actions_datagrid').datagrid(
-        {
-          url : '${pageContext.request.contextPath}/student/will/getAllTeachersForList',
-          fitColumns : true,
-          border : false,
-          nowrap : false,
-          pagination : true,
-          pageSize : 10,
-          frozenColumns : [ [ {
-            field : 'id',
-            title : '用户编号',
-            width : 50,
-            hidden : true
-          } ] ],
-          columns : [ [
-              {
-                field : 'name',
-                title : '姓名',
-                width : 40,
-                formatter : function(value, rowData) {
-                  return "<a href='javascript:void(0);' onclick='show_one_teacher_detail(" + rowData.id + ")'" + "'>"
-                      + value + "</a>";
-                }
-              }, {
-                field : 'capacity',
-                title : '可接受学生数目',
-                width : 40,
-              }, {
-                field : 'gender',
-                title : '性别',
-                width : 20,
-                sortable : true,
-              }, {
-                field : 'email',
-                title : '邮箱',
-                width : 35,
-                sortable : true,
-              }, {
-                field : 'phone',
-                title : '电话',
-                width : 55,
-                sortable : true
+
+    teacher_actions_datagrid = $('#teacher_actions_datagrid')
+        .datagrid(
+            {
+              url : '${pageContext.request.contextPath}/student/will/getTeacherActionEventsInDatagrid?teacherId=${sessionScope.USER.teacher.id}',
+              fitColumns : true,
+              border : false,
+              //这里sortname采用的是Entity中的名字，和后端耦合了
+              sortName : 'createTime',
+              sortOrder : 'ASC',
+              nowrap : false,
+              pagination : true,
+              pageSize : 10,
+              frozenColumns : [ [ {
+                field : 'id',
+                title : 'id',
+                width : 50,
+                hidden : true
               } ] ],
-          toolbar : [ '-', {
-            text : '刷新',
-            iconCls : 'icon-reload',
-            handler : function() {
-              all_teachers_datagrid.datagrid('reload');
-            }
-          }, '-' ]
-        });
+              columns : [ [ {
+                field : 'create_time',
+                title : '时间',
+                width : 40,
+              }, {
+                field : 'description',
+                title : '操作',
+                width : 200,
+                sortable : true,
+              } ] ]
+            });
+
+    var p = $('#teacher_actions_datagrid').datagrid('getPager');
+    $(p).pagination({
+      pageSize : 10,
+      pageList : [ 5, 10, 15 ],
+      beforePageText : "第",
+      afterPageText : "页,共{pages}页"
+    });
   });
 </script>
 </head>
@@ -125,7 +111,7 @@
 		</div>
 	</div>
 	<div class="section group">
-		<div class="col span_1_of_8">教师动态</div>
+		<div class="col span_1_of_8" style="color: #0099FF;">教师动态</div>
 		<div class="col span_7_of_8">
 			<div>
 				<div id="teacher_actions_datagrid"></div>

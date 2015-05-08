@@ -10,6 +10,15 @@ import javax.persistence.Query;
 
 import sse.entity.Teacher;
 
+/**
+ * @Project: sse
+ * @Title: GenericDao.java
+ * @Package sse.dao.base
+ * @Description: 基础Dao
+ * @author YuesongWang
+ * @date 2015年5月8日 上午10:46:13
+ * @version V1.0
+ */
 public abstract class GenericDao<K, E> implements Dao<K, E> {
     protected Class<E> entityClass;
 
@@ -22,6 +31,12 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         this.entityClass = (Class<E>) genericSuperclass.getActualTypeArguments()[1];
     }
 
+    /**
+     * Description: 开始事务
+     * 
+     * @param
+     * @return void
+     */
     public void beginTransaction()
     {
         if (!this.getEntityManager().getTransaction().isActive())
@@ -29,6 +44,12 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
 
     }
 
+    /**
+     * Description: 提交事务
+     * 
+     * @param
+     * @return void
+     */
     public void commitTransaction() {
         this.getEntityManager().getTransaction().commit();
     }
@@ -44,6 +65,12 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
             return this.entityManager;
     }
 
+    /**
+     * Description: 带事务的persist
+     * 
+     * @param @param entity
+     * @return void
+     */
     public void persistWithTransaction(E entity)
     {
         beginTransaction();
@@ -51,11 +78,12 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         commitTransaction();
     }
 
-    public void refresh(E entity)
-    {
-        this.getEntityManager().refresh(entity);
-    }
-
+    /**
+     * Description: 带事务merge
+     * 
+     * @param entity
+     *            void
+     */
     public void mergeWithTransaction(E entity)
     {
         beginTransaction();
@@ -63,11 +91,28 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         commitTransaction();
     }
 
+    /**
+     * Description: 带事务remove
+     * 
+     * @param entity
+     *            void
+     */
     public void removeWithTransaction(E entity)
     {
         beginTransaction();
         this.getEntityManager().remove(entity);
         commitTransaction();
+    }
+
+    /**
+     * Description: 更新实体使之与数据库同步
+     * 
+     * @param entity
+     *            void
+     */
+    public void refresh(E entity)
+    {
+        this.getEntityManager().refresh(entity);
     }
 
     public void persist(E entity) {
@@ -87,13 +132,30 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         return this.getEntityManager().find(entityClass, id);
     }
 
+    /**
+     * Description: 查找所有
+     * 
+     * @return
+     *         List<E>
+     */
     @SuppressWarnings("unchecked")
     public List<E> findAll() {
         return this.getEntityManager().createQuery("select w from " + entityClass.getName() + " w")
                 .getResultList();
     }
 
-    // FIND FOR PAGING
+    /**
+     * Description: 带分页和排序,带参数表，返回(page-1)*pageSize到page*pageSize的纪录
+     * 
+     * @param jql
+     * @param params
+     * @param page
+     * @param pageSize
+     * @param sortCriteria
+     * @param order
+     * @return
+     *         List<E>
+     */
     @SuppressWarnings("unchecked")
     public List<E> findForPaging(String jql, HashMap<String, Object> params, int page, int pageSize,
             String sortCriteria, String order) {
@@ -107,17 +169,16 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         return (List<E>) namedQuery.getResultList();
     }
 
-    // FIND FOR COUNT
-    public long findForCount(String jql, HashMap<String, Object> params) {
-        Query namedQuery = this.getEntityManager().createQuery(jql);
-        if (params != null)
-            for (String oneKey : params.keySet())
-                namedQuery.setParameter(oneKey, params.get(oneKey));
-        return namedQuery.getResultList().size();
-    }
-
+    /**
+     * Description: 不带分页和排序的，带参数表，返回全部纪录
+     * 
+     * @param @param jql
+     * @param @param params
+     * @param @return
+     * @return List<E>
+     */
     @SuppressWarnings("unchecked")
-    public List<E> findForList(String jql, HashMap<String, Object> params)
+    public List<E> findForPaging(String jql, HashMap<String, Object> params)
     {
 
         Query namedQuery = this.getEntityManager().createQuery(jql, entityClass);
@@ -127,8 +188,63 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         return (List<E>) namedQuery.getResultList();
     }
 
-    public List<E> findForList(String jql)
+    /**
+     * Description: 不带分页和排序，也不带参数的，返回全部纪录
+     * 
+     * @param @param jql
+     * @param @return
+     * @return List<E>
+     */
+    public List<E> findForPaging(String jql)
     {
-        return this.findForList(jql, null);
+        return this.findForPaging(jql, null);
     }
+
+    /**
+     * Description: 只带排序的，返回全部纪录
+     * 
+     * @param @param jql
+     * @param @param params
+     * @param @param sortCriteria
+     * @param @param order
+     * @param @return
+     * @return List<E>
+     */
+    @SuppressWarnings("unchecked")
+    public List<E> findForPaging(String jql, HashMap<String, Object> params, String sortCriteria, String order)
+    {
+        jql += ((sortCriteria == null || order == null) ? "" : " order by " + sortCriteria + " " + order);
+        Query namedQuery = this.getEntityManager().createQuery(jql, entityClass);
+        if (params != null)
+            for (String oneKey : params.keySet())
+                namedQuery.setParameter(oneKey, params.get(oneKey));
+        return (List<E>) namedQuery.getResultList();
+    }
+
+    /** 
+     * Description: 返回某表的所有纪录的计数，用于EasyUi分页时提供记录总数，便于分页
+     * @return
+     * int
+     */
+    public int findAllForCount() {
+        String sql = "select a from " + entityClass.getName() + "a";
+        return findForCount(sql, null);
+    }
+
+    /**
+     * Description: 返回符合该查询条件的所有纪录的计数，用于EasyUi分页时提供记录总数，便于分页
+     * 
+     * @param jql
+     * @param params
+     * 
+     * @return long
+     */
+    public int findForCount(String jql, HashMap<String, Object> params) {
+        Query namedQuery = this.getEntityManager().createQuery(jql);
+        if (params != null)
+            for (String oneKey : params.keySet())
+                namedQuery.setParameter(oneKey, params.get(oneKey));
+        return namedQuery.getResultList().size();
+    }
+
 }

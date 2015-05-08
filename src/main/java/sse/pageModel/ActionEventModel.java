@@ -18,15 +18,25 @@ package sse.pageModel;
  */
 public class ActionEventModel {
 
+    int id;
     String actor;
     String create_time;
     String description;
 
-    public ActionEventModel(String actor, String create_time, String description) {
+    public ActionEventModel(int id, String actor, String create_time, String description) {
         super();
+        this.id = id;
         this.actor = actor;
         this.create_time = create_time;
         this.description = description;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getActor() {

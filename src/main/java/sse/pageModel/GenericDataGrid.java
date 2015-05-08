@@ -14,7 +14,7 @@ import java.util.List;
  * @param <T> 数据模型
  */
 public class GenericDataGrid<T> {
-	private Long total = 0L;
+	private int total = 0;
 	private List<T> rows = new ArrayList<T>();
 
 	/**
@@ -29,7 +29,7 @@ public class GenericDataGrid<T> {
 	 * @param total 总行数
 	 * @param rows	行数据列表
 	 */
-	public GenericDataGrid(Long total, List<T> rows) {
+	public GenericDataGrid(int total, List<T> rows) {
 		super();
 		this.total = total;
 		this.rows = rows;
@@ -39,7 +39,7 @@ public class GenericDataGrid<T> {
 	 * 返回总记录数
 	 * @return
 	 */
-	public Long getTotal() {
+	public int getTotal() {
 		return total;
 	}
 
@@ -47,7 +47,7 @@ public class GenericDataGrid<T> {
 	 * 设置总记录数
 	 * @param total
 	 */
-	public void setTotal(Long total) {
+	public void setTotal(int total) {
 		this.total = total;
 	}
 

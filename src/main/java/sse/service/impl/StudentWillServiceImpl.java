@@ -2,6 +2,7 @@ package sse.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import sse.entity.Will;
 import sse.pageModel.ActionEventModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherListModel;
+import sse.utils.DateTimeUtil;
 import sse.utils.PaginationAndSortModel;
 
 @Service
@@ -42,8 +44,9 @@ public class StudentWillServiceImpl {
     public GenericDataGrid<TeacherListModel> findTeachersForPagingInGenericDataGrid(PaginationAndSortModel pam)
     {
         GenericDataGrid<TeacherListModel> dg = new GenericDataGrid<>();
-        List<Teacher> teacherList = teacherDaoImpl.findTeachersForPaging(pam.getRows(), pam.getPage(), pam.getSort(),
-                pam.getOrder());
+        List<Teacher> teacherList = teacherDaoImpl.findForPaging("select t from Teacher t",
+                new HashMap<String, Object>(), pam.getPage(),
+                pam.getRows(), pam.getSort(), pam.getOrder());
         List<TeacherListModel> teacherModelList = new LinkedList<TeacherListModel>();
         for (Teacher t : teacherList)
         {
@@ -54,7 +57,7 @@ public class StudentWillServiceImpl {
             teacherModelList.add(tl);
         }
         dg.setRows(teacherModelList);
-        dg.setTotal(teacherDaoImpl.findTeachersForCount());
+        dg.setTotal(teacherDaoImpl.findForCount("select t from Teacher t", null));
         return dg;
     }
 
@@ -104,29 +107,39 @@ public class StudentWillServiceImpl {
 
     /**
      * @Method: findTeachersActionEventsForPagingInGenericDataGrid
-     * @Description: TODO
+     * @Description: 查看自己老师最近的所有操作，只能看到老师的公共操作或者和自己的有关的操作
      * @param @param pam
      * @param @return
      * @return GenericDataGrid<ActionEventModel>
      * @throws
      */
     public GenericDataGrid<ActionEventModel> findTeachersActionEventsForPagingInGenericDataGrid(int teacherId,
+            int studentId,
             PaginationAndSortModel pam) {
         HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("actor", teacherId + "");
-        List<ActionEvent> actionEvents = actionEventDaoImpl.findForPaging(
-                "select a from ActionEvent a where a.actor=:actor", params, pam.getPage(), pam.getRows(),
-                pam.getSort(), pam.getOrder());
+        params.put("actor", teacherId);
+        params.put("listener", studentId);
+        List<ActionEvent> actionEvents = actionEventDaoImpl
+                .findForPaging(
+                        "select ae from ActionEvent ae where ae.actor.id=:actor and (ae.listener.id=:listener or ae.listener is NULL)",
+                        params, pam.getPage(),
+                        pam.getRows(),
+                        "ae." + pam.getSort(), pam.getOrder());
+
         List<ActionEventModel> actionEventModels = new ArrayList<ActionEventModel>();
         for (ActionEvent e : actionEvents)
         {
-            ActionEventModel aem = new ActionEventModel(e.getActor().toString(), e.getActor().getCreateTime()
-                    .toString(), e.getDescription());
+            ActionEventModel aem = new ActionEventModel(e.getId(), e.getActor().getName(), DateTimeUtil.formatToMin(e
+                    .getActor()
+                    .getCreateTime()), e.getDescription());
             actionEventModels.add(aem);
         }
         GenericDataGrid<ActionEventModel> dataGrid = new GenericDataGrid<ActionEventModel>();
         dataGrid.setRows(actionEventModels);
-        dataGrid.setTotal(actionEventDaoImpl.findForCount("select a from ActionEvent a where a.actor=:actor", params));
+        dataGrid.setTotal(actionEventDaoImpl
+                .findForCount(
+                        "select ae from ActionEvent ae where ae.actor.id=:actor and (ae.listener.id=:listener or ae.listener is NULL)",
+                        params));
         return dataGrid;
     }
 

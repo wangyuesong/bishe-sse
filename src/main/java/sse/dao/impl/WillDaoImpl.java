@@ -1,24 +1,25 @@
 package sse.dao.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
-
 import sse.commandmodel.WillModel;
 import sse.dao.base.GenericDao;
-import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.entity.WillPK;
 import sse.enums.WillStatusEnum;
 
 /**
- * @author yuesongwang
- *
+ * @Project: sse
+ * @Title: WillDaoImpl.java
+ * @Package sse.dao.impl
+ * @Description: TODO
+ * @author YuesongWang
+ * @date 2015年5月8日 上午10:43:15
+ * @version V1.0
  */
 @Repository
 public class WillDaoImpl extends GenericDao<WillPK, Will> {
@@ -33,6 +34,12 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
         return wills;
     }
 
+    /**
+     * Description: 更新学生的志愿
+     * 
+     * @param @param willModel
+     * @return void
+     */
     public void updateSelection(WillModel willModel)
     {
         int studentId = Integer.parseInt(willModel.getStudentId());
@@ -61,6 +68,13 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
 
     }
 
+    /**
+     * Description: TODO
+     * 
+     * @param @param studentId
+     * @param @return
+     * @return List<Will>
+     */
     public List<Will> findWillsByStudentId(int studentId)
     {
         String queryStr = "select w from Will w where w.id.studentId= :studentId";
@@ -68,6 +82,13 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
                 .setParameter("studentId", studentId).getResultList();
     }
 
+    /**
+     * Description: TODO
+     * 
+     * @param @param teacherId
+     * @param @return
+     * @return List<Will>
+     */
     public List<Will> findWillsByTeacherId(int teacherId)
     {
         String queryStr = "select w from Will w where w.id.teacherId= :teacherId";
@@ -76,12 +97,12 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
     }
 
     /**
-     * @Method: findAllNotRejectedWillsByTeacherIdLevelAscending
-     * @Description: Get one level wills which is not rejected by this teacher in ascending order
+     * Description: Get one level wills which is not rejected by this teacher in ascending order
+     * 
      * @param @param teacherId
+     * @param @param level
      * @param @return
      * @return List<Will>
-     * @throws
      */
     public List<Will> findAllNotRejectedWillsByTeacherIdAndLevel(int teacherId, int level)
     {
@@ -94,12 +115,11 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
     }
 
     /**
-     * @Method: deleteStudentWillByLevel
-     * @Description: 删除id为studentId的志愿登记为level的志愿,没有transaction
+     * Description: 删除id为studentId的志愿登记为level的志愿,没有transaction
+     * 
      * @param @param studentId
      * @param @param level
      * @return void
-     * @throws
      */
     public void deleteStudentWillByLevelWithoutTransaction(int studentId, int level)
     {
@@ -117,7 +137,6 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
      * @param @param i
      * @param @param teacherId
      * @return void
-     * @throws
      */
     public void updateStudentWillByLevel(int studentId, int i, int teacherId) {
         String queryStr = "select w from Will w where w.level=:level and w.id.studentId= :studentId";
@@ -127,7 +146,7 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
         if (!CollectionUtils.isEmpty(wills))
         {
             Will w = wills.get(0);
-            //如果这个will和新的will不一致，则更新一下，由于是WillPk是主键，不能更新，需要删除后添加
+            // 如果这个will和新的will不一致，则更新一下，由于是WillPk是主键，不能更新，需要删除后添加
             if (w.getId().getStudentId() != studentId || w.getId().getTeacherId() != teacherId)
             {
                 super.removeWithTransaction(w);

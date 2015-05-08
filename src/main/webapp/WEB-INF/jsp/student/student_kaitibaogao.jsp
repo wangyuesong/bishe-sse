@@ -139,7 +139,7 @@
               text : '刷新',
               iconCls : 'icon-reload',
               handler : function() {
-                $attachment_list_grid.datagrid('reload');
+                $('#attachment_list_grid').datagrid('reload');
               }
             }, '-' ]
           });
@@ -199,6 +199,28 @@
         } ]
       });
     }
+    function show_up_files() {
+      $.ajax({
+        url : "${pageContext.request.contextPath}/student/document/getAllTempAttachments",
+        type : "get",
+        success : function(data, textStatus) {
+          $("#attachment_list_grid").datagrid('reload');
+        }
+      });
+    };
+    function delete_one_attachment(id) {
+      $.ajax({
+        url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId="
+            + id,
+        type : "get",
+        success : function(data, textStatus) {
+          $("#attachment_list_grid").datagrid('reload');
+        },
+        error : function() {
+          $.messager.alert("错误", "删除失败，请联系管理员");
+        }
+      });
+    }
   </script>
 	<div style="height: 800px">
 		<div class="easyui-accordion" style="width: 100%; height: 80%;">
@@ -219,7 +241,8 @@
 		</div>
 		<div class="section group">
 			<div class="col span_1_of_6">
-				<p>描述:</p><a href="javascript:void(0);"
+				<p>描述:</p>
+				<a href="javascript:void(0);"
 					onclick='enable_edit_document_description()'>编辑</a> <a
 					href="javascript:void(0);" onclick='submit_document_description()'>保存</a>
 			</div>
