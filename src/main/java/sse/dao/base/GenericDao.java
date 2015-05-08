@@ -164,8 +164,11 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         if (params != null)
             for (String oneKey : params.keySet())
                 namedQuery.setParameter(oneKey, params.get(oneKey));
-        namedQuery.setFirstResult((page - 1) * pageSize);
-        namedQuery.setMaxResults(pageSize);
+        if (page != 0) {
+            namedQuery.setFirstResult((page - 1) * pageSize);
+            if (pageSize != 0)
+                namedQuery.setMaxResults(pageSize);
+        }
         return (List<E>) namedQuery.getResultList();
     }
 
@@ -221,10 +224,11 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
         return (List<E>) namedQuery.getResultList();
     }
 
-    /** 
+    /**
      * Description: 返回某表的所有纪录的计数，用于EasyUi分页时提供记录总数，便于分页
+     * 
      * @return
-     * int
+     *         int
      */
     public int findAllForCount() {
         String sql = "select a from " + entityClass.getName() + "a";

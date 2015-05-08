@@ -3,6 +3,7 @@ package sse.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.text.DateFormat;
@@ -18,6 +19,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,7 @@ import sse.exception.SSEException;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.DocumentListModel;
 import sse.pageModel.GenericDataGrid;
+import sse.utils.FtpTool;
 
 /**
  * @author yuesongwang
@@ -77,13 +80,6 @@ public class StudentDocumentServiceImpl {
     @Autowired
     private WillDaoImpl willDaoImpl;
 
-    // FTP Server configuration
-    String serverIp = "127.0.0.1";
-    int serverPort = 21;
-    int fileType = FTP.BINARY_FILE_TYPE;
-    String ftpUserName = "sseftp";
-    String ftpPassword = "123";
-
     public List<SimpleAttachmentInfo> getAllTempAttachmentOfAUser(User currentUser)
     {
         List<SimpleAttachmentInfo> infoList = new LinkedList<SimpleAttachmentInfo>();
@@ -105,6 +101,42 @@ public class StudentDocumentServiceImpl {
         return infoList;
     }
 
+    /**
+     * Description: 下载附件，将附件的流写入参数out中
+     * 
+     * @param attachmentId
+     * @param out
+     *            void
+     */
+    public void downloadAttachment(int attachmentId, OutputStream out)
+    {
+        FtpTool ftpTool = new FtpTool();
+        try {
+            String url = attachmentDaoImpl.findById(attachmentId).getUrl();
+            InputStream in = ftpTool.retrieveFileStream(url);
+            int replyCode = ftpTool.getReplyCode();
+            byte[] outputByte = new byte[4096];
+            while (in.read(outputByte, 0, 4096) != -1)
+            {
+                out.write(outputByte, 0, 4096);
+            }
+            boolean success = ftpTool.completePendingCommand();
+            in.close();
+            out.flush();
+            out.close();
+            if (!success)
+                throw new SSEException("下载失败");
+        } catch (IOException e) {
+            throw new SSEException("下载失败", e);
+        }
+
+    }
+
+    public String findAttachmentListNameByAttachmentId(int attchmentId)
+    {
+        return attachmentDaoImpl.findById(attchmentId).getListName();
+    }
+
     public AttachmentInfo uploadTempAttachment(User currentUser, Map<String, MultipartFile> fileMap)
             throws SSEException
     {
@@ -122,16 +154,17 @@ public class StudentDocumentServiceImpl {
             listFileName = mf.getOriginalFilename();
             realFileName = convertListNameToRealNameByAppendingTimeStamp(listFileName);
             baseDir = "/Users/sseftp/" + currentUser.getAccount() + currentUser.getName() + "/";
-            url = "ftp://" + ftpUserName + ":" + ftpPassword + "@" + serverIp + ":" + serverPort + baseDir
-                    + realFileName;
+            // url = "ftp://" + ftpUserName + ":" + ftpPassword + "@" + serverIp + ":" + serverPort + baseDir
+            // + realFileName;
+            url = baseDir + realFileName;
             fileLocationOnServer = baseDir + realFileName;
             InputStream oneFileInputStream = null;
             try {
                 oneFileInputStream = new ByteArrayInputStream(mf.getBytes());
-                FTPClient ftpClient = connectAndLoginFtpServer();
-                ftpClient.makeDirectory(new String(baseDir.getBytes("UTF-8"), "iso-8859-1"));
-                ftpClient.changeWorkingDirectory(baseDir);
-                ftpClient.storeFile(convertUTF8ToISO(fileLocationOnServer),
+                FtpTool ftpTool = new FtpTool();
+                ftpTool.makeDirectory(baseDir);
+                ftpTool.changeWorkingDirectory(baseDir);
+                ftpTool.storeFile(fileLocationOnServer,
                         oneFileInputStream);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -150,38 +183,6 @@ public class StudentDocumentServiceImpl {
                 + "",
                 AttachmentStatusEnum.TEMP, url);
         return info;
-    }
-
-    /**
-     * @Method: connectAndLoginFtpServer
-     * @Description: TODO
-     * @param @return
-     * @param @throws SocketException
-     * @param @throws IOException
-     * @return FTPClient
-     * @throws
-     */
-    private FTPClient connectAndLoginFtpServer() throws SocketException, IOException {
-        FTPClient ftpClient = new FTPClient();
-        // First connect
-        ftpClient.connect(serverIp, serverPort);
-        int reply = ftpClient.getReplyCode();
-        if (!FTPReply.isPositiveCompletion(reply))
-        {
-            ftpClient.disconnect();
-            throw new SSEException("FTP Server 不接受连接");
-        }
-        // Then login
-        if (!ftpClient.login(ftpUserName, ftpPassword))
-        {
-            ftpClient.disconnect();
-            throw new SSEException("用户名密码错误");
-        }
-        // Set file type and misc
-        ftpClient.setControlEncoding("UTF-8");
-        ftpClient.setFileType(fileType);
-        ftpClient.enterLocalPassiveMode();
-        return ftpClient;
     }
 
     public void createTempAttachmentEntryInDB(AttachmentInfo info)
@@ -203,9 +204,9 @@ public class StudentDocumentServiceImpl {
         String realName = attachment.getRealName();
 
         // Delete file on ftp server
-        FTPClient ftpClient = connectAndLoginFtpServer();
+        FtpTool ftpTool = new FtpTool();
         String baseDir = "/Users/sseftp/" + user.getAccount() + user.getName() + "/";
-        boolean result = ftpClient.deleteFile(convertUTF8ToISO(baseDir + realName));
+        boolean result = ftpTool.deleteFile(baseDir + realName);
         if (!result)
             return result;
         // Delete Attachment entry in db
@@ -295,11 +296,10 @@ public class StudentDocumentServiceImpl {
     public void cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(User user) throws IOException {
         List<Attachment> attachments = attachmentDaoImpl.findTempAttachmentsByUserId(user.getId());
         // Delete file on ftp server
-        FTPClient ftpClient = connectAndLoginFtpServer();
-        String baseDir = "/Users/sseftp/" + user.getAccount() + user.getName() + "/";
+        FtpTool ftpTool = new FtpTool();
         for (Attachment a : attachments)
         {
-            ftpClient.deleteFile(convertUTF8ToISO(baseDir + a.getRealName()));
+            ftpTool.deleteFile(a.getUrl());
             attachmentDaoImpl.removeWithTransaction(a);
         }
     }
@@ -326,22 +326,13 @@ public class StudentDocumentServiceImpl {
         willDaoImpl.updateSelection(model);
     }
 
-    private String convertUTF8ToISO(String utf8String)
-    {
-        try {
-            return new String(utf8String.getBytes("UTF-8"), "iso-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            logger.error("不支持的字符集", e);
-        }
-        return null;
-    }
-
     private String convertListNameToRealNameByAppendingTimeStamp(String listName)
     {
         int posOfDot = listName.lastIndexOf('.');
         String prefix = listName.substring(0, posOfDot);
         String postFix = listName.substring(posOfDot, listName.length());
-        prefix += "_" + new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+        prefix += "_" + sdf.format(new Date());
         prefix += postFix;
         return prefix;
     }

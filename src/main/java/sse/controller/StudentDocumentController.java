@@ -1,10 +1,12 @@
 package sse.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -21,7 +23,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.DocumentFormModel;
-import sse.entity.DocumentComment;
 import sse.entity.User;
 import sse.exception.SSEException;
 import sse.pageModel.DocumentCommentListModel;
@@ -71,6 +72,21 @@ public class StudentDocumentController {
         AttachmentInfo info = studentDocumentServiceImpl.uploadTempAttachment(currentUser, fileMap);
         // Create temp entry in DB Attachment table
         studentDocumentServiceImpl.createTempAttachmentEntryInDB(info);
+    }
+    
+    @RequestMapping(value = "/downloadAttachment")
+    public void downloadAttachment(HttpServletRequest request, int attachmentId, HttpServletResponse response)
+            throws SSEException {
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition",
+                "attachment; filename=" + studentDocumentServiceImpl.findAttachmentListNameByAttachmentId(attachmentId));
+        try {
+            studentDocumentServiceImpl.downloadAttachment(attachmentId, response.getOutputStream());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            throw new SSEException("下载失败，请联系管理员", e);
+        }
+
     }
 
     @ResponseBody

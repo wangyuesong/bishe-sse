@@ -36,9 +36,11 @@
                 formatter : function(value, rowData, index) {
                   var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnCancelUpload"'
                       + 'data-options="plain:true" onclick="delete_one_attachment(' + rowData.id + ')">删除</a>';
+                  var download = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnCancelUpload"'
+                      + 'data-options="plain:true" onclick="download_one_attachment(' + rowData.id + ')">下载</a>';
+                  remove += " " + download;
                   return remove;
                 }
-
               }
 
           ] ],
@@ -104,6 +106,19 @@
       },
       error : function() {
         $.messager.alert("错误", "删除失败，请联系管理员");
+      }
+    });
+  }
+  function download_one_attachment(id) {
+    $.ajax({
+      url : "${pageContext.request.contextPath}/student/document/downloadAttachment?attachmentId=" + id,
+      type : "post",
+      aysnc : false,
+      success : function(data, textStatus) {
+        alert("here");
+      },
+      error : function() {
+        $.messager.alert("错误", "下载失败，请联系管理员");
       }
     });
   }
