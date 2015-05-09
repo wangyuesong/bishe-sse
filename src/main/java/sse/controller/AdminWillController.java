@@ -20,7 +20,7 @@ import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
 import sse.service.impl.AdminWillServiceImpl;
 import sse.service.impl.StudentWillServiceImpl;
-import sse.service.impl.TeacherServiceImpl;
+import sse.service.impl.TeacherStudentServiceImpl;
 import sse.utils.PaginationAndSortModel;
 
 /**
@@ -35,7 +35,7 @@ public class AdminWillController {
     public AdminWillServiceImpl adminWillServiceImpl;
 
     @Autowired
-    private TeacherServiceImpl teacherServiceImpl;
+    private TeacherStudentServiceImpl teacherServiceImpl;
 
     @Autowired
     private StudentWillServiceImpl studentServiceImpl;
@@ -89,11 +89,11 @@ public class AdminWillController {
     @RequestMapping(value = "/updateMatchPairs", method = { RequestMethod.POST })
     public BasicJson updateMatchPairs(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ArrayList<MatchPair> matchPairs) {
-        BasicJson bj = teacherServiceImpl.doCapacityCheck(matchPairs);
+        BasicJson bj = adminWillServiceImpl.doCapacityCheck(matchPairs);
         if (!bj.isSuccess())
             return bj;
         else
-            teacherServiceImpl.updateRelationshipBetweenTeacherAndStudent(matchPairs);
+            adminWillServiceImpl.updateRelationshipBetweenTeacherAndStudent(matchPairs);
         // for (MatchPair matchPair : matchPairs)
         // studentServiceImpl.createNewRelationshipBetweenStudentAndTeacher(matchPair.getStudentId(),
         // matchPair.getTeacherId());
@@ -134,7 +134,7 @@ public class AdminWillController {
     @RequestMapping(value = "/doCapacityCheck", method = { RequestMethod.GET, RequestMethod.POST })
     public BasicJson doCapacityCheck(@RequestBody ArrayList<MatchPair> rows)
     {
-        BasicJson bj = teacherServiceImpl.doCapacityCheck(rows);
+        BasicJson bj = adminWillServiceImpl.doCapacityCheck(rows);
         return bj;
     }
 }

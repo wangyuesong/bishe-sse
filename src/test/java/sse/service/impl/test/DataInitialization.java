@@ -198,7 +198,8 @@ public class DataInitialization extends BaseJPATest {
                 "http://localhost:8080/sse/dispatch/student/student_all_teachers"));
         menus.add(new Menu(3, "填报志愿", menufbn("指导教师"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_select_will"));
-        menus.add(new Menu(4, "我的老师", menufbn("指导教师"), "Student", "http://localhost:8080/sse/dispatch/student/student_my_teacher"));
+        menus.add(new Menu(4, "我的老师", menufbn("指导教师"), "Student",
+                "http://localhost:8080/sse/dispatch/student/student_my_teacher"));
 
         for (Menu m : menus)
         {
@@ -249,13 +250,12 @@ public class DataInitialization extends BaseJPATest {
         {
             em.persist(m);
         }
-
         menus = new ArrayList<Menu>();
         em.persist(new Menu(18, "学生", null, "Teacher", ""));
         menus.add(new Menu(19, "选择学生", menufbn("学生"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_select_student"));
         menus.add(new Menu(20, "我的学生", menufbn("学生"), "Teacher",
-                "http://localhost:8080/sse/dispatch/teacher/admin_my_student"));
+                "http://localhost:8080/sse/dispatch/teacher/teacher_my_students"));
         for (Menu m : menus)
         {
             em.persist(m);
