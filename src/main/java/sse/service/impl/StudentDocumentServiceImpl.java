@@ -80,10 +80,21 @@ public class StudentDocumentServiceImpl {
     @Autowired
     private WillDaoImpl willDaoImpl;
 
-    public List<SimpleAttachmentInfo> getAllTempAttachmentOfAUser(User currentUser)
+    /**
+     * Description: 根据userId 和 Document type和附件的状态(Temp, Forever)找到一个用户的所有附件
+     * 
+     * @param userId
+     * @param type
+     * @param status
+     * @return
+     *         List<SimpleAttachmentInfo>
+     */
+    public List<SimpleAttachmentInfo> getAttachmentsOfAUserByTypeAndAttachmentStatus(int userId, DocumentTypeEnum type,
+            AttachmentStatusEnum status)
     {
         List<SimpleAttachmentInfo> infoList = new LinkedList<SimpleAttachmentInfo>();
-        List<Attachment> attachments = attachmentDaoImpl.findTempAttachmentsByUserId(currentUser.getId());
+        List<Attachment> attachments = attachmentDaoImpl.findForeverAttachmentsByUserIdAndDocumentType(userId, type,
+                status);
         if (org.springframework.util.CollectionUtils.isEmpty(attachments))
             return infoList;
         else
@@ -137,9 +148,19 @@ public class StudentDocumentServiceImpl {
         return attachmentDaoImpl.findById(attchmentId).getListName();
     }
 
-    public AttachmentInfo uploadTempAttachment(User currentUser, Map<String, MultipartFile> fileMap)
+    /**
+     * Description: 上传一个附件到FtpServer,并且返回该附件的相关信息
+     * 
+     * @param userId
+     * @param fileMap
+     * @return
+     * @throws SSEException
+     *             AttachmentInfo
+     */
+    public AttachmentInfo uploadAttachmentToFtp(int userId, Map<String, MultipartFile> fileMap)
             throws SSEException
     {
+        User creator = userDaoImpl.findById(userId);
         String realFileName = "";
         String listFileName = "";
         String fileLocationOnServer = "";
@@ -149,11 +170,10 @@ public class StudentDocumentServiceImpl {
         for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet())
         {
             MultipartFile mf = entity.getValue();
-
             fileSize = mf.getSize();
             listFileName = mf.getOriginalFilename();
             realFileName = convertListNameToRealNameByAppendingTimeStamp(listFileName);
-            baseDir = "/Users/sseftp/" + currentUser.getAccount() + currentUser.getName() + "/";
+            baseDir = "/Users/sseftp/" + creator.getAccount() + creator.getName() + "/";
             // url = "ftp://" + ftpUserName + ":" + ftpPassword + "@" + serverIp + ":" + serverPort + baseDir
             // + realFileName;
             url = baseDir + realFileName;
@@ -179,12 +199,40 @@ public class StudentDocumentServiceImpl {
 
             }
         }
-        AttachmentInfo info = new AttachmentInfo(currentUser, realFileName, listFileName, fileSize
-                + "",
-                AttachmentStatusEnum.TEMP, url);
+        AttachmentInfo info = new AttachmentInfo(creator, realFileName, listFileName, fileSize
+                + "", url);
         return info;
     }
 
+    /**
+     * Description: 在数据库中创建一个永久的Attachment,需要和文档建立关系，根据ownerId和documentType来查到已经存在的文档
+     * 
+     * @param info
+     * @param documentId
+     *            void
+     */
+    public void createForeverAttachmentEntryInDB(AttachmentInfo info, int ownerId, String documentType)
+    {
+        Attachment a = new Attachment();
+        a.setCreator(info.getCreator());
+        a.setListName(info.getListName());
+        a.setRealName(info.getRealName());
+        a.setUrl(info.getUrl());
+        a.setSize(info.getSize());
+        a.setStatus(AttachmentStatusEnum.FOREVER);
+        Document document = documentDaoImpl.findDocumentByStudentIdAndType(ownerId,
+                DocumentTypeEnum.getType(documentType));
+        document.addAttachment(a);
+        // Document已经设置级联保存和更新，因此在此处加入新的Attachment，只要把attachment加入document的attachemntList中再更新document，attachment会自动插入
+        documentDaoImpl.mergeWithTransaction(document);
+    }
+
+    /**
+     * Description: 在数据库中创建一个暂时的Attachment，无所属Document
+     * 
+     * @param info
+     *            void
+     */
     public void createTempAttachmentEntryInDB(AttachmentInfo info)
     {
         Attachment a = new Attachment();
@@ -194,7 +242,7 @@ public class StudentDocumentServiceImpl {
         a.setUrl(info.getUrl());
         a.setSize(info.getSize());
         a.setStatus(AttachmentStatusEnum.TEMP);
-        attachmentDaoImpl.createTempAttachment(a);
+        attachmentDaoImpl.persistWithTransaction(a);
     }
 
     public boolean deleteAttachmentOnFTPServerAndDBByAttachmentId(User user, int attachmentId) throws SocketException,
@@ -234,7 +282,9 @@ public class StudentDocumentServiceImpl {
             document.setLastModifiedBy(u);
             // Firstly find all the temp attachment belongs to this user
             documentDaoImpl.persistWithTransaction(document);
-            List<Attachment> tempAttachmentList = attachmentDaoImpl.findTempAttachmentsByUserId(u.getId());
+            List<Attachment> tempAttachmentList = attachmentDaoImpl.findForeverAttachmentsByUserIdAndDocumentType(
+                    u.getId(),
+                    DocumentTypeEnum.getType(documentModel.getDocument_type()), AttachmentStatusEnum.TEMP);
             if (tempAttachmentList != null)
                 for (Attachment attachment : tempAttachmentList)
                 {
@@ -293,8 +343,11 @@ public class StudentDocumentServiceImpl {
      * @return void
      * @throws
      */
-    public void cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(User user) throws IOException {
-        List<Attachment> attachments = attachmentDaoImpl.findTempAttachmentsByUserId(user.getId());
+    public void cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(User user, DocumentTypeEnum type)
+            throws IOException {
+        List<Attachment> attachments = attachmentDaoImpl.findForeverAttachmentsByUserIdAndDocumentType(user.getId(),
+                type,
+                AttachmentStatusEnum.TEMP);
         // Delete file on ftp server
         FtpTool ftpTool = new FtpTool();
         for (Attachment a : attachments)
@@ -340,14 +393,13 @@ public class StudentDocumentServiceImpl {
     public static class AttachmentInfo
     {
 
-        public AttachmentInfo(User creator, String realName, String listName, String size, AttachmentStatusEnum status,
+        public AttachmentInfo(User creator, String realName, String listName, String size,
                 String url) {
             super();
             this.creator = creator;
             this.realName = realName;
             this.listName = listName;
             this.size = size;
-            this.status = status;
             this.url = url;
         }
 
@@ -355,7 +407,6 @@ public class StudentDocumentServiceImpl {
         private String realName;
         private String listName;
         private String size;
-        private AttachmentStatusEnum status;
         private String url;
 
         public User getCreator() {
@@ -388,14 +439,6 @@ public class StudentDocumentServiceImpl {
 
         public void setSize(String size) {
             this.size = size;
-        }
-
-        public AttachmentStatusEnum getStatus() {
-            return status;
-        }
-
-        public void setStatus(AttachmentStatusEnum status) {
-            this.status = status;
         }
 
         public String getUrl() {
@@ -454,7 +497,7 @@ public class StudentDocumentServiceImpl {
         for (Document d : documents)
         {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            if (DocumentTypeEnum.getType(type) != DocumentTypeEnum.UNKNOWN)
+            if (StringUtils.equals(d.getDocumenttype().getValue(), type))
                 return new DocumentInfo(d.getContent(), sdf.format(d.getCreateTime()), sdf.format(d.getUpdateTime()));
         }
         return null;

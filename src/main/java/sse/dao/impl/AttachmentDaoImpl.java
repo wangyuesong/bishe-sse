@@ -10,6 +10,7 @@ import sse.entity.Attachment;
 import sse.entity.Document;
 import sse.entity.Menu;
 import sse.enums.AttachmentStatusEnum;
+import sse.enums.DocumentTypeEnum;
 
 /**
  * @author yuesongwang
@@ -18,18 +19,23 @@ import sse.enums.AttachmentStatusEnum;
 @Repository
 public class AttachmentDaoImpl extends GenericDao<Integer, Attachment>
 {
-    public void createTempAttachment(Attachment attachment)
+    /** 
+     * Description: TODO
+     * @param userId
+     * @param type
+     * @param status
+     * @return
+     * List<Attachment>
+     */
+    public List<Attachment> findForeverAttachmentsByUserIdAndDocumentType(int userId, DocumentTypeEnum type,
+            AttachmentStatusEnum status)
     {
-        this.persistWithTransaction(attachment);
-    }
-
-    public List<Attachment> findTempAttachmentsByUserId(int userId)
-    {
-        String queryStr = "select a from Attachment a where a.status = :status and a.creator.id = :creator";
+        String queryStr = "select a from Attachment a where a.status = :status and a.creator.id = :creator and a.document.documentType=:documentType";
         List<Attachment> attachments = this.getEntityManager()
                 .createQuery(queryStr, Attachment.class)
-                .setParameter("status", AttachmentStatusEnum.TEMP)
+                .setParameter("status", status)
                 .setParameter("creator", userId)
+                .setParameter("documentType", type)
                 .getResultList();
         return attachments;
     }

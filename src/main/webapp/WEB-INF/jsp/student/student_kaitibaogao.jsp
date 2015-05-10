@@ -73,10 +73,17 @@
 
       disable_edit_document_description();
 
+      var form_data = {
+        'creatorId' : '${sessionScope.USER.id}',
+        'ownerId' : '${sessionScope.USER.id}',
+        'documentType' : '开题报告'
+      };
+
       $("#file_upload").uploadify({
         'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
         'buttonText' : '浏览',
         'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+        'formData' : form_data,
         'removeCompleted' : true,
         'fileSizeLimit' : '3MB',
         'fileTypeExts' : '*.doc; *.pdf; *.docx;',
@@ -99,8 +106,9 @@
       $('#attachment_list_grid')
           .datagrid(
               {
-                url : '${pageContext.request.contextPath}/student/document/getAllTempAttachments',
-                type : 'get',
+                url : '${pageContext.request.contextPath}/student/document/getAllForeverAttachments?type=kaitibaogao',
+               
+                type : 'post',
                 fitColumns : true,
                 border : false,
                 nowrap : false,
@@ -205,8 +213,11 @@
     }
     function show_up_files() {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/getAllTempAttachments",
-        type : "get",
+        url : "${pageContext.request.contextPath}/student/document/getAllForeverAttachments",
+        type : "post",
+        data : {
+          'type' : '开题报告'
+        },
         success : function(data, textStatus) {
           $("#attachment_list_grid").datagrid('reload');
         }
@@ -214,7 +225,7 @@
     };
     function delete_one_attachment(id) {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId="
+        url : "${pageContext.request.contextPath}/student/document/deleteOneAttachmentByAttachmentId?attachmentId="
             + id,
         type : "get",
         success : function(data, textStatus) {

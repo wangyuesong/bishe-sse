@@ -24,14 +24,18 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.DocumentFormModel;
 import sse.entity.User;
+import sse.enums.AttachmentStatusEnum;
+import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.DocumentListModel;
 import sse.pageModel.GenericDataGrid;
 import sse.service.impl.StudentDocumentServiceImpl;
+import sse.service.impl.UserServiceImpl;
 import sse.service.impl.StudentDocumentServiceImpl.AttachmentInfo;
 import sse.service.impl.StudentDocumentServiceImpl.DocumentInfo;
 import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
+import sse.utils.SessionUtil;
 
 /**
  * @author yuesongwang
@@ -44,6 +48,9 @@ public class StudentDocumentController {
 
     @Autowired
     public StudentDocumentServiceImpl studentDocumentServiceImpl;
+
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
     @ResponseBody
     @RequestMapping(value = "/getAllDocuments", method = { RequestMethod.GET, RequestMethod.POST })
@@ -61,19 +68,49 @@ public class StudentDocumentController {
         return documents;
     }
 
+    /**
+     * Description: 创建附件，该方法为文档已经创建时对文档附件的创建动作
+     * 
+     * @param creatorId
+     * @param ownerId
+     * @param documentType
+     * @param request
+     * @param response
+     * @throws SSEException
+     *             void
+     */
     @RequestMapping(value = "/uploadAttachements", method = { RequestMethod.POST })
-    public void uploadAttachements(HttpServletRequest request, HttpServletResponse response) throws SSEException {
+    public void uploadAttachements(int creatorId, int ownerId, String documentType,
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws SSEException {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
-        HttpSession session = request.getSession();
-        User currentUser = (User) session.getAttribute("USER");
+        // Attachment上传到Ftp
+        AttachmentInfo info = studentDocumentServiceImpl.uploadAttachmentToFtp(creatorId, fileMap);
+        // 创建Attachment纪录并将Attachemnt和Document关联
+        studentDocumentServiceImpl.createForeverAttachmentEntryInDB(info, ownerId, documentType);
+    }
 
+    /**
+     * Description: 创建附件，该方法为文档尚未创建时对文档附件的创建动作，需要confirmCreateDocument
+     * 
+     * @param request
+     * @param response
+     * @throws SSEException
+     *             void
+     */
+    @RequestMapping(value = "/uploadTempAttachements", method = { RequestMethod.POST })
+    public void uploadTempAttachements(int userId, HttpServletRequest request, HttpServletResponse response)
+            throws SSEException {
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
         // Upload temporary doucments to ftp server
-        AttachmentInfo info = studentDocumentServiceImpl.uploadTempAttachment(currentUser, fileMap);
+        AttachmentInfo info = studentDocumentServiceImpl.uploadAttachmentToFtp(userId, fileMap);
         // Create temp entry in DB Attachment table
         studentDocumentServiceImpl.createTempAttachmentEntryInDB(info);
     }
-    
+
     @RequestMapping(value = "/downloadAttachment")
     public void downloadAttachment(HttpServletRequest request, int attachmentId, HttpServletResponse response)
             throws SSEException {
@@ -90,20 +127,35 @@ public class StudentDocumentController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/getAllTempAttachments", method = { RequestMethod.GET, RequestMethod.POST })
-    public List<SimpleAttachmentInfo> getAllTempAttachmentsByUserId(HttpServletRequest request,
+    @RequestMapping(value = "/getAllTempAttachments")
+    public List<SimpleAttachmentInfo> getAllTempAttachments(String type, HttpServletRequest request,
             HttpServletResponse response) {
-        HttpSession session = request.getSession();
-        if (session.getAttribute("USER") == null)
-            return new LinkedList<SimpleAttachmentInfo>();
-        else
-            return studentDocumentServiceImpl.getAllTempAttachmentOfAUser((User) session.getAttribute("USER"));
+        return studentDocumentServiceImpl.getAttachmentsOfAUserByTypeAndAttachmentStatus(SessionUtil
+                .getUserFromSession(request).getId(),
+                DocumentTypeEnum.getType(type), AttachmentStatusEnum.TEMP);
     }
 
-    // Ajax
     @ResponseBody
-    @RequestMapping(value = "/deleteOneTempAttachmentByAttachmentId", method = { RequestMethod.GET })
-    public boolean deleteOneTempAttachmentByAttachmentId(HttpServletRequest request,
+    @RequestMapping(value = "/getAllForeverAttachments")
+    public List<SimpleAttachmentInfo> getAllForeverAttachments(String type, HttpServletRequest request,
+            HttpServletResponse response) {
+        return studentDocumentServiceImpl.getAttachmentsOfAUserByTypeAndAttachmentStatus(SessionUtil
+                .getUserFromSession(request).getId(),
+                // Get方法传中文乱码，暂时用拼音
+                DocumentTypeEnum.getTypeByPinYin(type), AttachmentStatusEnum.FOREVER);
+    }
+
+    /**
+     * Description: 删除FTP上的某附件，同时删除数据库记录
+     * 
+     * @param request
+     * @param response
+     * @return
+     *         boolean
+     */
+    @ResponseBody
+    @RequestMapping(value = "/deleteOneAttachmentByAttachmentId", method = { RequestMethod.GET })
+    public boolean deleteOneAttachmentByAttachmentId(HttpServletRequest request,
             HttpServletResponse response) {
         User u = (User) (request.getSession().getAttribute("USER"));
         String attachmentId = request.getParameter("attachmentId");
@@ -130,13 +182,15 @@ public class StudentDocumentController {
 
     @ResponseBody
     @RequestMapping(value = "/cancelCreateDocument", method = { RequestMethod.POST })
-    public boolean cancelCreateDocument(HttpServletRequest request, HttpServletResponse response) throws SSEException {
+    public boolean cancelCreateDocument(String documentType, HttpServletRequest request, HttpServletResponse response)
+            throws SSEException {
         HttpSession session = request.getSession();
         if (session.getAttribute("USER") == null)
         {
             User u = (User) (request.getSession().getAttribute("USER"));
             try {
-                studentDocumentServiceImpl.cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(u);
+                studentDocumentServiceImpl.cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(u,
+                        DocumentTypeEnum.getType("documentType"));
             } catch (IOException e) {
                 logger.error("删除附件出错", e);
                 throw new SSEException("删除附件出错", e);

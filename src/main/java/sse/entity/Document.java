@@ -42,7 +42,7 @@ public class Document extends BaseModel implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
-    private DocumentTypeEnum documenttype;
+    private DocumentTypeEnum documentType;
 
     @ManyToOne
     @JoinColumn(name = "LAST_MODIFIED_BY")
@@ -74,7 +74,7 @@ public class Document extends BaseModel implements Serializable {
         this.id = id;
         this.name = name;
         this.content = content;
-        this.documenttype = documenttype;
+        this.documentType = documenttype;
         this.lastModifiedBy = lastModifiedBy;
         this.creator = creator;
     }
@@ -128,11 +128,11 @@ public class Document extends BaseModel implements Serializable {
     }
 
     public DocumentTypeEnum getDocumenttype() {
-        return documenttype;
+        return documentType;
     }
 
     public void setDocumenttype(DocumentTypeEnum documenttype) {
-        this.documenttype = documenttype;
+        this.documentType = documenttype;
     }
 
     public User getLastModifiedBy() {

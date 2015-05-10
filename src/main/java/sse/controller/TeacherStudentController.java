@@ -3,6 +3,7 @@ package sse.controller;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.entity.User;
+import sse.enums.AttachmentStatusEnum;
+import sse.enums.DocumentTypeEnum;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.StudentListModel;
 import sse.service.impl.StudentDocumentServiceImpl;
 import sse.service.impl.StudentDocumentServiceImpl.DocumentInfo;
+import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
 import sse.service.impl.TeacherStudentServiceImpl;
 import sse.utils.PaginationAndSortModel;
 import sse.utils.SessionUtil;
@@ -54,9 +58,12 @@ public class TeacherStudentController {
      */
     @ResponseBody
     @RequestMapping(value = "/getOneStudentDocument")
-    public DocumentInfo getOneStudentDocuments(HttpServletRequest request, int studentId, String type)
+    public DocumentInfo getOneStudentDocuments(HttpServletRequest request, String studentId, String type)
     {
-        return studentDocumentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(studentId, type);
+        String typae = type;
+        int studentIdI = Integer.parseInt(studentId);
+        DocumentInfo info = studentDocumentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(studentIdI, type);
+        return info;
     }
 
     @ResponseBody
@@ -65,6 +72,23 @@ public class TeacherStudentController {
     {
         return studentDocumentServiceImpl.findDocumentComments(studentId, type);
 
+    }
+
+    /**
+     * Description:教师根据学生Id和所需文档类型type获取该文档的所有附件
+     * 
+     * @param type
+     * @param request
+     * @param response
+     * @return
+     *         List<SimpleAttachmentInfo>
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getAllForeverAttachments", method = { RequestMethod.GET, RequestMethod.POST })
+    public List<SimpleAttachmentInfo> getAllForeverAttachments(int studentId, String type, HttpServletRequest request,
+            HttpServletResponse response) {
+        return studentDocumentServiceImpl.getAttachmentsOfAUserByTypeAndAttachmentStatus(studentId,
+                DocumentTypeEnum.getType(type), AttachmentStatusEnum.FOREVER);
     }
 
 }

@@ -1,5 +1,6 @@
 package sse.dao.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import sse.dao.base.GenericDao;
 import sse.entity.Document;
+import sse.entity.TimeNode;
+import sse.enums.DocumentTypeEnum;
 
 /**
  * @author yuesongwang
@@ -26,4 +29,13 @@ public class DocumentDaoImpl extends GenericDao<Integer, Document>
                 order);
     }
 
+    public Document findDocumentByStudentIdAndType(int studentId, DocumentTypeEnum documentType)
+    {
+        String queryStr = "select d from Document d where d.creator.id=:studentId and d.documentType=:documentType";
+        Document document = this.getEntityManager()
+                .createQuery(queryStr, Document.class).setParameter("studentId", studentId)
+                .setParameter("documentType", documentType).
+                getResultList().get(0);
+        return document;
+    }
 }
