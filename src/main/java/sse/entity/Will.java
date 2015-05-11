@@ -38,7 +38,7 @@ public class Will extends BaseModel implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
-    private WillStatusEnum status = WillStatusEnum.PENDING;
+    private WillStatusEnum status = WillStatusEnum.待定;
 
     public Will()
     {

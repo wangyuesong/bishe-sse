@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import sse.entity.User;
+import sse.commandmodel.BasicJson;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
+import sse.pageModel.CandidateStudentListModel;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.StudentListModel;
@@ -42,7 +42,7 @@ public class TeacherStudentController {
     {
         PaginationAndSortModel pam = new PaginationAndSortModel(request);
         int teacherId = SessionUtil.getUserFromSession(request).getId();
-        GenericDataGrid<StudentListModel> s = teacherStudentServiceImpl.findMyStudentsForPagingInGenericDataGrid(
+        GenericDataGrid<StudentListModel> s = teacherStudentServiceImpl.getMyStudentsForPagingInGenericDataGrid(
                 teacherId, pam);
         return s;
     }
@@ -68,7 +68,8 @@ public class TeacherStudentController {
 
     @ResponseBody
     @RequestMapping(value = "/getDocumentComments")
-    public List<DocumentCommentListModel> getDocumentComments(HttpServletRequest request, int studentId, String type)
+    public GenericDataGrid<DocumentCommentListModel> getDocumentComments(HttpServletRequest request, int studentId,
+            String type)
     {
         return studentDocumentServiceImpl.findDocumentCommentsForPagingByStudentIdAndDocumentType(studentId, type);
     }
@@ -90,4 +91,21 @@ public class TeacherStudentController {
                 // Get方法传中文乱码，暂时用拼音
                 DocumentTypeEnum.getTypeByPinYin(type), AttachmentStatusEnum.FOREVER);
     }
+
+    @ResponseBody
+    @RequestMapping(value = "/getCandidateStudents")
+    public GenericDataGrid<CandidateStudentListModel> getCandidateStudents(int teacherId, HttpServletRequest request,
+            HttpServletResponse response) {
+        PaginationAndSortModel pm = new PaginationAndSortModel(request);
+        return teacherStudentServiceImpl.getCandidateStudentsForPagingInDataGrid(teacherId, pm);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/changeWillStatus")
+    public BasicJson changeWillStatus(int willId, String decision, HttpServletRequest request,
+            HttpServletResponse response) {
+        PaginationAndSortModel pm = new PaginationAndSortModel(request);
+        return teacherStudentServiceImpl.getCandidateStudentsForPagingInDataGrid(teacherId, pm);
+    }
+
 }

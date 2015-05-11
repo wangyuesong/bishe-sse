@@ -2,7 +2,7 @@ package sse.enums;
 
 public enum WillStatusEnum {
 
-    PENDING("Pending"), REJECTED("Rejected"), ACCEPTED("Accepted"), UNKNOWN("Unknown");
+    待定("待定"), 拒绝("拒绝"), 接受("接受"), UNKNOWN("Unknown");
 
     private final String value;
 

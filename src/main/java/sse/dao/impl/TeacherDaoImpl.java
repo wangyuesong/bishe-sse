@@ -1,7 +1,5 @@
 package sse.dao.impl;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -9,8 +7,6 @@ import org.springframework.util.CollectionUtils;
 
 import sse.dao.base.GenericDao;
 import sse.entity.Teacher;
-import sse.pageModel.TeacherListModel;
-import sse.utils.ClassTool;
 
 @Repository
 public class TeacherDaoImpl extends GenericDao<Integer, Teacher>

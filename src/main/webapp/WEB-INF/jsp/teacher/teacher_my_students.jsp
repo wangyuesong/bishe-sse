@@ -75,7 +75,7 @@
               url : "${pageContext.request.contextPath}/student/document/makeComment",
               type : "post",
               data : {
-                studentId : "'" + studentId + "'",
+                studentId : studentId,
                 commentorId : '${sessionScope.USER.id}',
                 type : type,
                 content : $('#document_comment_content').val()
@@ -174,12 +174,12 @@
       var $create_time = $('#' + query_prefix + '_create_time');
       var $update_time = $('#' + query_prefix + '_update_time');
       var $template = $('#' + query_prefix + '_template');
-      /*     var $feedback_header = $('#' + query_prefix + '_feedback_header');
-          var $feedback_area = $('#' + query_prefix + '_feedback_area');
-          var $feedback_template = $("#" + query_prefix + "_feedback_template"); */
       var $feedback_datagrid = $("#" + query_prefix + "_feedback_datagrid");
       var $file_upload = $("#" + query_prefix + "_file_upload");
       var $attachment_list_grid = $('#' + query_prefix + '_attachment_list_grid');
+
+      //禁用描述框
+      $document_description.attr("disabled", true);
 
       var exists = false;
       //查看该用户是否已经创建该文档，如果没有则加载引导文档创建的界面，如果有的话则将已有文档载入
@@ -197,14 +197,12 @@
           if (!exists) {
             $container.css("display", "none");
             $create_template.css("display", "block");
-            /* $container.prepend($create_template.html()); */
           } else {
+            $container.css("display", "block");
             $create_template.css("display", "none");
             $document_description.text(data.content);
             $create_time.html(data.create_time);
             $update_time.html(data.update_time);
-            $container.html("");
-            $container.prepend($template.html());
           }
         }
       });
@@ -339,8 +337,11 @@
 
 	<!-- 总页面模版 -->
 	<!-- 学生列表 -->
-	<div id="student_list_grid"></div>
-
+	<fieldset style="color: #0099FF">
+		<legend id="legend" align="left" style="color: #0099FF">学生列表</legend>
+		<div id="student_list_grid"></div>
+	</fieldset>
+	<div style="margin-top: 20px; clear: both"></div>
 	<div id="student_detail_grid" style="height: 800px">
 		<!-- 学生信息模版 -->
 		<div class="easyui-accordion" data-options="multiple:true"

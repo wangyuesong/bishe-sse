@@ -264,7 +264,7 @@ public class DataInitialization extends BaseJPATest {
         // Document and comments
         Document d = new Document(1, "王岳松的开题报告", "测试文字", DocumentTypeEnum.开题报告, yuesongWang, yuesongWang);
         em.persist(d);
-        DocumentComment dc = new DocumentComment(1, "测试评论", pingSun, d);
+        DocumentComment dc = new DocumentComment("测试评论", pingSun, d);
         em.persist(dc);
 
         // Time nodes

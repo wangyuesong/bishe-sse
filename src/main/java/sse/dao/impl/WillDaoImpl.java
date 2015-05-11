@@ -109,7 +109,7 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
         String queryStr = "select w from Will w where w.id.teacherId= :teacherId and w.status!= :status and w.level= :level order by w.updateTime asc";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("teacherId", teacherId)
-                .setParameter("status", WillStatusEnum.REJECTED)
+                .setParameter("status", WillStatusEnum.接受)
                 .setParameter("level", level)
                 .getResultList();
     }

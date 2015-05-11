@@ -71,10 +71,6 @@ public class DocumentComment extends BaseModel implements Serializable {
         this.document = document;
     }
 
-    public DocumentComment() {
-        super();
-    }
-
     public DocumentComment(String content, User user, Document document) {
         super();
         this.content = content;
