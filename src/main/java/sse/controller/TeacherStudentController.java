@@ -70,8 +70,7 @@ public class TeacherStudentController {
     @RequestMapping(value = "/getDocumentComments")
     public List<DocumentCommentListModel> getDocumentComments(HttpServletRequest request, int studentId, String type)
     {
-        return studentDocumentServiceImpl.findDocumentComments(studentId, type);
-
+        return studentDocumentServiceImpl.findDocumentCommentsForPagingByStudentIdAndDocumentType(studentId, type);
     }
 
     /**
@@ -84,11 +83,11 @@ public class TeacherStudentController {
      *         List<SimpleAttachmentInfo>
      */
     @ResponseBody
-    @RequestMapping(value = "/getAllForeverAttachments", method = { RequestMethod.GET, RequestMethod.POST })
-    public List<SimpleAttachmentInfo> getAllForeverAttachments(int studentId, String type, HttpServletRequest request,
+    @RequestMapping(value = "/getAllForeverAttachments")
+    public List<SimpleAttachmentInfo> getAllForeverAttachments(String type, int studentId, HttpServletRequest request,
             HttpServletResponse response) {
         return studentDocumentServiceImpl.getAttachmentsOfAUserByTypeAndAttachmentStatus(studentId,
-                DocumentTypeEnum.getType(type), AttachmentStatusEnum.FOREVER);
+                // Get方法传中文乱码，暂时用拼音
+                DocumentTypeEnum.getTypeByPinYin(type), AttachmentStatusEnum.FOREVER);
     }
-
 }

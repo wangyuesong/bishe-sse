@@ -56,19 +56,44 @@
       });
       //如果文档存在，尝试加载评论
       if (exists)
-        $.ajax({
-          url : "${pageContext.request.contextPath}/student/document/getDocumentComments",
-          type : "post",
-          data : {
-            "type" : "开题报告"
+        $('#feedback-datagrid').datagrid({
+          url : '${pageContext.request.contextPath}/student/document/getDocumentComments',
+          queryParams : {
+            "type" : "开题报告",
+            "studentId" : '${sessionScope.USER.id}'
           },
-          success : function(data, textStatus) {
-            $.each(data, function(n, value) {
-              $('#feedback-header').text(
-                  (n + 1) + ". " + value.commentor + ":" + value.content + " " + value.createTime);
-              $('#feedback-area').prepend($("#feedback-template").html());
-            });
-          }
+          type : 'post',
+          fitColumns : true,
+          border : false,
+          nowrap : false,
+          singleSelect : true,
+          frozenColumns : [ [ {
+            field : 'id',
+            title : 'Id',
+            width : 10,
+            hidden : true
+          } ] ],
+          columns : [ [ {
+            field : 'content',
+            title : '内容',
+            width : 200,
+          }, {
+            field : 'createTime',
+            title : '时间',
+            width : 100,
+          }, {
+            field : 'commentor',
+            title : '留言人',
+            width : 100,
+          } ] ],
+          toolbar : [ '-', {
+            text : '回复',
+            iconCls : 'icon-reload',
+            handler : function() {
+              add_comment();
+
+            }
+          }, '-' ]
         });
 
       disable_edit_document_description();
@@ -107,13 +132,10 @@
           .datagrid(
               {
                 url : '${pageContext.request.contextPath}/student/document/getAllForeverAttachments?type=kaitibaogao',
-               
                 type : 'post',
                 fitColumns : true,
                 border : false,
                 nowrap : false,
-                /* pagination : true, */
-                pageSize : 10,
                 frozenColumns : [ [ {
                   field : 'id',
                   title : 'Id',
@@ -124,6 +146,11 @@
                     {
                       field : 'listName',
                       title : '名称',
+                      width : 100,
+                    },
+                    {
+                      field : 'creatorName',
+                      title : '上传人',
                       width : 100,
                     },
                     {
@@ -143,10 +170,7 @@
                         remove += " " + download;
                         return remove;
                       }
-
-                    }
-
-                ] ],
+                    } ] ],
                 toolbar : [ '-', {
                   text : '刷新',
                   iconCls : 'icon-reload',
@@ -155,6 +179,7 @@
                   }
                 }, '-' ]
               });
+      //设置评论表的提交
     })
 
     function enable_edit_document_description() {
@@ -181,7 +206,46 @@
         }
       });
     }
+    //Modal dialog 创建回复
+    function add_comment() {
+      $('<div class="temp_dialog"></div>').dialog({
+        href : '${pageContext.request.contextPath}/dispatch/student/student_make_comment',
+        onClose : function() {
+          $(this).dialog('destroy');
+        },
+        width : $(document.body).width() * 0.5,
+        height : $(document.body).height() * 0.5,
+        collapsible : true,
+        modal : true,
+        title : '回复',
+        buttons : [ {
+          text : '回复',
+          iconCls : 'icon-add',
+          handler : function() {
+            $.ajax({
+              url : "${pageContext.request.contextPath}/student/document/makeComment",
+              type : "post",
+              data : {
+                studentId : '${sessionScope.USER.id}',
+                commentorId : '${sessionScope.USER.id}',
+                type : '开题报告',
+                content : $('#document_comment_content').val()
+              },
+              success : function(data, textStatus) {
+                $(".temp_dialog").dialog('destroy');
+                $('#feedback-datagrid').datagrid("reload");
+                $.messager.show({
+                  title : '提示',
+                  msg : data.msg
+                });
+              }
+            });
+          }
+        } ]
+      });
+    }
 
+    //Modal Dialog创建文档
     function add_document() {
       $('<div class="temp_dialog"></div>').dialog({
         href : '${pageContext.request.contextPath}/dispatch/student/student_add_document',
@@ -269,7 +333,9 @@
 		<div class="section group">
 			<div class="col span_1_of_6">反馈:</div>
 			<div class="col span_5_of_6">
-				<div id="feedback-area"></div>
+				<div id="feedback-area">
+					<table id="feedback-datagrid"></table>
+				</div>
 			</div>
 		</div>
 		<div class="section group">
@@ -318,12 +384,12 @@
 		</p>
 	</div>
 
-	<div id="feedback-template" style="display: none">
+	<!-- <div id="feedback-template" style="display: none">
 		<div
 			style="background: #E6E6E6; color: #FFF; border: 1px solid #F7F7F7;">
 			<p style="display: inline;" id="feedback-header"></p>
 		</div>
 		<div id="feedback-content"></div>
-	</div>
+	</div> -->
 </body>
 

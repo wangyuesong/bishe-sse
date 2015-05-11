@@ -25,6 +25,11 @@
           } ] ],
           columns : [ [
               {
+                field : 'creatorName',
+                title : '上传人',
+                width : 100,
+              },
+              {
                 field : 'uploadTime',
                 title : '上传时间',
                 width : 100,

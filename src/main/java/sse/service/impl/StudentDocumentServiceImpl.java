@@ -106,6 +106,7 @@ public class StudentDocumentServiceImpl {
                 sai.setId(a.getId());
                 sai.setListName(a.getListName());
                 sai.setUploadTime(dateFormat.format(a.getCreateTime()));
+                sai.setCreatorName(a.getCreator().getName());
                 infoList.add(sai);
             }
         }
@@ -451,38 +452,6 @@ public class StudentDocumentServiceImpl {
 
     }
 
-    public static class SimpleAttachmentInfo
-    {
-        private int id;
-        private String listName;
-        private String uploadTime;
-
-        public String getUploadTime() {
-            return uploadTime;
-        }
-
-        public void setUploadTime(String uploadTime) {
-            this.uploadTime = uploadTime;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getListName() {
-            return listName;
-        }
-
-        public void setListName(String listName) {
-            this.listName = listName;
-        }
-
-    }
-
     /**
      * @Method: getDocumentInfoByStudentIdAndDocumentType
      * @Description: 检查该学生是否已经创建了这样的文档,是的话返回该文档的相关信息用于页面显示，否的话返回空
@@ -528,38 +497,62 @@ public class StudentDocumentServiceImpl {
     }
 
     /**
-     * @Method: findDocumentComments
-     * @Description: 根据学生id和请求的Document类型获取Document的所有DocumentComments,并且包装成Model
-     * @param @param id
-     * @param @param type
-     * @param @return
-     * @return List<DocumentsCommentListModel>
-     * @throws
+     * Description: 根据学生id和请求的Document类型获取Document的所有DocumentComments,并且包装成GenericDatagrid
+     * 
+     * @param id
+     * @param type
+     * @return
+     *         GenericDataGrid<DocumentCommentListModel>
      */
-    @SuppressWarnings("unchecked")
-    public List<DocumentCommentListModel> findDocumentComments(int id, String type) {
-        List<Document> documents = studentDaoImpl.findById(id).getDocuments();
-        List<DocumentCommentListModel> documentCommentModels = new ArrayList<DocumentCommentListModel>();
-        Document d = null;
-        for (Document document : documents)
-        {
-            if (StringUtils.equals(document.getDocumenttype().getValue(), type))
-                d = document;
-        }
+    public GenericDataGrid<DocumentCommentListModel> findDocumentCommentsForPagingByStudentIdAndDocumentType(int id,
+            String type) {
+        Document d = documentDaoImpl.findDocumentByStudentIdAndType(id, DocumentTypeEnum.getType(type));
+        // 如果没有这个类型的Document
         if (d == null)
             return null;
-        else
+        List<DocumentCommentListModel> documentCommentModels = new ArrayList<DocumentCommentListModel>();
+        for (DocumentComment documentComment : d.getDocumentComments())
         {
-            for (DocumentComment documentComment : d.getDocumentComments())
-            {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                DocumentCommentListModel dclm = new DocumentCommentListModel(documentComment.getContent(),
-                        sdf.format(documentComment.getCreateTime()), documentComment.getUser().getName());
-                documentCommentModels.add(dclm);
-            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DocumentCommentListModel dclm = new DocumentCommentListModel(documentComment.getId(),
+                    documentComment.getContent(),
+                    sdf.format(documentComment.getCreateTime()), documentComment.getUser().getName());
+            documentCommentModels.add(dclm);
         }
         Collections.sort(documentCommentModels);
-        return documentCommentModels;
+        return new GenericDataGrid<DocumentCommentListModel>(documentCommentModels.size(), documentCommentModels);
+    }
+
+    /** 
+     * Description: 增加Document的评论
+     * @param documentId
+     * @param content
+     * @param commentorId
+     * void
+     */
+    public void makeDocumentComment(int documentId, String content, int commentorId)
+    {
+        Document d = documentDaoImpl.findById(documentId);
+        DocumentComment dc = new DocumentComment(content, userDaoImpl.findById(commentorId), d);
+        d.addDocumentComment(dc);
+        documentDaoImpl.mergeWithTransaction(d);
+    }
+
+    /**
+     * Description: 根据学生id和文档类型，找到文档id，如果不存在则返回－1
+     * 
+     * @param studentId
+     * @param documentType
+     * @return
+     *         int
+     */
+    public int findDocumentIdByStudentIdAndDocumentType(int studentId, String documentType)
+    {
+        Document d = documentDaoImpl.findDocumentByStudentIdAndType(studentId, DocumentTypeEnum.getType(documentType));
+        if (d == null)
+            return -1;
+        else
+            return d.getId();
     }
 
     public static class DocumentInfo
@@ -597,6 +590,59 @@ public class StudentDocumentServiceImpl {
 
         public void setUpdate_time(String update_time) {
             this.update_time = update_time;
+        }
+
+    }
+
+    public static class SimpleAttachmentInfo
+    {
+        private int id;
+        private String listName;
+        private String uploadTime;
+        private String creatorName;
+
+        public SimpleAttachmentInfo() {
+            super();
+        }
+
+        public SimpleAttachmentInfo(int id, String listName, String uploadTime, String creatorName) {
+            super();
+            this.id = id;
+            this.listName = listName;
+            this.uploadTime = uploadTime;
+            this.creatorName = creatorName;
+        }
+
+        public String getCreatorName() {
+            return creatorName;
+        }
+
+        public void setCreatorName(String creatorName) {
+            this.creatorName = creatorName;
+        }
+
+        public String getUploadTime() {
+            return uploadTime;
+        }
+
+        public void setUploadTime(String uploadTime) {
+            this.uploadTime = uploadTime;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getListName() {
+            return listName;
+        }
+
+        public void setListName(String listName) {
+            this.listName = listName;
         }
 
     }

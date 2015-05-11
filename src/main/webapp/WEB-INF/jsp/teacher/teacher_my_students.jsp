@@ -30,16 +30,18 @@
 </head>
 <body>
 	<script>
-    function show_up_files() {
+    //通用刷新附件列表函数，根据prefix来确定更新哪个template中的附件列表
+    function show_up_files(prefix) {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/getAllTempAttachments",
+        url : "${pageContext.request.contextPath}/student/document/getAllForeverAttachments?type=" + prefix,
         type : "get",
         success : function(data, textStatus) {
-          $("#attachment_list_grid").datagrid('reload');
+          $("#" + prefix + "_attachment_list_grid").datagrid('reload');
         }
       });
     };
-    function delete_one_attachment(id) {
+    //通用删除某附件函数，根据prefix来确定删除后更新哪个template中的附件列表
+    function delete_one_attachment(prefix, id) {
       $.ajax({
         url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId="
             + id,
@@ -51,7 +53,53 @@
           $.messager.alert("错误", "删除失败，请联系管理员");
         }
       });
+    };
+
+    //Modal dialog 创建回复
+    function add_comment(studentId, type, $feedback_datagrid) {
+      $('<div class="temp_dialog"></div>').dialog({
+        href : '${pageContext.request.contextPath}/dispatch/student/student_make_comment',
+        onClose : function() {
+          $(this).dialog('destroy');
+        },
+        width : $(document.body).width() * 0.5,
+        height : $(document.body).height() * 0.5,
+        collapsible : true,
+        modal : true,
+        title : '回复',
+        buttons : [ {
+          text : '回复',
+          iconCls : 'icon-add',
+          handler : function() {
+            $.ajax({
+              url : "${pageContext.request.contextPath}/student/document/makeComment",
+              type : "post",
+              data : {
+                studentId : "'" + studentId + "'",
+                commentorId : '${sessionScope.USER.id}',
+                type : type,
+                content : $('#document_comment_content').val()
+              },
+              success : function(data, textStatus) {
+                $(".temp_dialog").dialog('destroy');
+                $feedback_datagrid.datagrid("reload");
+                $.messager.show({
+                  title : '提示',
+                  msg : data.msg
+                });
+              }
+            });
+          }
+        } ]
+      });
     }
+
+    function reload_one_student_detail(studentId) {
+      load_student_document_detail("任务书", studentId);
+      load_student_document_detail("开题报告", studentId);
+      load_student_document_detail("最终论文", studentId);
+    }
+
     $(function() {
       //设置宽高
       $("#student_detail_grid").height($(document.body).height());
@@ -99,14 +147,7 @@
                   width : 100,
                 }
 
-            ] ],
-            toolbar : [ '-', {
-              text : '刷新',
-              iconCls : 'icon-reload',
-              handler : function() {
-                $('#attachment_list_grid').datagrid('reload');
-              }
-            }, '-' ]
+            ] ]
           });
       $('#student_list_grid').datagrid('getPager').pagination({
         pageSize : 10,
@@ -115,11 +156,6 @@
         afterPageText : "页,共{pages}页"
       });
     });
-    function reload_one_student_detail(studentId) {
-      load_student_document_detail("任务书", studentId);
-      load_student_document_detail("开题报告", studentId);
-      load_student_document_detail("最终论文", studentId);
-    }
     //该方法用于加载学生的三个不同文档
     function load_student_document_detail(type, studentId) {
       var query_prefix = "";
@@ -138,9 +174,10 @@
       var $create_time = $('#' + query_prefix + '_create_time');
       var $update_time = $('#' + query_prefix + '_update_time');
       var $template = $('#' + query_prefix + '_template');
-      var $feedback_header = $('#' + query_prefix + '_feedback_header');
-      var $feedback_area = $('#' + query_prefix + '_feedback_area');
-      var $feedback_template = $("#" + query_prefix + "_feedback_template");
+      /*     var $feedback_header = $('#' + query_prefix + '_feedback_header');
+          var $feedback_area = $('#' + query_prefix + '_feedback_area');
+          var $feedback_template = $("#" + query_prefix + "_feedback_template"); */
+      var $feedback_datagrid = $("#" + query_prefix + "_feedback_datagrid");
       var $file_upload = $("#" + query_prefix + "_file_upload");
       var $attachment_list_grid = $('#' + query_prefix + '_attachment_list_grid');
 
@@ -158,9 +195,11 @@
           if (!(data == ""))
             exists = true;
           if (!exists) {
-            $container.html("");
-            $container.prepend($create_template.html());
+            $container.css("display", "none");
+            $create_template.css("display", "block");
+            /* $container.prepend($create_template.html()); */
           } else {
+            $create_template.css("display", "none");
             $document_description.text(data.content);
             $create_time.html(data.create_time);
             $update_time.html(data.update_time);
@@ -172,25 +211,56 @@
 
       //如果文档存在，尝试加载评论
       if (exists)
-        $.ajax({
-          url : "${pageContext.request.contextPath}/teacher/student/getDocumentComments",
-          type : "post",
-          data : {
-            'studentId' : studentId,
-            "type" : type
+        $feedback_datagrid.datagrid({
+          url : '${pageContext.request.contextPath}/student/document/getDocumentComments',
+          queryParams : {
+            "type" : type,
+            "studentId" : studentId
           },
-          success : function(data, textStatus) {
-            $.each(data, function(n, value) {
-              $feedback_header.text((n + 1) + ". " + value.commentor + ":" + value.content + " " + value.createTime);
-              $feedback_area.prepend($feedback_template.html());
-            });
-          }
+          type : 'post',
+          fitColumns : true,
+          border : false,
+          nowrap : false,
+          singleSelect : true,
+          frozenColumns : [ [ {
+            field : 'id',
+            title : 'Id',
+            width : 10,
+            hidden : true
+          } ] ],
+          columns : [ [ {
+            field : 'content',
+            title : '内容',
+            width : 200,
+          }, {
+            field : 'createTime',
+            title : '时间',
+            width : 100,
+          }, {
+            field : 'commentor',
+            title : '留言人',
+            width : 100,
+          } ] ],
+          toolbar : [ '-', {
+            text : '回复',
+            iconCls : 'icon-reload',
+            handler : function() {
+              add_comment(studentId, type, $feedback_datagrid);
+            }
+          }, '-' ]
         });
+
+      var form_data = {
+        'creatorId' : '${sessionScope.USER.id}',
+        'ownerId' : studentId,
+        'documentType' : type
+      };
 
       $file_upload.uploadify({
         'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
         'buttonText' : '浏览',
         'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+        'formData' : form_data,
         'removeCompleted' : true,
         'fileSizeLimit' : '3MB',
         'fileTypeExts' : '*.doc; *.pdf; *.docx;',
@@ -199,7 +269,7 @@
         'multi' : true,
         'simUploadLimit' : 2,
         'onQueueComplete' : function(event, data) {
-          show_up_files();
+          show_up_files(query_prefix);
         },
         'onFallback' : function() {
           $.messager.alert("提示", "检测到您的浏览器不支持Flash，请安装Flash插件");
@@ -212,13 +282,12 @@
 
       $attachment_list_grid
           .datagrid({
-            url : '${pageContext.request.contextPath}/student/document/getAllTempAttachments',
-            type : 'get',
+            url : '${pageContext.request.contextPath}/teacher/student/getAllForeverAttachments?studentId=' + studentId
+                + '&type=' + query_prefix,
+            type : 'post',
             fitColumns : true,
             border : false,
             nowrap : false,
-            /* pagination : true, */
-            pageSize : 10,
             frozenColumns : [ [ {
               field : 'id',
               title : 'Id',
@@ -232,6 +301,11 @@
                   width : 100,
                 },
                 {
+                  field : 'creatorName',
+                  title : '上传人',
+                  width : 100,
+                },
+                {
                   field : 'uploadTime',
                   title : '上传时间',
                   width : 100,
@@ -242,16 +316,14 @@
                   width : 100,
                   formatter : function(value, rowData, index) {
                     var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
-                        + 'data-options="plain:true" onclick="delete_one_attachment(' + rowData.id + ')">删除</a>';
+                        + 'data-options="plain:true" onclick="delete_one_attachment("' + query_prefix + '",'
+                        + rowData.id + ')">删除</a>';
                     var download = '<a href="${pageContext.request.contextPath}/student/document/downloadAttachment?attachmentId='
                         + rowData.id + '">下载</a>';
                     remove += " " + download;
                     return remove;
                   }
-
-                }
-
-            ] ],
+                } ] ],
             toolbar : [ '-', {
               text : '刷新',
               iconCls : 'icon-reload',
@@ -266,263 +338,229 @@
 
 
 	<!-- 总页面模版 -->
+	<!-- 学生列表 -->
 	<div id="student_list_grid"></div>
+
 	<div id="student_detail_grid" style="height: 800px">
+		<!-- 学生信息模版 -->
 		<div class="easyui-accordion" data-options="multiple:true"
 			style="width: 100%; height: 80%;">
 			<div id="renwushu_title" title="任务书" style="padding: 10px">
-				<div id="renwushu_container"></div>
+				<div id="renwushu_container" style="display: none">
+					<div class="section group">
+						<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">创建时间:</div>
+						<div class="col span_2_of_6" id="renwushu_create_time"></div>
+						<div class="col span_1_of_6">修改时间:</div>
+						<div class="col span_2_of_6" id="renwushu_update_time"></div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">
+							<p>描述:</p>
+						</div>
+						<div class="col span_4_of_6">
+							<textarea id="renwushu_document_description"
+								class="easyui-validatebox" style="width: 500px; height: 300px"
+								name="renwushu_document_description"></textarea>
+						</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">反馈:</div>
+						<div class="col span_5_of_6">
+							<table id="renwushu_feedback_datagrid"></table>
+						</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">附件:</div>
+						<div class="col span_5_of_6">
+							<div class="col span_3_of_5">
+								<fieldset>
+									<legend align="left">已上传附件</legend>
+									<div>
+										<table id="renwushu_attachment_list_grid"></table>
+									</div>
+								</fieldset>
+							</div>
+							<div class="col span_1_of_5">
+								<table>
+									<tr>
+										<th><label for="renwushu_Attachment_GUID">附件上传：</label></th>
+										<td>
+											<div>
+												<input class="easyui-validatebox" type="hidden"
+													id="renwushu_Attachment_GUID" name="Attachment_GUID" /> <input
+													id="renwushu_file_upload" type="file" multiple="multiple">
+												<a href="javascript:void(0)" class="easyui-linkbutton"
+													id="btnUpload"
+													data-options="plain:true,iconCls:'icon-save'"
+													onclick="javascript: $('#renwushu_file_upload').uploadify('upload', '*')">上传</a>
+
+												<a href="javascript:void(0)" class="easyui-linkbutton"
+													id="btnCancelUpload"
+													data-options="plain:true,iconCls:'icon-cancel'"
+													onclick="javascript: $('#renwushu_file_upload').uploadify('cancel', '*')">取消</a>
+												<div id="renwushu_fileQueue" class="fileQueue"></div>
+												<div id="div_files"></div>
+												<br />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="renwushu_create_template" style="display: none;">
+					<h3 style="color: #0099FF;">学生尚未创建任务书</h3>
+				</div>
 			</div>
 			<div id="kaitibaogao_title" title="开题报告" style="padding: 10px">
-				<div id="kaitibaogao_container"></div>
+				<div id="kaitibaogao_container" style="display: none">
+					<div class="section group">
+						<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">创建时间:</div>
+						<div class="col span_2_of_6" id="kaitibaogao_create_time"></div>
+						<div class="col span_1_of_6">修改时间:</div>
+						<div class="col span_2_of_6" id="kaitibaogao_update_time"></div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">
+							<p>描述:</p>
+						</div>
+						<div class="col span_4_of_6">
+							<textarea id="kaitibaogao_document_description"
+								class="easyui-validatebox" style="width: 500px; height: 300px"
+								name="kaitibaogao_document_description"></textarea>
+						</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">反馈:</div>
+						<div class="col span_5_of_6">
+							<table id="kaitibaogao_feedback_datagrid"></table>
+						</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">附件:</div>
+						<div class="col span_5_of_6">
+							<div class="col span_3_of_5">
+								<fieldset>
+									<legend align="left">已上传附件</legend>
+									<div>
+										<table id="kaitibaogao_attachment_list_grid"></table>
+									</div>
+								</fieldset>
+							</div>
+							<div class="col span_1_of_5">
+								<table>
+									<tr>
+										<th><label for="kaitibaogao_Attachment_GUID">附件上传：</label></th>
+										<td>
+											<div>
+												<input class="easyui-validatebox" type="hidden"
+													id="kaitibaogao_Attachment_GUID" name="Attachment_GUID" />
+												<input id="kaitibaogao_file_upload" type="file"
+													multiple="multiple"> <a href="javascript:void(0)"
+													class="easyui-linkbutton" id="btnUpload"
+													data-options="plain:true,iconCls:'icon-save'"
+													onclick="javascript: $('#kaitibaogao_file_upload').uploadify('upload', '*')">上传</a>
+
+												<a href="javascript:void(0)" class="easyui-linkbutton"
+													id="btnCancelUpload"
+													data-options="plain:true,iconCls:'icon-cancel'"
+													onclick="javascript: $('##kaitibaogao_file_upload').uploadify('cancel', '*')">取消</a>
+												<div id="kaitibaogao_fileQueue" class="fileQueue"></div>
+												<div id="div_files"></div>
+												<br />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<div id="kaitibaogao_create_template" style="display: none;">
+					<h3 style="color: #0099FF;">学生尚未创建开题报告</h3>
+				</div>
 			</div>
 			<div id="zuizhonglunwen_title" title="最终论文" style="padding: 10px">
-				<div id="zuizhonglunwen_container"></div>
+				<div id="zuizhonglunwen_container" style="display: none">
+					<div class="section group">
+						<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">创建时间:</div>
+						<div class="col span_2_of_6" id="zuizhonglunwen_create_time"></div>
+						<div class="col span_1_of_6">修改时间:</div>
+						<div class="col span_2_of_6" id="zuizhonglunwen_update_time"></div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">
+							<p>描述:</p>
+						</div>
+						<div class="col span_4_of_6">
+							<textarea id="zuizhonglunwen_document_description"
+								class="easyui-validatebox" style="width: 500px; height: 300px"
+								name="zuizhonglunwen_document_description"></textarea>
+						</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">反馈:</div>
+						<div class="col span_5_of_6">
+							<table id="zuizhonglunwen_feedback_datagrid"></table>
+						</div>
+					</div>
+					<div class="section group">
+						<div class="col span_1_of_6">附件:</div>
+						<div class="col span_5_of_6">
+							<div class="col span_3_of_5">
+								<fieldset>
+									<legend align="left">已上传附件</legend>
+									<div>
+										<table id="zuizhonglunwen_attachment_list_grid"></table>
+									</div>
+								</fieldset>
+							</div>
+							<div class="col span_1_of_5">
+								<table>
+									<tr>
+										<th><label for="zuizhonglunwen_Attachment_GUID">附件上传：</label></th>
+										<td>
+											<div>
+												<input class="easyui-validatebox" type="hidden"
+													id="zuizhonglunwen_Attachment_GUID" name="Attachment_GUID" />
+												<input id="zuizhonglunwen_file_upload" type="file"
+													multiple="multiple"> <a href="javascript:void(0)"
+													class="easyui-linkbutton" id="btnUpload"
+													data-options="plain:true,iconCls:'icon-save'"
+													onclick="javascript: $('#zuizhonglunwen_file_upload').uploadify('upload', '*')">上传</a>
+
+												<a href="javascript:void(0)" class="easyui-linkbutton"
+													id="btnCancelUpload"
+													data-options="plain:true,iconCls:'icon-cancel'"
+													onclick="javascript: $('#zuizhonglunwen_file_upload').uploadify('cancel', '*')">取消</a>
+												<div id="zuizhonglunwen_fileQueue" class="fileQueue"></div>
+												<div id="div_files"></div>
+												<br />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div id="zuizhonglunwen_create_template" style="display: none;">
+						<h3 style="color: #0099FF;">学生尚未创建论文</h3>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 	<!-- 总页面模版 -->
-
-	<!-- 下面为ajax载入模版 -->
-	<!-- 开题报告模版 -->
-	<div id="kaitibaogao_template" style="display: none;">
-		<div class="section group">
-			<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">创建时间:</div>
-			<div class="col span_2_of_6" id="kaitibaogao_create_time"></div>
-			<div class="col span_1_of_6">修改时间:</div>
-			<div class="col span_2_of_6" id="kaitibaogao_update_time"></div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">
-				<p>描述:</p>
-			</div>
-			<div class="col span_4_of_6">
-				<textarea id="kaitibaogao_document_description"
-					class="easyui-validatebox" style="width: 500px; height: 300px"
-					name="kaitibaogao_document_description"></textarea>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">反馈:</div>
-			<div class="col span_5_of_6">
-				<div id="kaitibaogao_feedback_area"></div>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">附件:</div>
-			<div class="col span_5_of_6">
-				<div class="col span_3_of_5">
-					<fieldset>
-						<legend align="left">已上传附件</legend>
-						<div>
-							<table id="kaitibaogao_attachment_list_grid"></table>
-						</div>
-					</fieldset>
-				</div>
-				<div class="col span_1_of_5">
-					<table>
-						<tr>
-							<th><label for="Attachment_GUID">附件上传：</label></th>
-							<td>
-								<div>
-									<input class="easyui-validatebox" type="hidden"
-										id="Attachment_GUID" name="Attachment_GUID" /> <input
-										id="kaitibaogao_file_upload" type="file" multiple="multiple">
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
-										onclick="javascript: $('#kaitibaogao_file_upload').uploadify('upload', '*')">上传</a>
-
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnCancelUpload"
-										data-options="plain:true,iconCls:'icon-cancel'"
-										onclick="javascript: $('##kaitibaogao_file_upload').uploadify('cancel', '*')">取消</a>
-									<div id="kaitibaogao_fileQueue" class="fileQueue"></div>
-									<div id="div_files"></div>
-									<br />
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="kaitibaogao_create_template" style="display: none;">
-		<h3 style="color: #0099FF;">学生尚未创建开题报告</h3>
-	</div>
-
-	<div id="kaitibaogao_feedback_template" style="display: none">
-		<div
-			style="background: #E6E6E6; color: #FFF; border: 1px solid #F7F7F7;">
-			<p style="display: inline;" id="kaitibaogao_feedback_header"></p>
-		</div>
-		<div id="kaitibaogao_feedback_content"></div>
-	</div>
-	<!-- 开题报告模版 -->
-
-
-	<!-- 任务书模版 -->
-	<div id="renwushu_template" style="display: none;">
-		<div class="section group">
-			<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">创建时间:</div>
-			<div class="col span_2_of_6" id="renwushu_create_time"></div>
-			<div class="col span_1_of_6">修改时间:</div>
-			<div class="col span_2_of_6" id="renwushu_update_time"></div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">
-				<p>描述:</p>
-			</div>
-			<div class="col span_4_of_6">
-				<textarea id="renwushu_document_description"
-					class="easyui-validatebox" style="width: 500px; height: 300px"
-					name="renwushu_document_description"></textarea>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">反馈:</div>
-			<div class="col span_5_of_6">
-				<div id="renwushu_feedback_area"></div>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">附件:</div>
-			<div class="col span_5_of_6">
-				<div class="col span_3_of_5">
-					<fieldset>
-						<legend align="left">已上传附件</legend>
-						<div>
-							<table id="renwushu_attachment_list_grid"></table>
-						</div>
-					</fieldset>
-				</div>
-				<div class="col span_1_of_5">
-					<table>
-						<tr>
-							<th><label for="Attachment_GUID">附件上传：</label></th>
-							<td>
-								<div>
-									<input class="easyui-validatebox" type="hidden"
-										id="Attachment_GUID" name="Attachment_GUID" /> <input
-										id="renwushu_file_upload" type="file" multiple="multiple">
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
-										onclick="javascript: $('#renwushu_file_upload').uploadify('upload', '*')">上传</a>
-
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnCancelUpload"
-										data-options="plain:true,iconCls:'icon-cancel'"
-										onclick="javascript: $('#renwushu_file_upload').uploadify('cancel', '*')">取消</a>
-									<div id="renwushu_fileQueue" class="fileQueue"></div>
-									<div id="div_files"></div>
-									<br />
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="renwushu_create_template" style="display: none;">
-		<h3 style="color: #0099FF;">学生尚未创建任务书</h3>
-	</div>
-
-	<div id="renwushu_feedback_template" style="display: none">
-		<div
-			style="background: #E6E6E6; color: #FFF; border: 1px solid #F7F7F7;">
-			<p style="display: inline;" id="renwushu_feedback_header"></p>
-		</div>
-		<div id="renwushu_feedback_content"></div>
-	</div>
-	<!-- 任务书模版 -->
-
-
-
-	<!-- 最终论文模版 -->
-	<div id="zuizhonglunwen_template" style="display: none;">
-		<div class="section group">
-			<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">创建时间:</div>
-			<div class="col span_2_of_6" id="zuizhonglunwen_create_time"></div>
-			<div class="col span_1_of_6">修改时间:</div>
-			<div class="col span_2_of_6" id="zuizhonglunwen_update_time"></div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">
-				<p>描述:</p>
-			</div>
-			<div class="col span_4_of_6">
-				<textarea id="zuizhonglunwen_document_description"
-					class="easyui-validatebox" style="width: 500px; height: 300px"
-					name="zuizhonglunwen_document_description"></textarea>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">反馈:</div>
-			<div class="col span_5_of_6">
-				<div id="renwushu_feedback_area"></div>
-			</div>
-		</div>
-		<div class="section group">
-			<div class="col span_1_of_6">附件:</div>
-			<div class="col span_5_of_6">
-				<div class="col span_3_of_5">
-					<fieldset>
-						<legend align="left">已上传附件</legend>
-						<div>
-							<table id="zuizhonglunwen_attachment_list_grid"></table>
-						</div>
-					</fieldset>
-				</div>
-				<div class="col span_1_of_5">
-					<table>
-						<tr>
-							<th><label for="Attachment_GUID">附件上传：</label></th>
-							<td>
-								<div>
-									<input class="easyui-validatebox" type="hidden"
-										id="Attachment_GUID" name="Attachment_GUID" /> <input
-										id="zuizhonglunwen_file_upload" type="file"
-										multiple="multiple"> <a href="javascript:void(0)"
-										class="easyui-linkbutton" id="btnUpload"
-										data-options="plain:true,iconCls:'icon-save'"
-										onclick="javascript: $('#zuizhonglunwen_file_upload').uploadify('upload', '*')">上传</a>
-
-									<a href="javascript:void(0)" class="easyui-linkbutton"
-										id="btnCancelUpload"
-										data-options="plain:true,iconCls:'icon-cancel'"
-										onclick="javascript: $('#zuizhonglunwen_file_upload').uploadify('cancel', '*')">取消</a>
-									<div id="zuizhonglunwen_fileQueue" class="fileQueue"></div>
-									<div id="div_files"></div>
-									<br />
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="zuizhonglunwen_create_template" style="display: none;">
-		<h3 style="color: #0099FF;">学生尚未创建任务书</h3>
-	</div>
-
-	<div id="zuizhonglunwen_feedback_template" style="display: none">
-		<div
-			style="background: #E6E6E6; color: #FFF; border: 1px solid #F7F7F7;">
-			<p style="display: inline;" id="zuizhonglunwen_feedback_header"></p>
-		</div>
-		<div id="zuizhonglunwen_feedback_content"></div>
-	</div>
-	<!-- 最终论文模版 -->
 </body>
 

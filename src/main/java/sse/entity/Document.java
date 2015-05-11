@@ -58,10 +58,26 @@ public class Document extends BaseModel implements Serializable {
     @OneToMany(mappedBy = "document", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<Attachment> documentAttachments;
 
+    /** 
+     * Description: 级联增加操作
+     * @param a
+     * void
+     */
     public void addAttachment(Attachment a)
     {
         a.setDocument(this);
         documentAttachments.add(a);
+    }
+
+    /** 
+     * Description: 同上
+     * @param dc
+     * void
+     */
+    public void addDocumentComment(DocumentComment dc)
+    {
+        dc.setDocument(this);
+        documentComments.add(dc);
     }
 
     public Document() {

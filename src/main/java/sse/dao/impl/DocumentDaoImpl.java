@@ -32,10 +32,13 @@ public class DocumentDaoImpl extends GenericDao<Integer, Document>
     public Document findDocumentByStudentIdAndType(int studentId, DocumentTypeEnum documentType)
     {
         String queryStr = "select d from Document d where d.creator.id=:studentId and d.documentType=:documentType";
-        Document document = this.getEntityManager()
+        List<Document> documentList = this.getEntityManager()
                 .createQuery(queryStr, Document.class).setParameter("studentId", studentId)
                 .setParameter("documentType", documentType).
-                getResultList().get(0);
-        return document;
+                getResultList();
+        if (documentList.size() == 0)
+            return null;
+        else
+            return documentList.get(0);
     }
 }

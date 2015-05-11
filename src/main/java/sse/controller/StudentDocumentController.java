@@ -2,6 +2,7 @@ package sse.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.DocumentFormModel;
+import sse.dao.impl.StudentDaoImpl;
 import sse.entity.User;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
@@ -66,6 +68,37 @@ public class StudentDocumentController {
                 null,
                 ((User) session.getAttribute("USER")).getId());
         return documents;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getDocumentComments", method = { RequestMethod.POST })
+    public GenericDataGrid<DocumentCommentListModel> getDocumentComments(int studentId, String type,
+            HttpServletRequest request)
+    {
+        return studentDocumentServiceImpl
+                .findDocumentCommentsForPagingByStudentIdAndDocumentType(studentId, type);
+    }
+
+    /**
+     * Description: 增加Document评论
+     * 
+     * @param studentId
+     * @param commentorId
+     * @param type
+     * @param content
+     * @param request
+     * @return
+     *         BasicJson
+     */
+    @ResponseBody
+    @RequestMapping(value = "/makeComment", method = { RequestMethod.POST })
+    public BasicJson makeComment(String studentId, String commentorId, String type, String content,
+            HttpServletRequest request)
+    {
+        int documentId = studentDocumentServiceImpl.findDocumentIdByStudentIdAndDocumentType(
+                Integer.parseInt(studentId), type);
+        studentDocumentServiceImpl.makeDocumentComment(documentId, content, Integer.parseInt(commentorId));
+        return new BasicJson(true, "留言成功", null);
     }
 
     /**
@@ -115,8 +148,17 @@ public class StudentDocumentController {
     public void downloadAttachment(HttpServletRequest request, int attachmentId, HttpServletResponse response)
             throws SSEException {
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition",
-                "attachment; filename=" + studentDocumentServiceImpl.findAttachmentListNameByAttachmentId(attachmentId));
+
+        try {
+            response.setHeader(
+                    "Content-Disposition",
+                    "attachment; filename="
+                            + new String(studentDocumentServiceImpl.findAttachmentListNameByAttachmentId(attachmentId)
+                                    .getBytes("GB2312"), "iso8859-1"));
+        } catch (UnsupportedEncodingException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         try {
             studentDocumentServiceImpl.downloadAttachment(attachmentId, response.getOutputStream());
         } catch (IOException e) {
@@ -219,12 +261,4 @@ public class StudentDocumentController {
         return new BasicJson(true, "更新成功", null);
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/getDocumentComments", method = { RequestMethod.POST })
-    public List<DocumentCommentListModel> getDocumentComments(String type, HttpServletRequest request)
-    {
-        User student = ((User) (request.getSession().getAttribute("USER")));
-        return studentDocumentServiceImpl.findDocumentComments(student.getId(), type);
-
-    }
 }
