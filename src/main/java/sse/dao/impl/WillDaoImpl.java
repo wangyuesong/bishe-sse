@@ -22,7 +22,7 @@ import sse.enums.WillStatusEnum;
  * @version V1.0
  */
 @Repository
-public class WillDaoImpl extends GenericDao<WillPK, Will> {
+public class WillDaoImpl extends GenericDao<Integer, Will> {
 
     @Autowired
     TeacherDaoImpl teacherDaoImpl;
@@ -54,7 +54,7 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
             {
                 // Keep those wills that needed to be updated or created
                 String teacherId = willModel.getWillByLevel(i);
-                willList.add(new Will(new WillPK(studentId, Integer.parseInt(teacherId)), i));
+                willList.add(new Will(studentId, Integer.parseInt(teacherId), i));
             }
         }
 
@@ -146,16 +146,18 @@ public class WillDaoImpl extends GenericDao<WillPK, Will> {
         if (!CollectionUtils.isEmpty(wills))
         {
             Will w = wills.get(0);
-            // 如果这个will和新的will不一致，则更新一下，由于是WillPk是主键，不能更新，需要删除后添加
-            if (w.getId().getStudentId() != studentId || w.getId().getTeacherId() != teacherId)
+            if (w.getStudentId() != studentId || w.getTeacherId() != teacherId)
             {
-                super.removeWithTransaction(w);
-                super.persistWithTransaction(new Will(new WillPK(studentId, teacherId), i));
+                w.setStudentId(studentId);
+                w.setTeacherId(teacherId);
+                super.mergeWithTransaction(w);
+                // super.removeWithTransaction(w);
+                // super.persistWithTransaction(new Will(new WillPK(studentId, teacherId), i));
             }
         }
         // 如果没有这个level的will，直接创建
         else {
-            super.persistWithTransaction(new Will(new WillPK(studentId, teacherId), i));
+            super.persistWithTransaction(new Will(studentId, teacherId, i));
         }
     }
 }

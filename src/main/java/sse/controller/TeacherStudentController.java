@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
@@ -22,6 +23,7 @@ import sse.service.impl.StudentDocumentServiceImpl;
 import sse.service.impl.StudentDocumentServiceImpl.DocumentInfo;
 import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
 import sse.service.impl.TeacherStudentServiceImpl;
+import sse.service.impl.TeacherStudentServiceImpl.StudentDetail;
 import sse.utils.PaginationAndSortModel;
 import sse.utils.SessionUtil;
 
@@ -101,11 +103,17 @@ public class TeacherStudentController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/showOneStudentDetail")
+    public StudentDetail showOneStudentDetail(String studentId)
+    {
+        return teacherStudentServiceImpl.getStudentDetail(Integer.parseInt(studentId));
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/changeWillStatus")
     public BasicJson changeWillStatus(int willId, String decision, HttpServletRequest request,
             HttpServletResponse response) {
-        PaginationAndSortModel pm = new PaginationAndSortModel(request);
-        return teacherStudentServiceImpl.getCandidateStudentsForPagingInDataGrid(teacherId, pm);
+        return teacherStudentServiceImpl.changeWillStatus(willId, decision);
     }
 
 }

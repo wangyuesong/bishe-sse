@@ -33,6 +33,7 @@ import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.DocumentDaoImpl;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
+import sse.dao.impl.TopicDaoImpl;
 import sse.dao.impl.UserDaoImpl;
 import sse.dao.impl.WillDaoImpl;
 import sse.entity.Attachment;
@@ -40,14 +41,18 @@ import sse.entity.Document;
 import sse.entity.DocumentComment;
 import sse.entity.Student;
 import sse.entity.Teacher;
+import sse.entity.Topic;
 import sse.entity.User;
 import sse.entity.Will;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
+import sse.enums.TopicStatusEnum;
+import sse.enums.TopicTypeEnum;
 import sse.exception.SSEException;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.DocumentListModel;
 import sse.pageModel.GenericDataGrid;
+import sse.pageModel.TopicModel;
 import sse.utils.FtpTool;
 
 /**
@@ -72,6 +77,9 @@ public class StudentDocumentServiceImpl {
 
     @Autowired
     private StudentDaoImpl studentDaoImpl;
+
+    @Autowired
+    private TopicDaoImpl topicDaoImpl;
 
     public StudentDocumentServiceImpl() {
         // TODO Auto-generated constructor stub
@@ -366,7 +374,7 @@ public class StudentDocumentServiceImpl {
             HashMap<String, String> returnMap = new HashMap<String, String>();
             for (Will w : wills)
             {
-                Teacher t = teacherDaoImpl.findById(w.getId().getTeacherId());
+                Teacher t = teacherDaoImpl.findById(w.getTeacherId());
                 returnMap.put("" + w.getLevel(), t.getAccount());
             }
             return returnMap;
@@ -523,12 +531,13 @@ public class StudentDocumentServiceImpl {
         return new GenericDataGrid<DocumentCommentListModel>(documentCommentModels.size(), documentCommentModels);
     }
 
-    /** 
+    /**
      * Description: 增加Document的评论
+     * 
      * @param documentId
      * @param content
      * @param commentorId
-     * void
+     *            void
      */
     public void makeDocumentComment(int documentId, String content, int commentorId)
     {
@@ -553,6 +562,38 @@ public class StudentDocumentServiceImpl {
             return -1;
         else
             return d.getId();
+    }
+
+    /**
+     * Description: 根据学生id查到其topic，若无则返回null
+     * 
+     * @param studentId
+     * @return
+     *         TopicModel
+     */
+    public TopicModel getTopicByStudentId(int studentId)
+    {
+        Topic t = studentDaoImpl.findById(studentId).getTopic();
+        if (t == null)
+            return null;
+        TopicModel tm = new TopicModel(t.getId(), t.getDescription(), t.getMainName(), t.getSubName(), t.getOutsider(),
+                t.getPassStatus().getValue(), t.getTeacherComment(), t.getTopicType().getValue());
+        return tm;
+    }
+
+    public void saveTopic(TopicModel tm, int studentId)
+    {
+        Topic t = studentDaoImpl.findById(studentId).getTopic();
+        if (t == null)
+            t = new Topic();
+        t.setMainName(tm.getMainName());
+        t.setSubName(tm.getSubName());
+        t.setDescription(tm.getDescription());
+        t.setOutsider(tm.getOutsider());
+        t.setPassStatus(TopicStatusEnum.getType(tm.getPassStatus()));
+        t.setTeacherComment(tm.getTeacherComment());
+        t.setTopicType(TopicTypeEnum.getType(tm.getTopicType()));
+        topicDaoImpl.mergeWithTransaction(t);
     }
 
     public static class DocumentInfo

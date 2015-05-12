@@ -103,6 +103,7 @@ import sse.entity.Menu;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.TimeNode;
+import sse.entity.Topic;
 import sse.entity.User;
 import sse.entity.Will;
 import sse.entity.WillPK;
@@ -110,6 +111,8 @@ import sse.enums.DocumentTypeEnum;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 import sse.enums.TimeNodeEnum;
+import sse.enums.TopicStatusEnum;
+import sse.enums.TopicTypeEnum;
 
 public class DataInitialization extends BaseJPATest {
 
@@ -159,28 +162,29 @@ public class DataInitialization extends BaseJPATest {
 
         List<Will> willList = new ArrayList<Will>();
         // Yuesong Wang
-        willList.add(new Will(new WillPK(fbn("王岳松"), fbn("刘岩")), 1));
-        willList.add(new Will(new WillPK(fbn("王岳松"), fbn("孙萍")), 2));
-        willList.add(new Will(new WillPK(fbn("王岳松"), fbn("王冬青")), 3));
+        willList.add(new Will(fbn("王岳松"), fbn("刘岩"), 1));
+
+        willList.add(new Will(fbn("王岳松"), fbn("孙萍"), 2));
+        willList.add(new Will(fbn("王岳松"), fbn("王冬青"), 3));
         // LeiYang
-        willList.add(new Will(new WillPK(fbn("杨磊"), fbn("李美惠")), 1));
-        willList.add(new Will(new WillPK(fbn("杨磊"), fbn("尹长青")), 2));
+        willList.add(new Will(fbn("杨磊"), fbn("李美惠"), 1));
+        willList.add(new Will(fbn("杨磊"), fbn("尹长青"), 2));
         // JunYao zhao
-        willList.add(new Will(new WillPK(fbn("赵俊尧"), fbn("刘岩")), 1));
-        willList.add(new Will(new WillPK(fbn("赵俊尧"), fbn("尹长青")), 2));
-        willList.add(new Will(new WillPK(fbn("赵俊尧"), fbn("孙萍")), 3));
+        willList.add(new Will(fbn("赵俊尧"), fbn("刘岩"), 1));
+        willList.add(new Will(fbn("赵俊尧"), fbn("尹长青"), 2));
+        willList.add(new Will(fbn("赵俊尧"), fbn("孙萍"), 3));
         // Zenan hu
-        willList.add(new Will(new WillPK(fbn("胡泽南"), fbn("刘岩")), 1));
-        willList.add(new Will(new WillPK(fbn("胡泽南"), fbn("孙萍")), 2));
-        willList.add(new Will(new WillPK(fbn("胡泽南"), fbn("王冬青")), 3));
+        willList.add(new Will(fbn("胡泽南"), fbn("刘岩"), 1));
+        willList.add(new Will(fbn("胡泽南"), fbn("孙萍"), 2));
+        willList.add(new Will(fbn("胡泽南"), fbn("王冬青"), 3));
         // Boyi li
-        willList.add(new Will(new WillPK(fbn("李博一"), fbn("孙萍")), 1));
-        willList.add(new Will(new WillPK(fbn("李博一"), fbn("王冬青")), 2));
-        willList.add(new Will(new WillPK(fbn("李博一"), fbn("刘岩")), 3));
+        willList.add(new Will(fbn("李博一"), fbn("孙萍"), 1));
+        willList.add(new Will(fbn("李博一"), fbn("王冬青"), 2));
+        willList.add(new Will(fbn("李博一"), fbn("刘岩"), 3));
         // Yifan Zhang
-        willList.add(new Will(new WillPK(fbn("张一帆"), fbn("刘岩")), 1));
-        willList.add(new Will(new WillPK(fbn("张一帆"), fbn("孙萍")), 2));
-        willList.add(new Will(new WillPK(fbn("张一帆"), fbn("李美惠")), 3));
+        willList.add(new Will(fbn("张一帆"), fbn("刘岩"), 1));
+        willList.add(new Will(fbn("张一帆"), fbn("孙萍"), 2));
+        willList.add(new Will(fbn("张一帆"), fbn("李美惠"), 3));
 
         for (Will w : willList)
         {
@@ -206,23 +210,26 @@ public class DataInitialization extends BaseJPATest {
             em.persist(m);
         }
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(5, "我的文档", null, "Student", ""));
-        menus.add(new Menu(6, "任务书", menufbn("我的文档"), "Student",
+        em.persist(new Menu(5, "我的毕设", null, "Student", ""));
+        menus.add(new Menu(6, "选题申请", menufbn("我的毕设"), "Student",
+                "http://localhost:8080/sse/dispatch/student/student_select_topic"));
+        menus.add(new Menu(7, "任务书", menufbn("我的毕设"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_list_documents"));
-        menus.add(new Menu(7, "开题报告", menufbn("我的文档"), "Student",
+        menus.add(new Menu(8, "开题报告", menufbn("我的毕设"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_kaitibaogao"));
-        menus.add(new Menu(8, "最终论文", menufbn("我的文档"), "Student",
+        menus.add(new Menu(9, "最终论文", menufbn("我的毕设"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_list_documents"));
+
         for (Menu m : menus)
         {
             em.persist(m);
         }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(9, "志愿", null, "Administrator", ""));
-        menus.add(new Menu(10, "志愿表", menufbn("志愿"), "Administrator",
+        em.persist(new Menu(10, "志愿", null, "Administrator", ""));
+        menus.add(new Menu(11, "志愿表", menufbn("志愿"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_list_will"));
-        menus.add(new Menu(11, "分配志愿", menufbn("志愿"), "Administrator",
+        menus.add(new Menu(12, "分配志愿", menufbn("志愿"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
@@ -230,10 +237,10 @@ public class DataInitialization extends BaseJPATest {
         }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(12, "信息管理", null, "Administrator", ""));
-        menus.add(new Menu(13, "用户管理", menufbn("信息管理"), "Administrator",
+        em.persist(new Menu(13, "信息管理", null, "Administrator", ""));
+        menus.add(new Menu(14, "用户管理", menufbn("信息管理"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_list_will"));
-        menus.add(new Menu(14, "文档管理", menufbn("信息管理"), "Administrator",
+        menus.add(new Menu(15, "文档管理", menufbn("信息管理"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
@@ -241,20 +248,20 @@ public class DataInitialization extends BaseJPATest {
         }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(15, "公告与日程", null, "Administrator", ""));
-        menus.add(new Menu(16, "公告管理", menufbn("公告与日程"), "Administrator",
+        em.persist(new Menu(16, "公告与日程", null, "Administrator", ""));
+        menus.add(new Menu(17, "公告管理", menufbn("公告与日程"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_list_will"));
-        menus.add(new Menu(17, "日程节点", menufbn("公告与日程"), "Administrator",
+        menus.add(new Menu(18, "日程节点", menufbn("公告与日程"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
             em.persist(m);
         }
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(18, "学生", null, "Teacher", ""));
-        menus.add(new Menu(19, "选择学生", menufbn("学生"), "Teacher",
+        em.persist(new Menu(19, "学生", null, "Teacher", ""));
+        menus.add(new Menu(20, "选择学生", menufbn("学生"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_select_student"));
-        menus.add(new Menu(20, "我的学生", menufbn("学生"), "Teacher",
+        menus.add(new Menu(21, "我的学生", menufbn("学生"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_my_students"));
         for (Menu m : menus)
         {
@@ -267,6 +274,11 @@ public class DataInitialization extends BaseJPATest {
         DocumentComment dc = new DocumentComment("测试评论", pingSun, d);
         em.persist(dc);
 
+        // Topic
+        Topic t = new Topic(1, "测试主选题", "测试副选题", "测试主内容", null, TopicStatusEnum.待审核, "不错！", TopicTypeEnum.个人选题);
+        yuesongWang.setTopic(t);
+        em.merge(t);
+
         // Time nodes
         List<TimeNode> timeNodes = new ArrayList<TimeNode>();
         timeNodes.add(new TimeNode(1, TimeNodeEnum.getType("填报志愿"), new Date(), "志愿填报时间"));
@@ -277,7 +289,6 @@ public class DataInitialization extends BaseJPATest {
         {
             em.persist(m);
         }
-
         commitTransaction();
         System.out.println("Finished");
     }

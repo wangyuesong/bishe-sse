@@ -32,7 +32,7 @@
       url : "${pageContext.request.contextPath}/teacher/student/changeWillStatus",
       type : "post",
       data : {
-        decision : "accept",
+        decision : "接受",
         willId : willId
       },
       success : function(data, textStatus) {
@@ -40,6 +40,7 @@
           title : '提示',
           msg : data.msg
         });
+        $('#candidate_students_datagrid').datagrid('reload');
       }
     });
   }
@@ -48,7 +49,7 @@
       url : "${pageContext.request.contextPath}/teacher/student/changeWillStatus",
       type : "post",
       data : {
-        decision : "reject",
+        decision : "拒绝",
         willId : willId
       },
       success : function(data, textStatus) {
@@ -56,10 +57,27 @@
           title : '提示',
           msg : data.msg
         });
+        $('#candidate_students_datagrid').datagrid('reload');
+      }
+    });
+  }
+
+  function load_one_student_detail(studentId) {
+    $.ajax({
+      url : "${pageContext.request.contextPath}/teacher/student/showOneStudentDetail?studentId=" + studentId,
+      type : "get",
+      success : function(data, textStatus) {
+        $("#name").text(data.name);
+        $("#email").text(data.email);
+        $("#gender").text(data.gender);
+        $("#phone").text(data.phone);
+        $("#self_description").text(data.selfDescription);
+        $("#detail_legend").text(data.name + "详细信息");
       }
     });
   }
   $(function() {
+
     $('#candidate_students_datagrid').datagrid(
         {
           url : '${pageContext.request.contextPath}/teacher/student/getCandidateStudents',
@@ -96,8 +114,8 @@
                 width : 100,
                 formatter : function(value, rowData, index) {
                   var reload = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnChange"'
-                      + 'data-options="plain:true" onclick="load_one_student_detail(' + rowData.id + ')">' + value
-                      + '</a>';
+                      + 'data-options="plain:true" onclick="load_one_student_detail(' + rowData.studentId + ')">'
+                      + value + '</a>';
                   return reload;
                 }
               },
@@ -150,6 +168,41 @@
   });
 </script>
 <body>
-	<table id="candidate_students_datagrid"></table>
+	<fieldset>
+		<legend id="legend" align="left" style="color: #0099FF">以下为第一志愿选择您的学生</legend>
+		备注:待定默认为拒绝
+		<table id="candidate_students_datagrid"></table>
+	</fieldset>
+	<div style="margin-top: 20px"></div>
+	<fieldset>
+		<legend id="detail_legend" align="left" style="color: #0099FF">学生详细信息</legend>
+		<div>
+			<table width="98%" border="0" cellpadding="2" class="tableForm"
+				cellspacing="1" bgcolor="#D1DDAA" align="center"
+				style="margin-top: 8px">
+				<tr bgcolor="#FAFAF1">
+					<td width="15%">姓名:</td>
+					<td id="name" width="35%"></td>
+					<td width="15%">邮箱:</td>
+					<td id="email" width="35%"></td>
+				</tr>
+				<tr bgcolor="#FAFAF1">
+					<td width="15%">性别:</td>
+					<td id="gender" width="35%"></td>
+					<td width="15%">电话:</td>
+					<td id="phone" width="35%"></td>
+				</tr>
+
+			</table>
+			<table width="98%" border="0" cellpadding="2" class="tableForm"
+				cellspacing="1" bgcolor="#D1DDAA" align="center"
+				style="margin-top: 8px">
+				<tr bgcolor="#FAFAF1">
+					<td width="30%">自我介绍:</td>
+					<td id="self_description" width="70%"></td>
+				</tr>
+			</table>
+		</div>
+	</fieldset>
 </body>
 

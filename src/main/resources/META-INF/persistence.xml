@@ -5,7 +5,6 @@
 	<persistence-unit name="SSEPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>sse.entity.Topic</class>
-    <class>sse.entity.Topictype</class>
     <class>sse.entity.User</class>
     <class>sse.entity.Student</class>
     <class>sse.entity.Teacher</class>

@@ -119,8 +119,8 @@ public class AdminWillServiceImpl {
                 if (willList.size() <= (t.getCapacity() - t.getStudents().size()))
                 {
                     for (Will w : willList)
-                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getId().getStudentId()), teacherDaoImpl
-                                .findById(w.getId().getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
+                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudentId()), teacherDaoImpl
+                                .findById(w.getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
                                 MatchTypeEnum.系统分配));
                 }
                 // Teacher's capacity is smaller than level i student's will
@@ -128,8 +128,8 @@ public class AdminWillServiceImpl {
                 {
                     List<Will> subWillList = willList.subList(0, t.getCapacity() - t.getStudents().size());
                     for (Will w : subWillList)
-                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getId().getStudentId()), teacherDaoImpl
-                                .findById(w.getId().getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
+                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudentId()), teacherDaoImpl
+                                .findById(w.getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
                                 MatchTypeEnum.系统分配));
                 }
             }
@@ -160,7 +160,7 @@ public class AdminWillServiceImpl {
         while (iter.hasNext())
         {
             Will w = iter.next();
-            if (studentIds.contains(w.getId().getStudentId()))
+            if (studentIds.contains(w.getStudentId()))
                 iter.remove();
         }
         return willList;
@@ -238,7 +238,7 @@ public class AdminWillServiceImpl {
     private void removeMatchedStudentsFromWillListByStudentId(String studentId, List<Will> willList) {
         for (int i = 0; i < willList.size(); i++)
         {
-            if (willList.get(i).getId().getStudentId() == Integer.parseInt(studentId))
+            if (willList.get(i).getStudentId() == Integer.parseInt(studentId))
                 willList.remove(i);
         }
     }
@@ -312,17 +312,17 @@ public class AdminWillServiceImpl {
                 tempModel = new WillModel();
                 preWill = w;
             }
-            if (preWill.getId().getStudentId() != w.getId().getStudentId()) {
+            if (preWill.getStudentId() != w.getStudentId()) {
                 willModelList.add(tempModel);
                 tempModel = new WillModel();
             }
-            Student s = studentDaoImpl.findById(w.getId().getStudentId());
+            Student s = studentDaoImpl.findById(w.getStudentId());
             tempModel.setStudentId(s.getId() + "");
             tempModel.setStudentAccount(s.getAccount());
             tempModel.setStudentName(s.getName());
-            tempModel.setWillByLevel(w.getLevel(), w.getId().getTeacherId() + "");
+            tempModel.setWillByLevel(w.getLevel(), w.getTeacherId() + "");
             tempModel
-                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getId().getTeacherId()).getName());
+                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getTeacherId()).getName());
             preWill = w;
         }
         if (tempModel.getStudentId() != null)
@@ -371,7 +371,7 @@ public class AdminWillServiceImpl {
                 List<Will> wills = willDaoImpl.findWillsByStudentId(s.getId());
                 boolean isWillCandiate = false;
                 for (Will w : wills)
-                    if (w.getId().getTeacherId() == t.getId())
+                    if (w.getTeacherId() == t.getId())
                     {
                         s.setMatchLevel(MatchLevelEnum.getTypeByIntLevel(w.getLevel()));
                         isWillCandiate = true;

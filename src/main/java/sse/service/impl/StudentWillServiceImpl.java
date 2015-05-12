@@ -92,7 +92,7 @@ public class StudentWillServiceImpl {
             HashMap<String, String> returnMap = new HashMap<String, String>();
             for (Will w : wills)
             {
-                returnMap.put("" + w.getLevel(), w.getId().getTeacherId() + "");
+                returnMap.put("" + w.getLevel(), w.getTeacherId() + "");
             }
             return returnMap;
         }

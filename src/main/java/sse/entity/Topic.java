@@ -1,7 +1,12 @@
 package sse.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
+import sse.enums.DocumentTypeEnum;
+import sse.enums.TopicStatusEnum;
+import sse.enums.TopicTypeEnum;
 
 /**
  * The persistent class for the topic database table.
@@ -11,90 +16,130 @@ import javax.persistence.*;
 @Table(name = "TOPIC")
 @NamedQuery(name = "Topic.findAll", query = "SELECT t FROM Topic t")
 public class Topic extends BaseModel implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(unique = true, nullable = false)
-	private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, nullable = false)
+    private int id;
 
-	@Column(length = 1000)
-	private String description;
+    @Column(nullable = false, length = 500)
+    private String mainName;
 
-	@Column(nullable = false, length = 500)
-	private String name;
+    @Column(nullable = false, length = 500)
+    private String subName;
 
-	@Column(length = 500)
-	private String outsider;
+    @Column(length = 1000)
+    private String description;
 
-	@Column(name = "PASS_STATUS", length = 45)
-	private String passStatus;
+    @Column(length = 500)
+    private String outsider;
 
-	@Column(name = "TEACHER_COMMENT", length = 1000)
-	private String teacherComment;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 45, nullable = false)
+    private TopicStatusEnum passStatus;
 
-	// bi-directional many-to-one association to Topictype
-	@ManyToOne
-	@JoinColumn(name = "TOPICTYPE_ID", nullable = false)
-	private Topictype topictype;
+    @Column(name = "TEACHER_COMMENT", length = 1000)
+    private String teacherComment;
+    
+    @OneToOne(mappedBy = "topic")
+    private Student student;
 
-	public Topic() {
-	}
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30, nullable = false)
+    private TopicTypeEnum topicType;
 
-	public int getId() {
-		return id;
-	}
+    public Student getStudent() {
+        return student;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setStudent(Student student) {
+        this.student = student;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getOutsider() {
-		return outsider;
-	}
+    public String getMainName() {
+        return mainName;
+    }
 
-	public void setOutsider(String outsider) {
-		this.outsider = outsider;
-	}
+    public void setMainName(String mainName) {
+        this.mainName = mainName;
+    }
 
-	public String getPassStatus() {
-		return passStatus;
-	}
+    public String getSubName() {
+        return subName;
+    }
 
-	public void setPassStatus(String passStatus) {
-		this.passStatus = passStatus;
-	}
+    public void setSubName(String subName) {
+        this.subName = subName;
+    }
 
-	public String getTeacherComment() {
-		return teacherComment;
-	}
+    public String getOutsider() {
+        return outsider;
+    }
 
-	public void setTeacherComment(String teacherComment) {
-		this.teacherComment = teacherComment;
-	}
+    public void setOutsider(String outsider) {
+        this.outsider = outsider;
+    }
 
-	public Topictype getTopictype() {
-		return topictype;
-	}
+    public TopicStatusEnum getPassStatus() {
+        return passStatus;
+    }
 
-	public void setTopictype(Topictype topictype) {
-		this.topictype = topictype;
-	}
+    public void setPassStatus(TopicStatusEnum passStatus) {
+        this.passStatus = passStatus;
+    }
+
+    public String getTeacherComment() {
+        return teacherComment;
+    }
+
+    public void setTeacherComment(String teacherComment) {
+        this.teacherComment = teacherComment;
+    }
+
+    public TopicTypeEnum getTopicType() {
+        return topicType;
+    }
+
+    public void setTopicType(TopicTypeEnum topicType) {
+        this.topicType = topicType;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
+    public Topic(int id, String mainName, String subName, String description, String outsider,
+            TopicStatusEnum passStatus, String teacherComment, TopicTypeEnum topicType) {
+        super();
+        this.id = id;
+        this.mainName = mainName;
+        this.subName = subName;
+        this.description = description;
+        this.outsider = outsider;
+        this.passStatus = passStatus;
+        this.teacherComment = teacherComment;
+        this.topicType = topicType;
+    }
+
+    public Topic() {
+        super();
+    }
 
 }

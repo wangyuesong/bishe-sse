@@ -1,13 +1,10 @@
 package sse.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -24,7 +21,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.DocumentFormModel;
-import sse.dao.impl.StudentDaoImpl;
 import sse.entity.User;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
@@ -32,11 +28,12 @@ import sse.exception.SSEException;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.DocumentListModel;
 import sse.pageModel.GenericDataGrid;
+import sse.pageModel.TopicModel;
 import sse.service.impl.StudentDocumentServiceImpl;
-import sse.service.impl.UserServiceImpl;
 import sse.service.impl.StudentDocumentServiceImpl.AttachmentInfo;
 import sse.service.impl.StudentDocumentServiceImpl.DocumentInfo;
 import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
+import sse.service.impl.UserServiceImpl;
 import sse.utils.SessionUtil;
 
 /**
@@ -261,4 +258,18 @@ public class StudentDocumentController {
         return new BasicJson(true, "更新成功", null);
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/getTopic", method = { RequestMethod.POST })
+    public TopicModel getTopic(int studentId)
+    {
+        return studentDocumentServiceImpl.getTopicByStudentId(studentId);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/saveTopic", method = { RequestMethod.POST })
+    public BasicJson saveTopic(TopicModel tm, int studentId)
+    {
+        studentDocumentServiceImpl.saveTopic(tm, studentId);
+        return new BasicJson(true, "保存成功", null);
+    }
 }

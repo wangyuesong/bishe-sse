@@ -1,5 +1,6 @@
 package sse.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -7,6 +8,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
@@ -32,6 +34,18 @@ public class Student extends User {
     @Enumerated(EnumType.STRING)
     @Column(length = 30, name = "MATCH_TYPE")
     private MatchTypeEnum matchType;
+
+    @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "TOPIC")
+    private Topic topic;
+
+    public Topic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+    }
 
     public MatchLevelEnum getMatchLevel() {
         return matchLevel;
