@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
 import sse.entity.Student;
+import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.WillStatusEnum;
 import sse.pageModel.CandidateStudentListModel;
@@ -124,14 +126,22 @@ public class TeacherStudentServiceImpl {
         Will w = willDaoImpl.findById(willId);
         w.setStatus(WillStatusEnum.getType(decision));
         willDaoImpl.mergeWithTransaction(w);
+        Student s = null;
+        if (StringUtils.equals("接受", decision)) {
+            s = studentDaoImpl.findById(w.getStudentId());
+            Teacher t = teacherDaoImpl.findById(w.getTeacherId());
+            t.addStudent(s);
+            teacherDaoImpl.mergeWithTransaction(t);
+        }
         return new BasicJson(true, "已" + decision, null);
     }
 
-    /** 
-     * Description: 
+    /**
+     * Description:
+     * 
      * @param studentId
      * @return
-     * StudentDetail
+     *         StudentDetail
      */
     public StudentDetail getStudentDetail(int studentId)
     {

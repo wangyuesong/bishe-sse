@@ -24,34 +24,37 @@
         $("#subName").textbox("setValue", data.subName);
         $("#outsider").textbox("setValue", data.outsider);
         $("#description").textbox("setValue", data.description);
+        $('#topicType').combo('setValue', data.topicType).combo('setText', data.topicType);
         $("#pass_status").html(data.passStatus);
         $("#teacher_comment").html(data.teacherComment);
       }
     });
-  })
-  function save_topic() {
-    var options = {
+
+    $("#topic_form").form({
       url : '${pageContext.request.contextPath}/student/document/saveTopic',
       type : "post",
-      success : function(data, textStatus) {
+      success : function(data, textResult) {
+        var jdata = $.parseJSON(data);
         $.messager.show({
           title : "成功",
-          msg : data
+          msg : jdata.msg
         });
-
       }
-    };
-    $("#topic_form").ajaxSubmit(options);
+    });
+  })
+
+  function save_topic() {
+    $("#topic_form").submit();
   }
 </script>
 <div style="padding: 20px">
 	<fieldset>
-		<form id="topic_form">
+		<form id="topic_form" type="post">
 			<input name="studentId" type="hidden" value="${sessionScope.USER.id}" />
-			<legend id="legend" align="left" style="color: #0099FF">
-				选题申请表 <a href="javascript:void(0)"
-					class="easyui-linkbutton icon-save" data-options="plain:true"
-					onclick="save_topic()"></a>保存
+			<legend id="legend">
+				选题申请表 <a href="javascript:void(0);" class="easyui-linkbutton"
+					data-options="iconCls:'icon-save',plain:true"
+					id="updateWillButton" onclick="save_topic()">保存</a> 
 			</legend>
 			<div class="section group">
 				<div class="col span_1_of_8">
@@ -138,5 +141,6 @@
     });
   })
   $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
+  $("legend").css("color", "#0099FF").attr("align", "left");
 </script>
 </body>

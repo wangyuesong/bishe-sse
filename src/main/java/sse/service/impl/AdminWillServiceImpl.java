@@ -300,7 +300,7 @@ public class AdminWillServiceImpl {
      * @return List<MatchPair>
      */
     public GenericDataGrid<WillModel> getWillListForDatagrid(int page, int pageSize) {
-        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.id.studentId,w.level ASC");
+        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.studentId,w.level ASC");
         // 转换Will为一种可以在页面上展示的WillModel
         List<WillModel> willModelList = new ArrayList<WillModel>();
         Will preWill = null;

@@ -590,8 +590,6 @@ public class StudentDocumentServiceImpl {
         t.setSubName(tm.getSubName());
         t.setDescription(tm.getDescription());
         t.setOutsider(tm.getOutsider());
-        t.setPassStatus(TopicStatusEnum.getType(tm.getPassStatus()));
-        t.setTeacherComment(tm.getTeacherComment());
         t.setTopicType(TopicTypeEnum.getType(tm.getTopicType()));
         topicDaoImpl.mergeWithTransaction(t);
     }

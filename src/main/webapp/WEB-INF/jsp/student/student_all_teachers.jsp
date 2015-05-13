@@ -94,11 +94,15 @@
   });
 </script>
 </head>
-<body id="shit">
-	<!-- <div id="dd" title="My Dialog" style="width: 400px; height: 200px;">
-	Dialog Content.</div> -->
+<fieldset>
+	<legend>所有教师</legend>
 	<div id="tab" data-options="region:'center'" style="height: 100%">
 		<table id="all_teachers_datagrid"></table>
 	</div>
+</fieldset>
 	<div id="one_teacher_datagrid"></div>
-</body>
+<script>
+  $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
+  $("legend").css("color", "#0099FF").attr("align", "left");
+</script>
+

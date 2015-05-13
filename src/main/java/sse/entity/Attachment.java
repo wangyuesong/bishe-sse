@@ -43,6 +43,10 @@ public class Attachment extends BaseModel implements Serializable {
     @JoinColumn(name = "DOCUMENT")
     private Document document;
 
+    @ManyToOne()
+    @JoinColumn(name = "SYSTEM_MESSAGE")
+    private SystemMessage groupMessage;
+
     @ManyToOne
     @JoinColumn(nullable = false, name = "CREATOR")
     private User creator;
@@ -50,6 +54,14 @@ public class Attachment extends BaseModel implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private AttachmentStatusEnum status;
+
+    public SystemMessage getGroupMessage() {
+        return groupMessage;
+    }
+
+    public void setGroupMessage(SystemMessage groupMessage) {
+        this.groupMessage = groupMessage;
+    }
 
     public AttachmentStatusEnum getStatus() {
         return status;

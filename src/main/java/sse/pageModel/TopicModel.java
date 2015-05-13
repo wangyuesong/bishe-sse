@@ -19,6 +19,10 @@ public class TopicModel {
     String teacherComment;
     String topicType;
 
+    public TopicModel() {
+        super();
+    }
+
     public int getId() {
         return id;
     }

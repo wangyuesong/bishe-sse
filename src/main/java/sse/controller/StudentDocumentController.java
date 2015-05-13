@@ -266,7 +266,7 @@ public class StudentDocumentController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/saveTopic", method = { RequestMethod.POST })
+    @RequestMapping(value = "/saveTopic")
     public BasicJson saveTopic(TopicModel tm, int studentId)
     {
         studentDocumentServiceImpl.saveTopic(tm, studentId);

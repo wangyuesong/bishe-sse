@@ -2,7 +2,7 @@ package sse.enums;
 
 public enum TimeNodeEnum {
 
-    填报志愿("填报志愿"), 课题申报("申报课题"), 毕设进行("毕设进行"), 答辩申请("答辩申请"), UNKNOWN("UNKNOWN");
+    填报志愿("填报志愿"), 课题申报("课题申报"), 毕设进行("毕设进行"), 答辩申请("答辩申请"), UNKNOWN("UNKNOWN");
 
     private final String value;
 

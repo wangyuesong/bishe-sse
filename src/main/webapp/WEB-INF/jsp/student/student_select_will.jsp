@@ -321,5 +321,8 @@
 	</form>
 </fieldset>
 
-
+<script>
+  $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left").css("margin-top","20px");
+  $("legend").css("color", "#0099FF").attr("align", "left");
+</script>
 </body>

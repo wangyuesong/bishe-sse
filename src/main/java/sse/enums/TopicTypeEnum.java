@@ -2,7 +2,7 @@ package sse.enums;
 
 public enum TopicTypeEnum {
 
-    教师选题("教师选题"), 企业项目("企业项目"), 个人选题("个人选题"), UNKNOWN("Unknown");
+    教师选题("教师选题"), 企业项目("企业选题"), 个人选题("个人选题"), UNKNOWN("Unknown");
 
     private final String value;
 

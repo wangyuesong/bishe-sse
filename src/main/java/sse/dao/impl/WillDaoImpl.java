@@ -77,7 +77,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public List<Will> findWillsByStudentId(int studentId)
     {
-        String queryStr = "select w from Will w where w.id.studentId= :studentId";
+        String queryStr = "select w from Will w where w.studentId= :studentId";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("studentId", studentId).getResultList();
     }
@@ -91,7 +91,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public List<Will> findWillsByTeacherId(int teacherId)
     {
-        String queryStr = "select w from Will w where w.id.teacherId= :teacherId";
+        String queryStr = "select w from Will w where w.teacherId= :teacherId";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("teacherId", teacherId).getResultList();
     }
@@ -106,7 +106,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public List<Will> findAllNotRejectedWillsByTeacherIdAndLevel(int teacherId, int level)
     {
-        String queryStr = "select w from Will w where w.id.teacherId= :teacherId and w.status!= :status and w.level= :level order by w.updateTime asc";
+        String queryStr = "select w from Will w where w.teacherId= :teacherId and w.status!= :status and w.level= :level order by w.updateTime asc";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("teacherId", teacherId)
                 .setParameter("status", WillStatusEnum.接受)
@@ -123,7 +123,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public void deleteStudentWillByLevelWithoutTransaction(int studentId, int level)
     {
-        String queryStr = "select w from Will w where w.level=:level and w.id.studentId= :studentId";
+        String queryStr = "select w from Will w where w.level=:level and w.studentId= :studentId";
         List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("studentId", studentId).setParameter("level", level).getResultList();
         if (!CollectionUtils.isEmpty(wills))
@@ -139,7 +139,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      * @return void
      */
     public void updateStudentWillByLevel(int studentId, int i, int teacherId) {
-        String queryStr = "select w from Will w where w.level=:level and w.id.studentId= :studentId";
+        String queryStr = "select w from Will w where w.level=:level and w.studentId= :studentId";
         List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("studentId", studentId).setParameter("level", i).getResultList();
         // 如果之前有这个level的will

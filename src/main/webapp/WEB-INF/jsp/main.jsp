@@ -19,7 +19,7 @@
 		style="width: 200px; overflow: hidden;"></div>
 	<div
 		data-options="region:'east',title:'日程事件',href:'${pageContext.request.contextPath}/dispatch/layout_east'"
-		style="width: 300px;"></div>
+		style="width: 250px;"></div>
 	<div
 		data-options="region:'center',title:'欢迎使用本系统',href:'${pageContext.request.contextPath}/dispatch/layout_center'"
 		style="overflow: hidden;"></div>

@@ -28,6 +28,9 @@ public class TimeNode extends BaseModel implements Serializable {
     @Column(length = 30, nullable = false)
     private TimeNodeEnum name;
 
+    @Column(length = 40, nullable = false)
+    private String pinYinName;
+
     @Column(nullable = false)
     private Date time;
 
@@ -38,10 +41,11 @@ public class TimeNode extends BaseModel implements Serializable {
 
     }
 
-    public TimeNode(int id, TimeNodeEnum name, Date time, String description) {
+    public TimeNode(int id, TimeNodeEnum name, String pinYinName, Date time, String description) {
         super();
         this.id = id;
         this.name = name;
+        this.pinYinName = pinYinName;
         this.time = time;
         this.description = description;
     }
@@ -52,6 +56,14 @@ public class TimeNode extends BaseModel implements Serializable {
 
     public void setName(TimeNodeEnum name) {
         this.name = name;
+    }
+
+    public String getPinYinName() {
+        return pinYinName;
+    }
+
+    public void setPinYinName(String pinYinName) {
+        this.pinYinName = pinYinName;
     }
 
     public int getId() {

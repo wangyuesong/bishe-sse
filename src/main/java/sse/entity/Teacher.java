@@ -6,6 +6,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -22,7 +23,7 @@ public class Teacher extends User {
     private static final long serialVersionUID = 400018318739519613L;
 
     // bi-directional many-to-one association to User
-    @OneToMany(mappedBy = "teacher", cascade = { CascadeType.REFRESH })
+    @OneToMany(mappedBy = "teacher", cascade = { CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.MERGE })
     private List<Student> students;
 
     @Column(length = 45)
@@ -38,6 +39,13 @@ public class Teacher extends User {
 
     @Column(length = 1000, name = "CANDIDATE_TOPICS")
     private String candidateTopics;
+
+
+    public void addStudent(Student s)
+    {
+        s.setTeacher(this);
+        this.students.add(s);
+    }
 
     public String getCandidateTopics() {
         return candidateTopics;

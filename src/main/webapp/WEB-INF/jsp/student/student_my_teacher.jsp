@@ -76,47 +76,55 @@
 </head>
 <body>
 	<div class="section group">
-		<div class="col span_1_of_8" style="color: #0099FF;">教师基本信息</div>
-		<div class="col span_7_of_8">
-			<div>
-				<table width="98%" border="0" cellpadding="2" class="tableForm"
-					cellspacing="1" bgcolor="#D1DDAA" align="center"
-					style="margin-top: 8px">
-					<tr bgcolor="#FAFAF1">
-						<td width="15%">姓名:</td>
-						<td id="name" width="35%"></td>
-						<td width="15%">职称:</td>
-						<td id="title" width="35%"></td>
-					</tr>
-					<tr bgcolor="#FAFAF1">
-						<td width="15%">邮箱:</td>
-						<td id="email" width="35%"></td>
-						<td width="15%">电话:</td>
-						<td id="phone" width="35%"></td>
-					</tr>
-					<tr bgcolor="#FAFAF1">
-						<td width="15%">学历:</td>
-						<td id="degree" width="35%"></td>
-						<td width="15%">计划指导人数:</td>
-						<td id="capacity" width="35%"></td>
-					</tr>
-					<tr bgcolor="#FAFAF1">
-						<td width="15%">方向:</td>
-						<td id="direction" width="35%"></td>
-						<td width="15%">备选题目:</td>
-						<td id="candidateTopics" width="35%"></td>
-					</tr>
-				</table>
-			</div>
+		<div class="col span_8_of_8">
+			<fieldset>
+				<legend>教师详细信息</legend>
+				<div>
+					<table width="98%" border="0" cellpadding="2" class="tableForm"
+						cellspacing="1" bgcolor="#D1DDAA" align="center"
+						style="margin-top: 8px">
+						<tr bgcolor="#FAFAF1">
+							<td width="15%">姓名:</td>
+							<td id="name" width="35%"></td>
+							<td width="15%">职称:</td>
+							<td id="title" width="35%"></td>
+						</tr>
+						<tr bgcolor="#FAFAF1">
+							<td width="15%">邮箱:</td>
+							<td id="email" width="35%"></td>
+							<td width="15%">电话:</td>
+							<td id="phone" width="35%"></td>
+						</tr>
+						<tr bgcolor="#FAFAF1">
+							<td width="15%">学历:</td>
+							<td id="degree" width="35%"></td>
+							<td width="15%">计划指导人数:</td>
+							<td id="capacity" width="35%"></td>
+						</tr>
+						<tr bgcolor="#FAFAF1">
+							<td width="15%">方向:</td>
+							<td id="direction" width="35%"></td>
+							<td width="15%">备选题目:</td>
+							<td id="candidateTopics" width="35%"></td>
+						</tr>
+					</table>
+				</div>
+			</fieldset>
 		</div>
 	</div>
 	<div class="section group">
-		<div class="col span_1_of_8" style="color: #0099FF;">教师动态</div>
-		<div class="col span_7_of_8">
-			<div>
-				<div id="teacher_actions_datagrid"></div>
+		<fieldset>
+			<legend>教师动态</legend>
+			<div class="col span_8_of_8">
+				<div>
+					<div id="teacher_actions_datagrid"></div>
+				</div>
 			</div>
-		</div>
+		</fieldset>
 	</div>
+	<script>
+    $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
+    $("legend").css("color", "#0099FF").attr("align", "left");
+  </script>
 
 </body>

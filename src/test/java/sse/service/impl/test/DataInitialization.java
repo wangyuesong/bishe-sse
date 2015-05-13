@@ -101,6 +101,7 @@ import sse.entity.Document;
 import sse.entity.DocumentComment;
 import sse.entity.Menu;
 import sse.entity.Student;
+import sse.entity.SystemMessage;
 import sse.entity.Teacher;
 import sse.entity.TimeNode;
 import sse.entity.Topic;
@@ -113,6 +114,7 @@ import sse.enums.MatchTypeEnum;
 import sse.enums.TimeNodeEnum;
 import sse.enums.TopicStatusEnum;
 import sse.enums.TopicTypeEnum;
+import sse.pageModel.SystemMessageListModel;
 
 public class DataInitialization extends BaseJPATest {
 
@@ -250,9 +252,9 @@ public class DataInitialization extends BaseJPATest {
         menus = new ArrayList<Menu>();
         em.persist(new Menu(16, "公告与日程", null, "Administrator", ""));
         menus.add(new Menu(17, "公告管理", menufbn("公告与日程"), "Administrator",
-                "http://localhost:8080/sse/dispatch/administrator/admin_list_will"));
+                "http://localhost:8080/sse/dispatch/administrator/admin_list_messages"));
         menus.add(new Menu(18, "日程节点", menufbn("公告与日程"), "Administrator",
-                "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
+                "http://localhost:8080/sse/dispatch/administrator/admin_set_timenode"));
         for (Menu m : menus)
         {
             em.persist(m);
@@ -263,11 +265,12 @@ public class DataInitialization extends BaseJPATest {
                 "http://localhost:8080/sse/dispatch/teacher/teacher_select_student"));
         menus.add(new Menu(21, "我的学生", menufbn("学生"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_my_students"));
+        menus.add(new Menu(22, "公告", null, "Teacher",
+                "http://localhost:8080/sse/dispatch/teacher/teacher_publish_group_message"));
         for (Menu m : menus)
         {
             em.persist(m);
         }
-
         // Document and comments
         Document d = new Document(1, "王岳松的开题报告", "测试文字", DocumentTypeEnum.开题报告, yuesongWang, yuesongWang);
         em.persist(d);
@@ -281,11 +284,20 @@ public class DataInitialization extends BaseJPATest {
 
         // Time nodes
         List<TimeNode> timeNodes = new ArrayList<TimeNode>();
-        timeNodes.add(new TimeNode(1, TimeNodeEnum.getType("填报志愿"), new Date(), "志愿填报时间"));
-        timeNodes.add(new TimeNode(2, TimeNodeEnum.getType("课题申报"), addTime(new Date(), 1), "课题申报时间"));
-        timeNodes.add(new TimeNode(3, TimeNodeEnum.getType("毕设进行"), addTime(new Date(), 2), "毕设进行时间"));
-        timeNodes.add(new TimeNode(3, TimeNodeEnum.getType("答辩申请"), addTime(new Date(), 3), "答辩申请时间"));
+        timeNodes.add(new TimeNode(1, TimeNodeEnum.getType("填报志愿"), "tianbaozhiyuan", new Date(), "志愿填报时间"));
+        timeNodes.add(new TimeNode(2, TimeNodeEnum.getType("课题申报"), "ketishenbao", addTime(new Date(), 1), "课题申报时间"));
+        timeNodes.add(new TimeNode(3, TimeNodeEnum.getType("毕设进行"), "bishejinxing", addTime(new Date(), 2), "毕设进行时间"));
+        timeNodes
+                .add(new TimeNode(3, TimeNodeEnum.getType("答辩申请"), "dabianshenqing", addTime(new Date(), 3), "答辩申请时间"));
         for (TimeNode m : timeNodes)
+        {
+            em.persist(m);
+        }
+
+        // Time nodes
+        List<SystemMessage> systemMessages = new ArrayList<SystemMessage>();
+        systemMessages.add(new SystemMessage(1, "测试公告", "测试公告测试公告测试公告测试公告测试公告"));
+        for (SystemMessage m : systemMessages)
         {
             em.persist(m);
         }
