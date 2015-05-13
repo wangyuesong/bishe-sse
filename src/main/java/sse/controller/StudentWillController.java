@@ -20,7 +20,7 @@ import sse.entity.User;
 import sse.pageModel.ActionEventModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherListModel;
-import sse.service.impl.StudentDocumentServiceImpl;
+import sse.service.impl.DocumentSerivceImpl;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.StudentWillServiceImpl.TeacherDetail;
 import sse.utils.PaginationAndSortModel;
@@ -34,7 +34,7 @@ public class StudentWillController {
     private StudentWillServiceImpl studentWillService;
 
     @Autowired
-    private StudentDocumentServiceImpl sutdentDocumentService;
+    private DocumentSerivceImpl sutdentDocumentService;
 
     @ResponseBody
     @RequestMapping(value = "/getTeachersInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })

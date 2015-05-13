@@ -76,10 +76,16 @@
       }
     });
 
+    var form_data = {
+      'creatorId' : '${sessionScope.USER.id}',
+      'ownerId' : '${sessionScope.USER.id}',
+      'documentType' : '开题报告'
+    };
     $("#file_upload_2").uploadify({
       'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
       'buttonText' : '浏览',
-      'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+      'formData' : form_data,
+      'uploader' : '${pageContext.request.contextPath}/student/document/uploadTempAttachments',
       'removeCompleted' : true,
       'fileSizeLimit' : '3MB',
       'fileTypeExts' : '*.doc; *.pdf; *.docx;',

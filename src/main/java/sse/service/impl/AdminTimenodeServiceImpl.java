@@ -2,19 +2,30 @@ package sse.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import sse.commandmodel.DocumentFormModel;
+import sse.commandmodel.SystemMessageFormModel;
 import sse.commandmodel.TimeNodeFormModel;
+import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.SystemMessageDaoImpl;
 import sse.dao.impl.TimeNodeDaoImpl;
+import sse.entity.Attachment;
+import sse.entity.Document;
 import sse.entity.SystemMessage;
 import sse.entity.TimeNode;
+import sse.entity.User;
+import sse.enums.AttachmentStatusEnum;
+import sse.enums.DocumentTypeEnum;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.SystemMessageListModel;
+import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.utils.PaginationAndSortModel;
 
 /**
@@ -32,6 +43,9 @@ public class AdminTimenodeServiceImpl {
 
     @Autowired
     private TimeNodeDaoImpl timeNodeDaoImpl;
+
+    @Autowired
+    private AttachmentDaoImpl attachmentDaoImpl;
 
     @Autowired
     private SystemMessageDaoImpl systemMessageDaoImpl;
@@ -79,5 +93,47 @@ public class AdminTimenodeServiceImpl {
                     .getCreateTime())));
         int count = systemMessageDaoImpl.findForCount("select s from SystemMessage s", null);
         return new GenericDataGrid<SystemMessageListModel>(count, messageModels);
+    }
+
+    /**
+     * Description: TODO
+     * 
+     * @return
+     *         List<SimpleAttachmentInfo>
+     */
+    public List<SimpleAttachmentInfo> getTempAttachmentsOfAdmin() {
+        // TODO Auto-generated method stub
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("role", "Administrator");
+        params.put("status", AttachmentStatusEnum.TEMP);
+        List<Attachment> attachments = attachmentDaoImpl
+                .findForPaging("select a from Attachment a where a.creator.role=:role and a.status=:status", params);
+        List<SimpleAttachmentInfo> attachmentInfos = new ArrayList<DocumentSerivceImpl.SimpleAttachmentInfo>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (Attachment a : attachments)
+            attachmentInfos.add(new SimpleAttachmentInfo(a.getId(), a.getListName(), sdf.format(a.getCreateTime()),
+                    "管理员"));
+        return attachmentInfos;
+    }
+
+    public void confirmCreateDocumentAndAddSystemMessageToDB(SystemMessageFormModel formModel) {
+        SystemMessage message = new SystemMessage();
+        message.setContent(formModel.getContent());
+        message.setTitle(formModel.getTitle());
+        // Firstly find all the temp attachment belongs to this user
+        systemMessageDaoImpl.persistWithTransaction(message);
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("role", "Administrator");
+        params.put("status", AttachmentStatusEnum.TEMP);
+        List<Attachment> tempAttachmentList = attachmentDaoImpl
+                .findForPaging("select a from Attachment a where a.creator.role=:role and a.status=:status");
+        if (tempAttachmentList != null)
+            for (Attachment attachment : tempAttachmentList)
+            {
+                // Change the status of attachment to FOREVER
+                attachment.setStatus(AttachmentStatusEnum.FOREVER);
+                message.addAttachment(attachment);
+            }
+        systemMessageDaoImpl.persistWithTransaction(message);
     }
 }

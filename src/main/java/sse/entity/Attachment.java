@@ -45,7 +45,7 @@ public class Attachment extends BaseModel implements Serializable {
 
     @ManyToOne()
     @JoinColumn(name = "SYSTEM_MESSAGE")
-    private SystemMessage groupMessage;
+    private SystemMessage systemMessage;
 
     @ManyToOne
     @JoinColumn(nullable = false, name = "CREATOR")
@@ -55,12 +55,12 @@ public class Attachment extends BaseModel implements Serializable {
     @Column(length = 10, nullable = false)
     private AttachmentStatusEnum status;
 
-    public SystemMessage getGroupMessage() {
-        return groupMessage;
+    public SystemMessage getSystemMessage() {
+        return systemMessage;
     }
 
-    public void setGroupMessage(SystemMessage groupMessage) {
-        this.groupMessage = groupMessage;
+    public void setSystemMessage(SystemMessage groupMessage) {
+        this.systemMessage = groupMessage;
     }
 
     public AttachmentStatusEnum getStatus() {

@@ -19,9 +19,9 @@ import sse.pageModel.CandidateStudentListModel;
 import sse.pageModel.DocumentCommentListModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.StudentListModel;
-import sse.service.impl.StudentDocumentServiceImpl;
-import sse.service.impl.StudentDocumentServiceImpl.DocumentInfo;
-import sse.service.impl.StudentDocumentServiceImpl.SimpleAttachmentInfo;
+import sse.service.impl.DocumentSerivceImpl;
+import sse.service.impl.DocumentSerivceImpl.DocumentInfo;
+import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.service.impl.TeacherStudentServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl.StudentDetail;
 import sse.utils.PaginationAndSortModel;
@@ -36,7 +36,7 @@ public class TeacherStudentController {
     private TeacherStudentServiceImpl teacherStudentServiceImpl;
 
     @Autowired
-    private StudentDocumentServiceImpl studentDocumentServiceImpl;
+    private DocumentSerivceImpl studentDocumentServiceImpl;
 
     @ResponseBody
     @RequestMapping(value = "/getMyStudentsInDatagrid")
@@ -89,7 +89,7 @@ public class TeacherStudentController {
     @RequestMapping(value = "/getAllForeverAttachments")
     public List<SimpleAttachmentInfo> getAllForeverAttachments(String type, int studentId, HttpServletRequest request,
             HttpServletResponse response) {
-        return studentDocumentServiceImpl.getAttachmentsOfAUserByTypeAndAttachmentStatus(studentId,
+        return studentDocumentServiceImpl.getAttachmentsOfStudentByUserIdDocumentTypeAndAttachmentStatus(studentId,
                 // Get方法传中文乱码，暂时用拼音
                 DocumentTypeEnum.getTypeByPinYin(type), AttachmentStatusEnum.FOREVER);
     }

@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" isELIgnored="false"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <jsp:include page="/inc.jsp"></jsp:include>
@@ -31,10 +30,14 @@
 <body>
 	<script>
     //通用刷新附件列表函数，根据prefix来确定更新哪个template中的附件列表
-    function show_up_files(prefix) {
+    function show_up_files(studentId, type, prefix) {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/getAllForeverAttachments?type=" + prefix,
-        type : "get",
+        url : "${pageContext.request.contextPath}/document/getAllForeverAttachmentsByUserIdAndDocumentType",
+        data : {
+          'type' : type,
+          'userId' : studentId
+        },
+        type : "post",
         success : function(data, textStatus) {
           $("#" + prefix + "_attachment_list_grid").datagrid('reload');
         }
@@ -43,11 +46,14 @@
     //通用删除某附件函数，根据prefix来确定删除后更新哪个template中的附件列表
     function delete_one_attachment(prefix, id) {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId="
-            + id,
-        type : "get",
+        url : "${pageContext.request.contextPath}/document/deleteOneAttachmentByAttachmentId?attachmentId=" + id,
+        type : "post",
         success : function(data, textStatus) {
-          $("#attachment_list_grid").datagrid('reload');
+          $.messager.show({
+            title : '提示',
+            msg : data.msg
+          });
+          $("#" + prefix + "_attachment_list_grid").datagrid('reload');
         },
         error : function() {
           $.messager.alert("错误", "删除失败，请联系管理员");
@@ -72,7 +78,7 @@
           iconCls : 'icon-add',
           handler : function() {
             $.ajax({
-              url : "${pageContext.request.contextPath}/student/document/makeComment",
+              url : "${pageContext.request.contextPath}/document/makeComment",
               type : "post",
               data : {
                 studentId : studentId,
@@ -210,7 +216,7 @@
       //如果文档存在，尝试加载评论
       if (exists)
         $feedback_datagrid.datagrid({
-          url : '${pageContext.request.contextPath}/student/document/getDocumentComments',
+          url : '${pageContext.request.contextPath}/document/getDocumentCommentsByStudentIdAndDocumentType',
           queryParams : {
             "type" : type,
             "studentId" : studentId
@@ -257,7 +263,7 @@
       $file_upload.uploadify({
         'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
         'buttonText' : '浏览',
-        'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+        'uploader' : '${pageContext.request.contextPath}/document/uploadForeverAttachments',
         'formData' : form_data,
         'removeCompleted' : true,
         'fileSizeLimit' : '3MB',
@@ -267,7 +273,7 @@
         'multi' : true,
         'simUploadLimit' : 2,
         'onQueueComplete' : function(event, data) {
-          show_up_files(query_prefix);
+          show_up_files(studentId, type, query_prefix);
         },
         'onFallback' : function() {
           $.messager.alert("提示", "检测到您的浏览器不支持Flash，请安装Flash插件");
@@ -314,9 +320,9 @@
                   width : 100,
                   formatter : function(value, rowData, index) {
                     var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
-                        + 'data-options="plain:true" onclick="delete_one_attachment("' + query_prefix + '",'
+                        + 'data-options="plain:true" onclick="delete_one_attachment(\'' + query_prefix + '\','
                         + rowData.id + ')">删除</a>';
-                    var download = '<a href="${pageContext.request.contextPath}/student/document/downloadAttachment?attachmentId='
+                    var download = '<a href="${pageContext.request.contextPath}/document/downloadAttachmentByAttachmentId?attachmentId='
                         + rowData.id + '">下载</a>';
                     remove += " " + download;
                     return remove;

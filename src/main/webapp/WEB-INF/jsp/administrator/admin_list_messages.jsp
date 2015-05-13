@@ -82,22 +82,22 @@
       onClose : function() {
         $(this).dialog('destroy');
       },
-      width : $(document.body).width() * 0.5,
-      height : $(document.body).height() > 400 ? $(document.body).height() : 400,
+      width : $(document.body).width() > 400 ? $(document.body).width() * 0.7 : 400,
+      height : $(document.body).height() > 500 ? $(document.body).height() : 500,
       collapsible : true,
       resizable : true,
       modal : true,
-      title : '回复',
+      title : '发布',
       buttons : [ {
-        text : '回复',
+        text : '发布',
         iconCls : 'icon-add',
         handler : function() {
           $.ajax({
-            url : "${pageContext.request.contextPath}/admin/timenodemessage/createSystemMessage",
+            url : "${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage",
             type : "post",
             success : function(data, textStatus) {
               $(".temp_dialog").dialog('destroy');
-              $('#feedback-datagrid').datagrid("reload");
+              $('#messages_datagrid').datagrid("reload");
               $.messager.show({
                 title : '提示',
                 msg : data.msg

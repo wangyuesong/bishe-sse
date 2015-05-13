@@ -130,7 +130,6 @@ public class StudentWillServiceImpl {
         for (ActionEvent e : actionEvents)
         {
             ActionEventModel aem = new ActionEventModel(e.getId(), e.getActor().getName(), DateTimeUtil.formatToMin(e
-                    .getActor()
                     .getCreateTime()), e.getDescription());
             actionEventModels.add(aem);
         }

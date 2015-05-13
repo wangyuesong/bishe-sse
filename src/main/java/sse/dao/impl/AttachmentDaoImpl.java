@@ -27,7 +27,7 @@ public class AttachmentDaoImpl extends GenericDao<Integer, Attachment>
      * @return
      * List<Attachment>
      */
-    public List<Attachment> findForeverAttachmentsByUserIdAndDocumentType(int userId, DocumentTypeEnum type,
+    public List<Attachment> findAttachmentsByUserIdDocumentTypeAndStatus(int userId, DocumentTypeEnum type,
             AttachmentStatusEnum status)
     {
         String queryStr = "select a from Attachment a where a.status = :status and a.creator.id = :creator and a.document.documentType=:documentType";
@@ -39,5 +39,6 @@ public class AttachmentDaoImpl extends GenericDao<Integer, Attachment>
                 .getResultList();
         return attachments;
     }
+    
 
 }

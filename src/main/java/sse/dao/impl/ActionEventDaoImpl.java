@@ -1,18 +1,18 @@
 package sse.dao.impl;
 
-import java.util.HashMap;
-import java.util.List;
-
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
 import sse.dao.base.GenericDao;
 import sse.entity.ActionEvent;
-import sse.entity.Teacher;
+import sse.entity.User;
 
 @Repository
 public class ActionEventDaoImpl extends GenericDao<Integer, ActionEvent>
 {
 
-    
+    public void createActionEvent(User actor, User listener, String description)
+    {
+        ActionEvent event = new ActionEvent(actor, listener, description);
+        this.persistWithTransaction(event);
+    }
 }

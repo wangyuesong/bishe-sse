@@ -56,12 +56,17 @@ import sse.pageModel.TopicModel;
 import sse.utils.FtpTool;
 
 /**
- * @author yuesongwang
- *
+ * @Project: sse
+ * @Title: DocumentSerivceImpl.java
+ * @Package sse.service.impl
+ * @Description: TODO
+ * @author YuesongWang
+ * @date 2015年5月13日 下午1:31:53
+ * @version V1.0
  */
 @Service
-public class StudentDocumentServiceImpl {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentDocumentServiceImpl.class);
+public class DocumentSerivceImpl {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DocumentSerivceImpl.class);
 
     @Autowired
     private DocumentDaoImpl documentDaoImpl;
@@ -81,7 +86,7 @@ public class StudentDocumentServiceImpl {
     @Autowired
     private TopicDaoImpl topicDaoImpl;
 
-    public StudentDocumentServiceImpl() {
+    public DocumentSerivceImpl() {
         // TODO Auto-generated constructor stub
     }
 
@@ -89,7 +94,7 @@ public class StudentDocumentServiceImpl {
     private WillDaoImpl willDaoImpl;
 
     /**
-     * Description: 根据userId 和 Document type和附件的状态(Temp, Forever)找到一个用户的所有附件
+     * Description: 根据userId 和 Document type和附件的状态(Temp, Forever)找到一个学生的所有附件，包括教师为其上传的
      * 
      * @param userId
      * @param type
@@ -97,26 +102,28 @@ public class StudentDocumentServiceImpl {
      * @return
      *         List<SimpleAttachmentInfo>
      */
-    public List<SimpleAttachmentInfo> getAttachmentsOfAUserByTypeAndAttachmentStatus(int userId, DocumentTypeEnum type,
+    public List<SimpleAttachmentInfo> getAttachmentsOfStudentByUserIdDocumentTypeAndAttachmentStatus(int userId,
+            DocumentTypeEnum type,
             AttachmentStatusEnum status)
     {
         List<SimpleAttachmentInfo> infoList = new LinkedList<SimpleAttachmentInfo>();
-        List<Attachment> attachments = attachmentDaoImpl.findForeverAttachmentsByUserIdAndDocumentType(userId, type,
-                status);
-        if (org.springframework.util.CollectionUtils.isEmpty(attachments))
-            return infoList;
-        else
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("status", status);
+        params.put("documentCreatorId", userId);
+        params.put("documentType", type);
+        List<Attachment> attachments = attachmentDaoImpl
+                .findForPaging(
+                        "select a from Attachment a where a.status = :status and a.document.creator.id = :documentCreatorId and a.document.documentType=:documentType",
+                        params);
+        for (Attachment a : attachments)
         {
-            for (Attachment a : attachments)
-            {
-                SimpleAttachmentInfo sai = new SimpleAttachmentInfo();
-                DateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
-                sai.setId(a.getId());
-                sai.setListName(a.getListName());
-                sai.setUploadTime(dateFormat.format(a.getCreateTime()));
-                sai.setCreatorName(a.getCreator().getName());
-                infoList.add(sai);
-            }
+            SimpleAttachmentInfo sai = new SimpleAttachmentInfo();
+            DateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
+            sai.setId(a.getId());
+            sai.setListName(a.getListName());
+            sai.setUploadTime(dateFormat.format(a.getCreateTime()));
+            sai.setCreatorName(a.getCreator().getName());
+            infoList.add(sai);
         }
         return infoList;
     }
@@ -254,16 +261,14 @@ public class StudentDocumentServiceImpl {
         attachmentDaoImpl.persistWithTransaction(a);
     }
 
-    public boolean deleteAttachmentOnFTPServerAndDBByAttachmentId(User user, int attachmentId) throws SocketException,
+    public boolean deleteAttachmentOnFTPServerAndDBByAttachmentId(int attachmentId) throws SocketException,
             IOException
     {
         Attachment attachment = attachmentDaoImpl.findById(attachmentId);
-        String realName = attachment.getRealName();
-
         // Delete file on ftp server
         FtpTool ftpTool = new FtpTool();
-        String baseDir = "/Users/sseftp/" + user.getAccount() + user.getName() + "/";
-        boolean result = ftpTool.deleteFile(baseDir + realName);
+        String url = attachment.getUrl();
+        boolean result = ftpTool.deleteFile(url);
         if (!result)
             return result;
         // Delete Attachment entry in db
@@ -279,33 +284,30 @@ public class StudentDocumentServiceImpl {
      * @return void
      * @throws
      */
-    public void confirmCreateDocumentAndAddDocumentToDB(User u, DocumentFormModel documentModel) {
-        if (u != null)
-        {
-            // Create document
-            Document document = new Document();
-            document.setCreator(u);
-            document.setDocumenttype(DocumentTypeEnum.getType(documentModel.getDocument_type()));
-            document.setName(documentModel.getDocument_name());
-            document.setContent(documentModel.getDocument_description());
-            document.setLastModifiedBy(u);
-            // Firstly find all the temp attachment belongs to this user
-            documentDaoImpl.persistWithTransaction(document);
-            List<Attachment> tempAttachmentList = attachmentDaoImpl.findForeverAttachmentsByUserIdAndDocumentType(
-                    u.getId(),
-                    DocumentTypeEnum.getType(documentModel.getDocument_type()), AttachmentStatusEnum.TEMP);
-            if (tempAttachmentList != null)
-                for (Attachment attachment : tempAttachmentList)
-                {
-                    // Change the status of attachment to FOREVER
-                    attachment.setStatus(AttachmentStatusEnum.FOREVER);
-                    attachment.setDocument(document);
-                    if (org.springframework.util.CollectionUtils.isEmpty(document.getDocumentAttachments()))
-                        document.setDocumentAttachments(new LinkedList<Attachment>());
-                    attachmentDaoImpl.mergeWithTransaction(attachment);
-                }
-            studentDaoImpl.refresh(studentDaoImpl.findById(u.getId()));
-        }
+    public void confirmCreateDocumentAndAddDocumentToDB(int userId, DocumentFormModel documentModel) {
+        // Create document
+        Document document = new Document();
+        document.setCreator(userDaoImpl.findById(userId));
+        document.setDocumenttype(DocumentTypeEnum.getType(documentModel.getDocument_type()));
+        document.setName(documentModel.getDocument_name());
+        document.setContent(documentModel.getDocument_description());
+        document.setLastModifiedBy(userDaoImpl.findById(userId));
+        // Firstly find all the temp attachment belongs to this user
+        documentDaoImpl.persistWithTransaction(document);
+        List<Attachment> tempAttachmentList = attachmentDaoImpl.findAttachmentsByUserIdDocumentTypeAndStatus(
+                userId,
+                DocumentTypeEnum.getType(documentModel.getDocument_type()), AttachmentStatusEnum.TEMP);
+        if (tempAttachmentList != null)
+            for (Attachment attachment : tempAttachmentList)
+            {
+                // Change the status of attachment to FOREVER
+                attachment.setStatus(AttachmentStatusEnum.FOREVER);
+                attachment.setDocument(document);
+                if (org.springframework.util.CollectionUtils.isEmpty(document.getDocumentAttachments()))
+                    document.setDocumentAttachments(new LinkedList<Attachment>());
+                attachmentDaoImpl.mergeWithTransaction(attachment);
+            }
+        studentDaoImpl.refresh(studentDaoImpl.findById(userId));
     }
 
     /**
@@ -352,9 +354,9 @@ public class StudentDocumentServiceImpl {
      * @return void
      * @throws
      */
-    public void cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(User user, DocumentTypeEnum type)
+    public void cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(int creatorId, DocumentTypeEnum type)
             throws IOException {
-        List<Attachment> attachments = attachmentDaoImpl.findForeverAttachmentsByUserIdAndDocumentType(user.getId(),
+        List<Attachment> attachments = attachmentDaoImpl.findAttachmentsByUserIdDocumentTypeAndStatus(creatorId,
                 type,
                 AttachmentStatusEnum.TEMP);
         // Delete file on ftp server
@@ -399,67 +401,6 @@ public class StudentDocumentServiceImpl {
         return prefix;
     }
 
-    public static class AttachmentInfo
-    {
-
-        public AttachmentInfo(User creator, String realName, String listName, String size,
-                String url) {
-            super();
-            this.creator = creator;
-            this.realName = realName;
-            this.listName = listName;
-            this.size = size;
-            this.url = url;
-        }
-
-        private User creator;
-        private String realName;
-        private String listName;
-        private String size;
-        private String url;
-
-        public User getCreator() {
-            return creator;
-        }
-
-        public void setCreator(User creator) {
-            this.creator = creator;
-        }
-
-        public String getSize() {
-            return size;
-        }
-
-        public String getRealName() {
-            return realName;
-        }
-
-        public void setRealName(String realName) {
-            this.realName = realName;
-        }
-
-        public String getListName() {
-            return listName;
-        }
-
-        public void setListName(String listName) {
-            this.listName = listName;
-        }
-
-        public void setSize(String size) {
-            this.size = size;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-    }
-
     /**
      * @Method: getDocumentInfoByStudentIdAndDocumentType
      * @Description: 检查该学生是否已经创建了这样的文档,是的话返回该文档的相关信息用于页面显示，否的话返回空
@@ -475,7 +416,8 @@ public class StudentDocumentServiceImpl {
         {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             if (StringUtils.equals(d.getDocumenttype().getValue(), type))
-                return new DocumentInfo(d.getContent(), sdf.format(d.getCreateTime()), sdf.format(d.getUpdateTime()));
+                return new DocumentInfo(d.getName(), d.getContent(), sdf.format(d.getCreateTime()), sdf.format(d
+                        .getUpdateTime()));
         }
         return null;
     }
@@ -564,47 +506,19 @@ public class StudentDocumentServiceImpl {
             return d.getId();
     }
 
-    /**
-     * Description: 根据学生id查到其topic，若无则返回null
-     * 
-     * @param studentId
-     * @return
-     *         TopicModel
-     */
-    public TopicModel getTopicByStudentId(int studentId)
-    {
-        Topic t = studentDaoImpl.findById(studentId).getTopic();
-        if (t == null)
-            return null;
-        TopicModel tm = new TopicModel(t.getId(), t.getDescription(), t.getMainName(), t.getSubName(), t.getOutsider(),
-                t.getPassStatus().getValue(), t.getTeacherComment(), t.getTopicType().getValue());
-        return tm;
-    }
-
-    public void saveTopic(TopicModel tm, int studentId)
-    {
-        Topic t = studentDaoImpl.findById(studentId).getTopic();
-        if (t == null)
-            t = new Topic();
-        t.setMainName(tm.getMainName());
-        t.setSubName(tm.getSubName());
-        t.setDescription(tm.getDescription());
-        t.setOutsider(tm.getOutsider());
-        t.setTopicType(TopicTypeEnum.getType(tm.getTopicType()));
-        topicDaoImpl.mergeWithTransaction(t);
-    }
-
     public static class DocumentInfo
     {
+        String name;
         String content;
         String create_time;
         String update_time;
 
-        public DocumentInfo(String content, String create_time, String update_time) {
-            super();
-            this.content = content;
-            this.create_time = create_time;
-            this.update_time = update_time;
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public String getContent() {
@@ -628,6 +542,14 @@ public class StudentDocumentServiceImpl {
         }
 
         public void setUpdate_time(String update_time) {
+            this.update_time = update_time;
+        }
+
+        public DocumentInfo(String name, String content, String create_time, String update_time) {
+            super();
+            this.name = name;
+            this.content = content;
+            this.create_time = create_time;
             this.update_time = update_time;
         }
 
@@ -682,6 +604,67 @@ public class StudentDocumentServiceImpl {
 
         public void setListName(String listName) {
             this.listName = listName;
+        }
+
+    }
+
+    public static class AttachmentInfo
+    {
+
+        public AttachmentInfo(User creator, String realName, String listName, String size,
+                String url) {
+            super();
+            this.creator = creator;
+            this.realName = realName;
+            this.listName = listName;
+            this.size = size;
+            this.url = url;
+        }
+
+        private User creator;
+        private String realName;
+        private String listName;
+        private String size;
+        private String url;
+
+        public User getCreator() {
+            return creator;
+        }
+
+        public void setCreator(User creator) {
+            this.creator = creator;
+        }
+
+        public String getSize() {
+            return size;
+        }
+
+        public String getRealName() {
+            return realName;
+        }
+
+        public void setRealName(String realName) {
+            this.realName = realName;
+        }
+
+        public String getListName() {
+            return listName;
+        }
+
+        public void setListName(String listName) {
+            this.listName = listName;
+        }
+
+        public void setSize(String size) {
+            this.size = size;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
         }
 
     }

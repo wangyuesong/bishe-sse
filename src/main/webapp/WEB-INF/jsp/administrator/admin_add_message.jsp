@@ -5,12 +5,17 @@
 	href="${pageContext.request.contextPath}/resources/style/jquery.wysiwyg.css">
 <script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/js/jquery.wysiwyg.js"></script>
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/col.css"
+	rel="stylesheet">
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/8cols.css"
+	rel="stylesheet">
+<link
+	href="${pageContext.request.contextPath}/resources/style/uploadify.css"
+	rel="stylesheet" type="text/css" />
 <script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/js/wysiwyg.image.js"></script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/js/wysiwyg.link.js"></script>
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/js/wysiwyg.table.js"></script>
+	src="${pageContext.request.contextPath}/resources/js/jquery.uploadify.js"></script>
 <script type="text/javascript">
   $(function() {
     //初始化编辑器
@@ -18,12 +23,11 @@
     //初始化Attachment的列表
     $('#attachment_list_grid').datagrid(
         {
-          url : '${pageContext.request.contextPath}/student/document/getAllTempAttachments',
-          type : 'get',
+          url : '${pageContext.request.contextPath}/admin/timenodemessage/getAllTempAttachments',
+          type : "post",
           fitColumns : true,
           border : false,
           nowrap : false,
-          /* pagination : true, */
           pageSize : 10,
           frozenColumns : [ [ {
             field : 'id',
@@ -71,27 +75,27 @@
         });
 
     //确认创建这个Document后，数据库增加Document记录，Attachment变为永久
-    $("#document_add_form").form({
-      url : '${pageContext.request.contextPath}/student/document/confirmCreateDocument',
+    $("#message_add_form").form({
+      url : '${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage',
       type : "post",
       success : function(result) {
         var r = $.parseJSON(result);
-        //关闭模态框
-        $('.temp_dialog').dialog('close');
-        //重新载入List
-        $('#project_list_datagrid').datagrid('reload');
-        $.messager.show({
-          title : "成功",
-          msg : "成功"
-        });
+        /*   //关闭模态框
+          $('.temp_dialog').dialog('close');
+          //重新载入List
+          $('#project_list_datagrid').datagrid('reload');
+          $.messager.show({
+            title : "成功",
+            msg : "成功"
+          }); */
 
       }
     });
 
-    $("#file_upload_2").uploadify({
+    $("#file_upload").uploadify({
       'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
       'buttonText' : '浏览',
-      'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+      'uploader' : '${pageContext.request.contextPath}/student/document/uploadTempAttachments',
       'removeCompleted' : true,
       'fileSizeLimit' : '3MB',
       'fileTypeExts' : '*.doc; *.pdf; *.docx;',
@@ -152,38 +156,22 @@
 </script>
 <div align="center">
 	<fieldset>
-		<form id="topic_form">
+		<form id="message_add_form">
 			<div class="section group">
 				<div class="col span_1_of_8">
 					<label>标题:</label>
 				</div>
 				<div class="col span_7_of_8">
-					<input class="easyui-textbox" name="title" id="title"
-						style="width: 100%;"></input>
+					<input name="title" id="title" style="width: 100%;"></input>
 				</div>
 			</div>
-
 
 			<div class="section group">
 				<div class="col span_1_of_8">
 					<label>内容:</label>
 				</div>
 				<div class="col span_7_of_8">
-					<textarea id="content" row="5" cols="80"></textarea>
-				</div>
-			</div>
-			<div class="section group">
-				<div class="col span_1_of_8">
-					<label>状态:</label>
-				</div>
-				<div class="col span_1_of_8">
-					<label id="pass_status"></label>
-				</div>
-				<div class="col span_1_of_8">
-					<label>教师意见:</label>
-				</div>
-				<div class="col span_5_of_8">
-					<label id="teacher_comment"></label>
+					<textarea id="content" rows="5" cols="80"></textarea>
 				</div>
 			</div>
 		</form>
@@ -207,15 +195,15 @@
 							<div>
 								<input class="easyui-validatebox" type="hidden"
 									id="Attachment_GUID" name="Attachment_GUID" /> <input
-									id="file_upload_2" type="file" multiple="multiple"> <a
+									id="file_upload" type="file" multiple="multiple"> <a
 									href="javascript:void(0)" class="easyui-linkbutton"
 									id="btnUpload" data-options="plain:true,iconCls:'icon-save'"
-									onclick="javascript: $('#file_upload_2').uploadify('upload', '*')">上传</a>
+									onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
 
 								<a href="javascript:void(0)" class="easyui-linkbutton"
 									id="btnCancelUpload"
 									data-options="plain:true,iconCls:'icon-cancel'"
-									onclick="javascript: $('#file_upload_2').uploadify('cancel', '*')">取消</a>
+									onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
 								<div id="fileQueue" class="fileQueue"></div>
 								<div id="div_files"></div>
 								<br />

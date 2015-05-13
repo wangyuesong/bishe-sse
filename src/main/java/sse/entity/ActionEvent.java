@@ -61,4 +61,15 @@ public class ActionEvent extends BaseModel implements Serializable {
         this.description = description;
     }
 
+    public ActionEvent(User actor, User listener, String description) {
+        super();
+        this.actor = actor;
+        this.listener = listener;
+        this.description = description;
+    }
+
+    public ActionEvent() {
+        super();
+    }
+
 }

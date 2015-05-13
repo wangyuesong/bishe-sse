@@ -35,10 +35,11 @@
       var exits = false;
       //查看该用户是否已经创建该文档，如果没有则加载引导文档创建的界面，如果有的话则将已有文档载入
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/checkIfHasSuchDocument",
+        url : "${pageContext.request.contextPath}/document/checkIfHasSuchDocumentByUserIdAndType",
         type : "post",
         async : false,
         data : {
+          "userId" : '${sessionScope.USER.id}',
           "type" : "开题报告"
         },
         success : function(data, textStatus) {
@@ -57,7 +58,7 @@
       //如果文档存在，尝试加载评论
       if (exists)
         $('#feedback-datagrid').datagrid({
-          url : '${pageContext.request.contextPath}/student/document/getDocumentComments',
+          url : '${pageContext.request.contextPath}/document/getDocumentCommentsByStudentIdAndDocumentType',
           queryParams : {
             "type" : "开题报告",
             "studentId" : '${sessionScope.USER.id}'
@@ -107,7 +108,7 @@
       $("#file_upload").uploadify({
         'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
         'buttonText' : '浏览',
-        'uploader' : '${pageContext.request.contextPath}/student/document/uploadAttachements',
+        'uploader' : '${pageContext.request.contextPath}/document/uploadForeverAttachments',
         'formData' : form_data,
         'removeCompleted' : true,
         'fileSizeLimit' : '3MB',
@@ -131,7 +132,11 @@
       $('#attachment_list_grid')
           .datagrid(
               {
-                url : '${pageContext.request.contextPath}/student/document/getAllForeverAttachments?type=kaitibaogao',
+                url : '${pageContext.request.contextPath}/document/getAllForeverAttachmentsByUserIdAndDocumentType',
+                queryParams : {
+                  'type' : '开题报告',
+                  'userId' : '${sessionScope.USER.id}'
+                },
                 type : 'post',
                 fitColumns : true,
                 border : false,
@@ -165,7 +170,7 @@
                       formatter : function(value, rowData, index) {
                         var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
                             + 'data-options="plain:true" onclick="delete_one_attachment(' + rowData.id + ')">删除</a>';
-                        var download = '<a href="${pageContext.request.contextPath}/student/document/downloadAttachment?attachmentId='
+                        var download = '<a href="${pageContext.request.contextPath}/document/downloadAttachmentByAttachmentId?attachmentId='
                             + rowData.id + '">下载</a>';
                         remove += " " + download;
                         return remove;
@@ -191,11 +196,12 @@
 
     function submit_document_description() {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/updateDocumentDescription",
+        url : "${pageContext.request.contextPath}/document/updateDocumentDescription",
         type : "post",
         data : {
-          'document_type' : '开题报告',
-          'document_description' : $("#document_description").val()
+          'userId' : '${sessionScope.USER.id}',
+          'documentType' : '开题报告',
+          'documentDescription' : $("#document_description").val()
         },
         success : function(data, textStatus) {
           $.messager.show({
@@ -223,7 +229,7 @@
           iconCls : 'icon-add',
           handler : function() {
             $.ajax({
-              url : "${pageContext.request.contextPath}/student/document/makeComment",
+              url : "${pageContext.request.contextPath}/document/makeComment",
               type : "post",
               data : {
                 studentId : '${sessionScope.USER.id}',
@@ -251,9 +257,13 @@
         href : '${pageContext.request.contextPath}/dispatch/student/student_add_document',
         onClose : function() {
           $.ajax({
-            url : "${pageContext.request.contextPath}/student/document/cancelCreateDocument",
+            url : "${pageContext.request.contextPath}/document/cancelCreateDocument",
             type : "post",
             success : function(data, textStatus) {
+              $.messager.show({
+                title : '提示',
+                msg : data.msg
+              });
             }
           });
           $(this).dialog('destroy');
@@ -277,9 +287,10 @@
     }
     function show_up_files() {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/getAllForeverAttachments",
+        url : "${pageContext.request.contextPath}/document/getAllForeverAttachmentsByUserIdAndDocumentType",
         type : "post",
         data : {
+          'userId' : '${sessionScope.USER.id}',
           'type' : '开题报告'
         },
         success : function(data, textStatus) {
@@ -289,8 +300,7 @@
     };
     function delete_one_attachment(id) {
       $.ajax({
-        url : "${pageContext.request.contextPath}/student/document/deleteOneAttachmentByAttachmentId?attachmentId="
-            + id,
+        url : "${pageContext.request.contextPath}/document/deleteOneAttachmentByAttachmentId?attachmentId=" + id,
         type : "get",
         success : function(data, textStatus) {
           $("#attachment_list_grid").datagrid('reload');

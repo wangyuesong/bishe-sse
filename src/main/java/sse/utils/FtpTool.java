@@ -12,7 +12,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 
 import sse.exception.SSEException;
-import sse.service.impl.StudentDocumentServiceImpl;
+import sse.service.impl.DocumentSerivceImpl;
 
 /**
  * @Project: sse

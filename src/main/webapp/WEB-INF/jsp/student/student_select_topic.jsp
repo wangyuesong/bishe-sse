@@ -1,9 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-
-<head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
 <jsp:include page="/inc.jsp"></jsp:include>
 <link
 	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/col.css"
@@ -14,7 +11,7 @@
 <script>
   $(function() {
     $.ajax({
-      url : "${pageContext.request.contextPath}/student/document/getTopic",
+      url : "${pageContext.request.contextPath}/student/topic/getTopic",
       data : {
         "studentId" : '${sessionScope.USER.id}'
       },
@@ -31,7 +28,7 @@
     });
 
     $("#topic_form").form({
-      url : '${pageContext.request.contextPath}/student/document/saveTopic',
+      url : '${pageContext.request.contextPath}/student/topic/saveTopic',
       type : "post",
       success : function(data, textResult) {
         var jdata = $.parseJSON(data);
@@ -53,8 +50,8 @@
 			<input name="studentId" type="hidden" value="${sessionScope.USER.id}" />
 			<legend id="legend">
 				选题申请表 <a href="javascript:void(0);" class="easyui-linkbutton"
-					data-options="iconCls:'icon-save',plain:true"
-					id="updateWillButton" onclick="save_topic()">保存</a> 
+					data-options="iconCls:'icon-save',plain:true" id="updateWillButton"
+					onclick="save_topic()">保存</a>
 			</legend>
 			<div class="section group">
 				<div class="col span_1_of_8">
@@ -143,4 +140,3 @@
   $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
   $("legend").css("color", "#0099FF").attr("align", "left");
 </script>
-</body>
