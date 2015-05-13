@@ -1,27 +1,23 @@
 package sse.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.SystemMessageFormModel;
-import sse.commandmodel.TimeNodeFormModel;
-import sse.exception.SSEException;
+import sse.dao.impl.TimeNodeDaoImpl.CalendarEvent;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.SystemMessageListModel;
+import sse.pageModel.TimeNodeListModel;
 import sse.service.impl.AdminTimenodeServiceImpl;
-import sse.service.impl.DocumentSerivceImpl.AttachmentInfo;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl;
@@ -45,17 +41,10 @@ public class AdminTimeNodeAndMessageController {
     private StudentWillServiceImpl studentServiceImpl;
 
     @ResponseBody
-    @RequestMapping(value = "/updateTimeNodes")
-    public BasicJson updateTimeNodes(TimeNodeFormModel model,
-            HttpServletRequest request) {
-        adminTimenodeServiceImpl.updateTimeNodes(model);
-        return new BasicJson(true, "已更新", null);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/getCurrentTimeNodes")
-    public TimeNodeFormModel getCurrentTimeNodes(HttpServletRequest request) {
-        return adminTimenodeServiceImpl.getCurrentTimeNodes();
+    @RequestMapping(value = "/getCurrentTimeNodesInDatagrid")
+    public GenericDataGrid<TimeNodeListModel> getCurrentTimeNodesInDatagrid(HttpServletRequest request) {
+        PaginationAndSortModel pam = new PaginationAndSortModel(request);
+        return adminTimenodeServiceImpl.getCurrentTimeNodesInDatagrid(pam);
     }
 
     @ResponseBody
@@ -79,4 +68,28 @@ public class AdminTimeNodeAndMessageController {
         return new BasicJson(true, "发布成功", null);
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/deleteSystemMessage")
+    public BasicJson deleteSystemMessage(int systemMessageId, HttpServletRequest request) {
+        adminTimenodeServiceImpl.deleteSystemMessage(systemMessageId);
+        return new BasicJson(true, "删除成功", null);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/changeTimeNodes")
+    public BasicJson changeTimeNodes(@RequestBody List<TimeNodeListModel> models, HttpServletRequest request) {
+        return adminTimenodeServiceImpl.changeTimeNodes(models);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/deleteTimeNode")
+    public BasicJson deleteTimeNode(int timeNodeId, HttpServletRequest request) {
+        return adminTimenodeServiceImpl.deleteTimeNode(timeNodeId);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getTimeNodes")
+    public List<CalendarEvent> getTimeNodes(HttpServletRequest request) {
+        return adminTimenodeServiceImpl.getAllTimeNodes();
+    }
 }

@@ -48,11 +48,24 @@
                     + '</a>';
                 return reload;
               }
-            }, {
+            },
+            {
               field : 'createTime',
               title : '日期',
               width : 100
-            } ] ],
+            },
+            {
+              field : "opt",
+              title : "操作",
+              width : 100,
+              formatter : function(value, rowData, index) {
+                var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
+                    + 'data-options="plain:true" onclick="delete_one_system_message(' + rowData.id + ')">删除</a>';
+                return remove;
+              }
+            }
+
+        ] ],
         toolbar : [ '-', {
           text : '刷新',
           iconCls : 'icon-reload',
@@ -74,13 +87,29 @@
     beforePageText : "第",
     afterPageText : "页,共{pages}页"
   });
+  function delete_one_system_message(id) {
+    $.ajax({
+      url : "${pageContext.request.contextPath}/admin/timenodemessage/deleteSystemMessage",
+      data : {
+        "systemMessageId" : id
+      },
+      type : "post",
+      success : function(data, textStatus) {
+        $.messager.show({
+          title : '提示',
+          msg : data.msg
+        });
+        $('#messages_datagrid').datagrid('reload');
+      }
+    });
 
+  }
   //Modal dialog 创建回复
   function add_message() {
     $('<div class="temp_dialog"></div>').dialog({
       href : '${pageContext.request.contextPath}/dispatch/administrator/admin_add_message',
       onClose : function() {
-        $(this).dialog('destroy');
+        $(".temp_dialog").dialog('destroy');
       },
       width : $(document.body).width() > 400 ? $(document.body).width() * 0.7 : 400,
       height : $(document.body).height() > 500 ? $(document.body).height() : 500,
@@ -92,18 +121,9 @@
         text : '发布',
         iconCls : 'icon-add',
         handler : function() {
-          $.ajax({
-            url : "${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage",
-            type : "post",
-            success : function(data, textStatus) {
-              $(".temp_dialog").dialog('destroy');
-              $('#messages_datagrid').datagrid("reload");
-              $.messager.show({
-                title : '提示',
-                msg : data.msg
-              });
-            }
-          });
+          $("#message_add_form").submit();
+          $(".temp_dialog").dialog('destroy');
+          $('#messages_datagrid').datagrid('reload');
         }
       } ]
     });

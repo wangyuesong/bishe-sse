@@ -13,68 +13,214 @@
 <fieldset>
 	<legend id="legend" align="center">时间节点</legend>
 	<div>
-		<table width="98%" border="0" cellpadding="2" class="tableForm"
-			cellspacing="1" bgcolor="#D1DDAA" align="center"
-			style="margin-top: 8px">
-			<tr bgcolor="#FAFAF1">
-				<td width="15%">填报志愿:</td>
-				<td width="35%"><input type="text" value=""
-					id="tianbaozhiyuan_datetime_picker" /></td>
-				<td width="15%">描述:</td>
-				<td width="35%"><input class="easyui-textbox"
-					id="tianbaozhiyuan_desc" data-options="multiline:true"
-					style="width: 100%; height: 100px"></td>
-			</tr>
-			<tr bgcolor="#FAFAF1">
-				<td width="15%">课题申报:</td>
-				<td width="35%"><input type="text" value=""
-					id="ketishenbao_datetime_picker" /></td>
-				<td width="15%">描述:</td>
-				<td width="35%"><input class="easyui-textbox"
-					id="keitishenbao_desc" data-options="multiline:true"
-					style="width: 100%; height: 100px"></td>
-			</tr>
-
-			<tr bgcolor="#FAFAF1">
-				<td width="15%">毕设进行:</td>
-				<td width="35%"><input type="text" value=""
-					id="bishejinxing_datetime_picker" /></td>
-				<td width="15%">描述:</td>
-				<td width="35%"><input class="easyui-textbox"
-					id="bishejinxing_desc" data-options="multiline:true"
-					style="width: 100%; height: 100px"></td>
-			</tr>
-			<tr bgcolor="#FAFAF1">
-				<td width="15%">答辩申请:</td>
-				<td width="35%"><input type="text" value=""
-					id="dabianshenqing_datetime_picker" /></td>
-				<td width="15%">描述:</td>
-				<td width="35%"><input class="easyui-textbox"
-					id="dabianshenqing_desc" data-options="multiline:true"
-					style="width: 100%; height: 100px"></td>
-			</tr>
-			<tr>
-				<td width="15%"><a href="javascript:void(0);"
-					class="easyui-linkbutton"
-					data-options="iconCls:'icon-reload',plain:true"
-					id="updateWillButton" onclick="update_timenodes()">更新</a></td>
-			</tr>
-		</table>
+		<table id="time_node_datagrid"></table>
 	</div>
 </fieldset>
 <script type="text/javascript">
-  function update_timenodes() {
+  var time_node_types = [ {
+    "value" : "关键",
+    "text" : "关键"
+  }, {
+    "value" : "普通",
+    "text" : "普通"
+  } ];
+  $('#time_node_datagrid').datagrid(
+      {
+        url : '${pageContext.request.contextPath}/admin/timenodemessage/getCurrentTimeNodesInDatagrid',
+        type : 'post',
+        onClickCell : onClickCell,
+        fitColumns : true,
+        border : false,
+        nowrap : false,
+        pagination : true,
+        pageSize : 10,
+        singleSelect : true,
+        frozenColumns : [ [ {
+          field : 'id',
+          title : 'Id',
+          width : 10,
+          hidden : true
+        } ] ],
+        columns : [ [
+            {
+              field : 'name',
+              title : '节点名',
+              width : 80,
+              editor : {
+                type : "textbox"
+              }
+            },
+            {
+              field : 'time',
+              title : '时间',
+              width : 80,
+              editor : {
+                type : "datetimepicker"
+              }
+            },
+            {
+              field : 'type',
+              title : '类型',
+              width : 30,
+              editor : {
+                type : "combobox",
+                options : {
+                  data : time_node_types,
+                  valueField : "value",
+                  textField : "text"
+                }
+              }
+            },
+            {
+              field : 'description',
+              title : '描述',
+              width : 100,
+              editor : {
+                type : "textbox"
+              }
+            },
+            {
+              field : 'opt',
+              title : '操作',
+              width : 100,
+              formatter : function(value, rowData, index) {
+                var edit = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
+                    + 'data-options="plain:true" onclick="edit_access_rules(' + rowData.id + ')">更改规则</a>';
+                var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
+                    + 'data-options="plain:true" onclick="delete_time_node(' + rowData.id + ')">删除节点</a>';
+                return edit + " " + remove;
+              }
+            } ] ],
+        toolbar : [ '-', {
+          text : '保存',
+          iconCls : 'icon-save',
+          handler : accept
+        }, '-', '-', {
+          text : '增加',
+          iconCls : 'icon-add',
+          handler : append
+        }, '-', '-', {
+          text : '取消',
+          iconCls : 'icon-undo',
+          handler : reject
+        }, '-', '-', {
+          text : '查看变更',
+          iconCls : 'icon-search',
+          handler : getChanges
+        }, '-' ]
+      });
+
+  $('#time_node_datagrid').datagrid('getPager').pagination({
+    pageSize : 10,
+    pageList : [ 5, 10, 15 ],
+    beforePageText : "第",
+    afterPageText : "页,共{pages}页"
+  });
+  $.extend($.fn.datagrid.defaults.editors, {
+    datetimepicker : {
+      init : function(container, options) {
+        var input = $('<input type="text" class="datagrid-editable-input">').appendTo(container);
+        input.datetimepicker({
+          lang : 'ch',
+        });
+        return input;
+      },
+      destroy : function(target) {
+        $(target).remove();
+      },
+      getValue : function(target) {
+        return $(target).val();
+      },
+      setValue : function(target, value) {
+        $(target).val(value);
+      },
+      resize : function(target, width) {
+        $(target)._outerWidth(width);
+      }
+    }
+  });
+
+  var editIndex = undefined;
+  var grid = $('#time_node_datagrid');
+  function endEditing() {
+    if (editIndex == undefined) {
+      return true
+    }
+    if (grid.datagrid('validateRow', editIndex)) {
+      var ed = grid.datagrid('getEditor', {
+        index : editIndex,
+        field : 'teacherAccount'
+      });
+      grid.datagrid('endEdit', editIndex);
+      editIndex = undefined;
+      return true;
+    } else {
+      return false;
+    }
+  }
+  function onClickCell(index, field) {
+    if (editIndex != index) {
+      if (endEditing()) {
+        grid.datagrid('selectRow', index).datagrid('beginEdit', index);
+        var ed = grid.datagrid('getEditor', {
+          index : index,
+          field : field
+        });
+        ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+        editIndex = index;
+      } else {
+        grid.datagrid('selectRow', editIndex);
+      }
+    }
+  }
+  function append() {
+    if (endEditing()) {
+      grid.datagrid('appendRow', {});
+      editIndex = grid.datagrid('getRows').length - 1;
+      grid.datagrid('selectRow', editIndex).datagrid('beginEdit', editIndex);
+    }
+  }
+  function removeit() {
+    if (editIndex == undefined) {
+      return;
+    }
+    grid.datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+    editIndex = undefined;
+  }
+  function accept() {
+    if (endEditing()) {
+      var changed_rows = grid.datagrid('getChanges');
+      $.ajax({
+        url : "${pageContext.request.contextPath}/admin/timenodemessage/changeTimeNodes",
+        type : "post",
+        dataType : 'json',
+        contentType : 'application/json',
+        data : JSON.stringify(grid.datagrid('getChanges')),
+        success : function(data, textStatus) {
+          $.messager.show({
+            title : '提示',
+            msg : data.msg
+          });
+        }
+      });
+      grid.datagrid('acceptChanges');
+    }
+  }
+  function reject() {
+    grid.datagrid('rejectChanges');
+    editIndex = undefined;
+  }
+  function getChanges() {
+    var rows = grid.datagrid('getChanges');
+    alert(JSON.stringify(rows));
+    alert(rows.length + ' rows are changed!');
+  }
+
+  function delete_time_node(time_node_id) {
     $.ajax({
-      url : "${pageContext.request.contextPath}/admin/timenodemessage/updateTimeNodes",
+      url : "${pageContext.request.contextPath}/admin/timenodemessage/deleteTimeNode",
       data : {
-        "tianbaozhiyuan_date" : $('#tianbaozhiyuan_datetime_picker').val(),
-        "ketishenbao_date" : $('#ketishenbao_datetime_picker').val(),
-        "bishejinxing_date" : $('#bishejinxing_datetime_picker').val(),
-        "dabianshenqing_date" : $('#dabianshenqing_datetime_picker').val(),
-        "tianbaozhiyuan_desc" : $('#tianbaozhiyuan_desc').textbox("getValue"),
-        "ketishenbao_desc" : $('#keitishenbao_desc').textbox("getValue"),
-        "bishejinxing_desc" : $('#bishejinxing_desc').textbox("getValue"),
-        "dabianshenqing_desc" : $('#dabianshenqing_desc').textbox("getValue"),
+        "timeNodeId" : time_node_id
       },
       type : "post",
       success : function(data, textStatus) {
@@ -82,36 +228,51 @@
           title : '提示',
           msg : data.msg
         });
+        grid.datagrid("reload");
       }
+    });
+
+  }
+
+  function edit_access_rules(time_node_id) {
+    $('<div class="temp_dialog"></div>').dialog({
+      href : '${pageContext.request.contextPath}/dispatch/admin/admin_edit_access_rule',
+      onClose : function() {
+        $(this).dialog('destroy');
+      },
+      width : $(document.body).width() * 0.8,
+      height : $(document.body).height() * 0.8,
+      collapsible : true,
+      modal : true,
+      title : '回复',
+      buttons : [ {
+        text : '回复',
+        iconCls : 'icon-add',
+        handler : function() {
+          $.ajax({
+            url : "${pageContext.request.contextPath}/document/makeComment",
+            type : "post",
+            data : {
+              studentId : '${sessionScope.USER.id}',
+              commentorId : '${sessionScope.USER.id}',
+              type : '开题报告',
+              content : $('#document_comment_content').val()
+            },
+            success : function(data, textStatus) {
+              $(".temp_dialog").dialog('destroy');
+              $('#feedback-datagrid').datagrid("reload");
+              $.messager.show({
+                title : '提示',
+                msg : data.msg
+              });
+            }
+          });
+        }
+      } ]
     });
   }
 
-  $.ajax({
-    url : "${pageContext.request.contextPath}/admin/timenodemessage/getCurrentTimeNodes",
-    success : function(data, textStatus) {
-      $('#tianbaozhiyuan_datetime_picker').val(data.tianbaozhiyuan_date);
-      $('#ketishenbao_datetime_picker').val(data.ketishenbao_date);
-      $('#bishejinxing_datetime_picker').val(data.bishejinxing_date);
-      $('#dabianshenqing_datetime_picker').val(data.dabianshenqing_date);
-      $('#tianbaozhiyuan_desc').textbox("setValue", data.tianbaozhiyuan_desc);
-      $('#keitishenbao_desc').textbox("setValue", data.ketishenbao_desc);
-      $('#bishejinxing_desc').textbox("setValue", data.bishejinxing_desc);
-      $('#dabianshenqing_desc').textbox("settValue", dabianshenqing_desc);
-    }
-  });
-
-  $('#tianbaozhiyuan_datetime_picker').datetimepicker({
-    lang : 'ch',
-  });
-  $('#ketishenbao_datetime_picker').datetimepicker({
-    lang : 'ch',
-  });
-  $('#bishejinxing_datetime_picker').datetimepicker({
-    lang : 'ch',
-  });
-  $('#dabianshenqing_datetime_picker').datetimepicker({
-    lang : 'ch',
-  });
+  //CSS related
 
   $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
   $("legend").css("color", "#0099FF").attr("align", "left");

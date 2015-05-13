@@ -1,30 +1,30 @@
 package sse.service.impl;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import sse.commandmodel.DocumentFormModel;
+import sse.commandmodel.BasicJson;
 import sse.commandmodel.SystemMessageFormModel;
-import sse.commandmodel.TimeNodeFormModel;
 import sse.dao.impl.AttachmentDaoImpl;
 import sse.dao.impl.SystemMessageDaoImpl;
 import sse.dao.impl.TimeNodeDaoImpl;
+import sse.dao.impl.TimeNodeDaoImpl.CalendarEvent;
 import sse.entity.Attachment;
-import sse.entity.Document;
 import sse.entity.SystemMessage;
 import sse.entity.TimeNode;
-import sse.entity.User;
 import sse.enums.AttachmentStatusEnum;
-import sse.enums.DocumentTypeEnum;
+import sse.enums.TimeNodeTypeEnum;
+import sse.exception.SSEException;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.SystemMessageListModel;
+import sse.pageModel.TimeNodeListModel;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.utils.PaginationAndSortModel;
 
@@ -50,29 +50,24 @@ public class AdminTimenodeServiceImpl {
     @Autowired
     private SystemMessageDaoImpl systemMessageDaoImpl;
 
-    public void updateTimeNodes(TimeNodeFormModel model)
-    {
-        timeNodeDaoImpl.updateTimeNodes(model);
-    }
-
     /**
      * Description: 获得所有时间节点
      * 
      * @return
      *         TimeNodeFormModel
      */
-    public TimeNodeFormModel getCurrentTimeNodes() {
-        TimeNode tianbaozhiuan = timeNodeDaoImpl.findTimeNodeByName("填报志愿");
-        TimeNode ketishenbao = timeNodeDaoImpl.findTimeNodeByName("课题申报");
-        TimeNode bishejinxing = timeNodeDaoImpl.findTimeNodeByName("毕设进行");
-        TimeNode dabianshenqing = timeNodeDaoImpl.findTimeNodeByName("答辩申请");
+    public GenericDataGrid<TimeNodeListModel> getCurrentTimeNodesInDatagrid(PaginationAndSortModel pam) {
+        List<TimeNode> timeNodes = timeNodeDaoImpl.findForPaging("select t from TimeNode t", null,
+                pam.getPage(), pam.getRows(), pam.getSort(), pam.getOrder());
+        List<TimeNodeListModel> models = new ArrayList<TimeNodeListModel>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        TimeNodeFormModel model = new TimeNodeFormModel(sdf.format(tianbaozhiuan.getTime()),
-                sdf.format(ketishenbao.getTime()), sdf.format(bishejinxing.getTime()), sdf.format(dabianshenqing
-                        .getTime()),
-                tianbaozhiuan.getDescription(), ketishenbao.getDescription(), bishejinxing.getDescription(),
-                dabianshenqing.getDescription());
-        return model;
+        for (TimeNode t : timeNodes)
+        {
+            models.add(new TimeNodeListModel(t.getId(), t.getName(), t.getDescription(), sdf.format(t.getTime()), t
+                    .getType().getValue()));
+        }
+        int count = timeNodeDaoImpl.findAllForCount();
+        return new GenericDataGrid<TimeNodeListModel>(count, models);
     }
 
     /**
@@ -126,7 +121,7 @@ public class AdminTimenodeServiceImpl {
         params.put("role", "Administrator");
         params.put("status", AttachmentStatusEnum.TEMP);
         List<Attachment> tempAttachmentList = attachmentDaoImpl
-                .findForPaging("select a from Attachment a where a.creator.role=:role and a.status=:status");
+                .findForPaging("select a from Attachment a where a.creator.role=:role and a.status=:status", params);
         if (tempAttachmentList != null)
             for (Attachment attachment : tempAttachmentList)
             {
@@ -135,5 +130,66 @@ public class AdminTimenodeServiceImpl {
                 message.addAttachment(attachment);
             }
         systemMessageDaoImpl.persistWithTransaction(message);
+    }
+
+    public void deleteSystemMessage(int messageId)
+    {
+        systemMessageDaoImpl.removeWithTransaction(systemMessageDaoImpl.findById(messageId));
+    }
+
+    /**
+     * Description: 更改TimeNodes,包含新增和更新
+     * 
+     * @param models
+     *            void
+     */
+    public BasicJson changeTimeNodes(List<TimeNodeListModel> models) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        for (TimeNodeListModel model : models)
+        {
+            // 新建
+            if (model.getId() == 0)
+            {
+                TimeNode t;
+                try {
+                    t = new TimeNode(TimeNodeTypeEnum.getType(model.getType()), model.getName(), sdf.parse(model
+                            .getTime()), model.getDescription());
+                } catch (ParseException e) {
+                    throw new SSEException("时间格式不对", e);
+                }
+                timeNodeDaoImpl.persistWithTransaction(t);
+            }
+            else
+            {
+                TimeNode t = timeNodeDaoImpl.findById(model.getId());
+                t.setType(TimeNodeTypeEnum.getType(model.getType()));
+                t.setName(model.getName());
+                try {
+                    t.setTime(sdf.parse(model.getTime()));
+                } catch (ParseException e) {
+                    throw new SSEException("时间格式不对", e);
+                }
+                t.setDescription(model.getDescription());
+                timeNodeDaoImpl.mergeWithTransaction(t);
+            }
+        }
+        return new BasicJson(true, "保存成功", null);
+    }
+
+    public BasicJson deleteTimeNode(int timeNodeId)
+    {
+        timeNodeDaoImpl.removeWithTransaction(timeNodeDaoImpl.findById(timeNodeId));
+        return new BasicJson(true, "删除成功", null);
+    }
+
+    /**
+     * Description: 右侧日历获取所有时间节点
+     * 
+     * @return
+     *         List<CalendarEvent>
+     */
+    public List<CalendarEvent> getAllTimeNodes()
+    {
+        return timeNodeDaoImpl.getAllTimeNodes();
     }
 }

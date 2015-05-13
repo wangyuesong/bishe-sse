@@ -9,7 +9,6 @@ import org.springframework.util.CollectionUtils;
 import sse.commandmodel.WillModel;
 import sse.dao.base.GenericDao;
 import sse.entity.Will;
-import sse.entity.WillPK;
 import sse.enums.WillStatusEnum;
 
 /**

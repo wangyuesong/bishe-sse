@@ -1,12 +1,12 @@
 package sse.enums;
 
-public enum TimeNodeEnum {
+public enum TimeNodeTypeEnum {
 
-    填报志愿("填报志愿"), 课题申报("课题申报"), 毕设进行("毕设进行"), 答辩申请("答辩申请"), UNKNOWN("UNKNOWN");
+    关键("关键"), 普通("普通"), UNKNOWN("UNKNOWN");
 
     private final String value;
 
-    private TimeNodeEnum(String value) {
+    private TimeNodeTypeEnum(String value) {
         this.value = value;
     }
 
@@ -19,8 +19,8 @@ public enum TimeNodeEnum {
         return this.value;
     }
 
-    public static TimeNodeEnum getType(String value) {
-        for (TimeNodeEnum type : TimeNodeEnum.values()) {
+    public static TimeNodeTypeEnum getType(String value) {
+        for (TimeNodeTypeEnum type : TimeNodeTypeEnum.values()) {
             if (type.value.equalsIgnoreCase(value)) {
                 return type;
             }

@@ -231,7 +231,7 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
      *         int
      */
     public int findAllForCount() {
-        String sql = "select a from " + entityClass.getName() + "a";
+        String sql = "select a from " + entityClass.getName() + " a";
         return findForCount(sql, null);
     }
 

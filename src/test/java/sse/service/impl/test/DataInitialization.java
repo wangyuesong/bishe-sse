@@ -1,91 +1,3 @@
-//package sse.service.impl.test;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//import org.junit.Test;
-//
-//import sse.entity.Student;
-//import sse.entity.Teacher;
-//import sse.entity.User;
-//import sse.entity.Will;
-//import sse.entity.WillPK;
-//
-//public class DataInitialization extends BaseJPATest {
-//
-//    public int fbn(String name)
-//    {
-//        return ((User)(em.createQuery("select u from User u where u.name=:name").setParameter("name", name)
-//                .getResultList().get(0))).getId();
-//    }
-//
-//    @Test
-//    public void test() {
-//        int numOfStudent = 7;
-//        System.out.println("Hloo");
-//
-//        System.out.println(fbn("YuesongWang"));
-//        beginTransaction();
-//        String p = "Initial0";
-//        Student yuesongWang = new Student(1, "1152754", "YuesongWang", p);
-//        em.persist(yuesongWang);
-//        Student leiYang = new Student(2, "1152755", "LeiYang", p);
-//        em.persist(leiYang);
-//        Student JunyaoZhao = new Student(3, "1152756", "JunyaoZhao", p);
-//        em.persist(JunyaoZhao);
-//        Student ZenanHu = new Student(4, "1152757", "ZenanHu", p);
-//        em.persist(ZenanHu);
-//        Student BoyiLi = new Student(5, "1152759", "BoyiLi", p);
-//        em.persist(BoyiLi);
-//        Student YifanZhang = new Student(6, "1152760", "YifanZhang", p);
-//        em.persist(YifanZhang);
-//
-//        Teacher yanLiu = new Teacher(7, "1252753", "YanLiu", p, 3);
-//        em.persist(yanLiu);
-//        Teacher pingSun = new Teacher(8, "1252754", "PingSun", p, 2);
-//        em.persist(pingSun);
-//        Teacher dongQingWang = new Teacher(9, "1252755", "DongqingWang", p, 5);
-//        em.persist(dongQingWang);
-//        Teacher changQingYin = new Teacher(10, "1252756", "ChangqingYin", p, 2);
-//        em.persist(changQingYin);
-//        Teacher meihuiLi = new Teacher(11, "1252757", "MeihuiLi", p, 2);
-//        em.persist(meihuiLi);
-//
-//        List<Will> willList = new ArrayList<Will>();
-//        // Yuesong Wang
-//        willList.add(new Will(new WillPK(fbn("YuesongWang"), fbn("YanLiu")), 1));
-//        willList.add(new Will(new WillPK(fbn("YuesongWang"), fbn("PingSun")), 2));
-//        willList.add(new Will(new WillPK(fbn("YuesongWang"), fbn("dongqingWang")), 3));
-//        // LeiYang
-//        willList.add(new Will(new WillPK(fbn("LeiYang"), fbn("MeihuiLi")), 1));
-//        willList.add(new Will(new WillPK(fbn("LeiYang"), fbn("ChangqingYin")), 2));
-//        // JunYao zhao
-//        willList.add(new Will(new WillPK(fbn("JunyaoZhao"), fbn("YanLiu")), 1));
-//        willList.add(new Will(new WillPK(fbn("JunyaoZhao"), fbn("ChangqingYin")), 2));
-//        willList.add(new Will(new WillPK(fbn("JunyaoZhao"), fbn("PingSun")), 3));
-//        // Zenan hu
-//        willList.add(new Will(new WillPK(fbn("ZenanHu"), fbn("YanLiu")), 1));
-//        willList.add(new Will(new WillPK(fbn("ZenanHu"), fbn("PingSun")), 2));
-//        willList.add(new Will(new WillPK(fbn("ZenanHu"), fbn("DongqingWang")), 3));
-//        // Boyi li
-//        willList.add(new Will(new WillPK(fbn("BoyiLi"), fbn("PingSun")), 1));
-//        willList.add(new Will(new WillPK(fbn("BoyiLi"), fbn("DongqingWang")), 2));
-//        willList.add(new Will(new WillPK(fbn("BoyiLi"), fbn("DongqingWang")), 3));
-//        // Yifan Zhang
-//        willList.add(new Will(new WillPK(6, 7), 1));
-//        willList.add(new Will(new WillPK(6, 8), 2));
-//        willList.add(new Will(new WillPK(6, 11), 3));
-//
-//        for (Will w : willList)
-//        {
-//            em.persist(w);
-//        }
-//        commitTransaction();
-//
-//    }
-//
-//}
-
 package sse.service.impl.test;
 
 import java.text.SimpleDateFormat;
@@ -107,14 +19,12 @@ import sse.entity.TimeNode;
 import sse.entity.Topic;
 import sse.entity.User;
 import sse.entity.Will;
-import sse.entity.WillPK;
 import sse.enums.DocumentTypeEnum;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
-import sse.enums.TimeNodeEnum;
+import sse.enums.TimeNodeTypeEnum;
 import sse.enums.TopicStatusEnum;
 import sse.enums.TopicTypeEnum;
-import sse.pageModel.SystemMessageListModel;
 
 public class DataInitialization extends BaseJPATest {
 
@@ -284,11 +194,11 @@ public class DataInitialization extends BaseJPATest {
 
         // Time nodes
         List<TimeNode> timeNodes = new ArrayList<TimeNode>();
-        timeNodes.add(new TimeNode(1, TimeNodeEnum.getType("填报志愿"), "tianbaozhiyuan", new Date(), "志愿填报时间"));
-        timeNodes.add(new TimeNode(2, TimeNodeEnum.getType("课题申报"), "ketishenbao", addTime(new Date(), 1), "课题申报时间"));
-        timeNodes.add(new TimeNode(3, TimeNodeEnum.getType("毕设进行"), "bishejinxing", addTime(new Date(), 2), "毕设进行时间"));
+        timeNodes.add(new TimeNode(TimeNodeTypeEnum.关键, "志愿填报", new Date(), "志愿填报时间"));
+        timeNodes.add(new TimeNode(TimeNodeTypeEnum.关键, "课题申报", addTime(new Date(), 1), "课题申报时间"));
+        timeNodes.add(new TimeNode(TimeNodeTypeEnum.关键, "毕设进行", addTime(new Date(), 2), "毕设进行时间"));
         timeNodes
-                .add(new TimeNode(3, TimeNodeEnum.getType("答辩申请"), "dabianshenqing", addTime(new Date(), 3), "答辩申请时间"));
+                .add(new TimeNode(TimeNodeTypeEnum.关键, "答辩申请", addTime(new Date(), 3), "答辩申请时间"));
         for (TimeNode m : timeNodes)
         {
             em.persist(m);

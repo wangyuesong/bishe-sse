@@ -11,7 +11,6 @@
     <class>sse.entity.BaseModel</class>
     <class>sse.entity.Menu</class>
     <class>sse.entity.Will</class>
-    <class>sse.entity.WillPK</class>
     <class>sse.entity.TimeNode</class>
     <class>sse.entity.DocumentComment</class>
     <class>sse.entity.Attachment</class>
@@ -19,6 +18,7 @@
     <class>sse.entity.Administrator</class>
     <class>sse.entity.ActionEvent</class>
     <class>sse.entity.SystemMessage</class>
+    <class>sse.entity.AccessRule</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/sse?characterEncoding=utf-8"/>
       <property name="javax.persistence.jdbc.user" value="root"/>
