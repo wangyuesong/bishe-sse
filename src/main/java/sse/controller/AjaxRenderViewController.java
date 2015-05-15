@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,7 +20,7 @@ import sse.dao.impl.TimeNodeDaoImpl;
 import sse.entity.AccessRule;
 import sse.entity.TimeNode;
 import sse.permission.PermissionCheckEntity;
-import sse.utils.AccessRulePropertiesUtil;
+import sse.service.impl.AccessRuleServiceImpl;
 
 @Controller
 public class AjaxRenderViewController {
@@ -27,11 +29,7 @@ public class AjaxRenderViewController {
     TimeNodeDaoImpl timeNodeDaoImpl;
 
     @Autowired
-    AccessRuleDaoImpl accessRuleDaoImpl;
-
-    List<PermissionCheckEntity> studentBannedPermissions;
-
-    List<PermissionCheckEntity> teacherBannedPermissions;
+    AccessRuleServiceImpl accessRuleServiceImpl;
 
     /**
      * Description: 刷新系统内存中的准入规则黑名单
@@ -44,93 +42,10 @@ public class AjaxRenderViewController {
      * teacherBannedPermissions）
      * void
      */
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/refreshPermission", method = { RequestMethod.GET })
     public void refreshPermission()
     {
-        studentBannedPermissions = new LinkedList<PermissionCheckEntity>();
-        teacherBannedPermissions = new LinkedList<PermissionCheckEntity>();
-        List<TimeNode> timeNodes = timeNodeDaoImpl.findAll();
-        for (TimeNode t : timeNodes)
-        {
-            List<AccessRule> rules = t.getAccessRules();
-            PermissionCheckEntity studentPce = new PermissionCheckEntity();
-            PermissionCheckEntity teacherPce = new PermissionCheckEntity();
-            // 设置时间节点
-            studentPce.setTimeNode(t);
-            teacherPce.setTimeNode(t);
-            // 对于该时间节点的每个禁止URL
-            for (AccessRule r : rules)
-            {
-                if (StringUtils.equals(r.getRole(), "Student"))
-                    studentPce.getBannedUrls().add(r.getUrl());
-                else if (StringUtils.equals(r.getRole(), "Teacher"))
-                    teacherPce.getBannedUrls().add(r.getUrl());
-            }
-            studentBannedPermissions.add(studentPce);
-            teacherBannedPermissions.add(teacherPce);
-        }
-        Collections.sort(studentBannedPermissions);
-        Collections.sort(teacherBannedPermissions);
-    }
-
-    private boolean doStudentAccessCheck(String requestUrl)
-    {
-        boolean result = true;
-        Date currentTime = new Date();
-        for (int i = 0; i < studentBannedPermissions.size(); i++)
-        {
-            PermissionCheckEntity currentPce;
-            PermissionCheckEntity nextPce;
-            if (i + 1 == studentBannedPermissions.size()) // 已经检查到最后一个PCE
-            {
-                currentPce = studentBannedPermissions.get(i);
-                // 如果最后一个PCE比当前时间还晚，证明系统还未开放，所有权限都会被禁止
-                if (currentPce.getTimeNode().getTime().compareTo(currentTime) > 0)
-                    return false;
-                // 当前时间处于最后一个PCE影响时段,则进行最后一个PCE检查
-                else
-                    return currentPce.doPermissionCheck(requestUrl);
-            }
-            else {
-                currentPce = studentBannedPermissions.get(i);
-                nextPce = studentBannedPermissions.get(i + 1);
-                // 当前时间处在当前PCE和下一个PCE影响时段之间，则做当前PCE检查
-                if (currentPce.getTimeNode().getTime().compareTo(currentTime) < 0
-                        && nextPce.getTimeNode().getTime().compareTo(currentTime) > 0)
-                    return currentPce.doPermissionCheck(requestUrl);
-            }
-        }
-        return result;
-    }
-    private boolean doTeacherAccessCheck(String requestUrl)
-    {
-        boolean result = true;
-        Date currentTime = new Date();
-        for (int i = 0; i < teacherBannedPermissions.size(); i++)
-        {
-            PermissionCheckEntity currentPce;
-            PermissionCheckEntity nextPce;
-            if (i + 1 == teacherBannedPermissions.size()) // 已经检查到最后一个PCE
-            {
-                currentPce = teacherBannedPermissions.get(i);
-                // 如果最后一个PCE比当前时间还晚，证明系统还未开放，所有权限都会被禁止
-                if (currentPce.getTimeNode().getTime().compareTo(currentTime) > 0)
-                    return false;
-                // 当前时间处于最后一个PCE影响时段,则进行最后一个PCE检查
-                else
-                    return currentPce.doPermissionCheck(requestUrl);
-            }
-            else {
-                currentPce = teacherBannedPermissions.get(i);
-                nextPce = teacherBannedPermissions.get(i + 1);
-                // 当前时间处在当前PCE和下一个PCE影响时段之间，则做当前PCE检查
-                if (currentPce.getTimeNode().getTime().compareTo(currentTime) < 0
-                        && nextPce.getTimeNode().getTime().compareTo(currentTime) > 0)
-                    return currentPce.doPermissionCheck(requestUrl);
-            }
-        }
-        return result;
+        accessRuleServiceImpl.refreshPermission();
     }
 
     @RequestMapping(value = "/dispatch/{url}/{url2}", method = { RequestMethod.GET })
@@ -140,9 +55,9 @@ public class AjaxRenderViewController {
     {
         boolean result = true;
         if (StringUtils.equals(redirectUrl, "student"))
-            result = doStudentAccessCheck(redirectUrl2);
+            result = accessRuleServiceImpl.doStudentAccessCheck(redirectUrl2);
         else if (StringUtils.equals(redirectUrl, "teacher"))
-            result = doTeacherAccessCheck(redirectUrl2);
+            result = accessRuleServiceImpl.doTeacherAccessCheck(redirectUrl2);
         if (result)
             return new ModelAndView(redirectUrl + "/" + redirectUrl2);
         else

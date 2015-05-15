@@ -1,11 +1,15 @@
 package sse.controller;
 
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.MatchPair;
 import sse.commandmodel.WillModel;
+import sse.exception.SSEException;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
 import sse.service.impl.AdminWillServiceImpl;
@@ -46,13 +51,6 @@ public class AdminWillController {
             HttpServletResponse response) {
         PaginationAndSortModel pam = new PaginationAndSortModel(request);
         return adminWillServiceImpl.findCurrentMatchConditionsForDatagrid(pam);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/exportCurrentMatchConditionInExcel", method = { RequestMethod.GET, RequestMethod.POST })
-    public void exportCurrentMatchConditionInExcel(HttpServletRequest request,
-            HttpServletResponse response) {
-        adminWillServiceImpl.exportCurrentMatchConditionInExcel();
     }
 
     @ResponseBody
@@ -136,6 +134,50 @@ public class AdminWillController {
     {
         BasicJson bj = adminWillServiceImpl.doCapacityCheck(rows);
         return bj;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/exportCurrentMatchConditionInExcel")
+    public void exportCurrentMatchConditionInExcel(HttpServletRequest request,
+            HttpServletResponse response) {
+        try {
+            Workbook wb = adminWillServiceImpl.exportCurrentMatchConditionInExcel();
+            response.setContentType("application/octet-stream");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            response.setHeader(
+                    "Content-Disposition",
+                    "attachment; filename="
+                            + new String(("学生教师表" + sdf.format(new Date()) + ".xls")
+                                    .getBytes("GB2312"), "iso8859-1"));
+            OutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            outputStream.close();
+        } catch (Exception e)
+        {
+            throw new SSEException("导出失败", e);
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/exportWillListInExcel")
+    public void exportWillListInExcel(HttpServletRequest request,
+            HttpServletResponse response) {
+        try {
+            Workbook wb = adminWillServiceImpl.exportWillListInExcel();
+            response.setContentType("application/octet-stream");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            response.setHeader(
+                    "Content-Disposition",
+                    "attachment; filename="
+                            + new String(("学生志愿表" + sdf.format(new Date()) + ".xls")
+                                    .getBytes("GB2312"), "iso8859-1"));
+            OutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            outputStream.close();
+        } catch (Exception e)
+        {
+            throw new SSEException("导出失败", e);
+        }
     }
 
 }

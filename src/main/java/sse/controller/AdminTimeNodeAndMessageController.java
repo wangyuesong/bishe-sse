@@ -1,7 +1,6 @@
 package sse.controller;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import sse.pageModel.AccessRuleListModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.SystemMessageListModel;
 import sse.pageModel.TimeNodeListModel;
+import sse.service.impl.AccessRuleServiceImpl;
 import sse.service.impl.AdminTimenodeServiceImpl;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.service.impl.StudentWillServiceImpl;
@@ -38,6 +38,9 @@ public class AdminTimeNodeAndMessageController {
 
     @Autowired
     private AdminTimenodeServiceImpl adminTimenodeServiceImpl;
+
+    @Autowired
+    private AccessRuleServiceImpl accessRuleServiceImpl;
 
     @Autowired
     private TeacherStudentServiceImpl teacherServiceImpl;
@@ -83,13 +86,17 @@ public class AdminTimeNodeAndMessageController {
     @ResponseBody
     @RequestMapping(value = "/changeTimeNodes")
     public BasicJson changeTimeNodes(@RequestBody List<TimeNodeListModel> models, HttpServletRequest request) {
-        return adminTimenodeServiceImpl.changeTimeNodes(models);
+        BasicJson returnJson = adminTimenodeServiceImpl.changeTimeNodes(models);
+        accessRuleServiceImpl.refreshPermission();
+        return returnJson;
     }
 
     @ResponseBody
     @RequestMapping(value = "/deleteTimeNode")
     public BasicJson deleteTimeNode(int timeNodeId, HttpServletRequest request) {
-        return adminTimenodeServiceImpl.deleteTimeNode(timeNodeId);
+        BasicJson returnJson = adminTimenodeServiceImpl.deleteTimeNode(timeNodeId);
+        accessRuleServiceImpl.refreshPermission();
+        return returnJson;
     }
 
     @ResponseBody
@@ -135,6 +142,7 @@ public class AdminTimeNodeAndMessageController {
             HttpServletRequest request) {
         adminTimenodeServiceImpl.updateAccessRules(Integer.parseInt(model.getTimeNodeId()), model.getTeacherRules(),
                 model.getStudentRules());
+        accessRuleServiceImpl.refreshPermission();
         return new BasicJson(true, "更新成功", null);
     }
 

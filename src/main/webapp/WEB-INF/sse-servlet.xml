@@ -17,6 +17,8 @@
 	<context:component-scan base-package="sse.service" />
 	<context:component-scan base-package="sse.controller" />
 	
+	
+	
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass"

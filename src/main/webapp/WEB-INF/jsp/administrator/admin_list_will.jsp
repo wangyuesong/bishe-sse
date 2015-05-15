@@ -11,8 +11,11 @@
 </style>
 </head>
 <body>
-	<table id="dg">
-	</table>
+	<fieldset>
+		<legend>志愿表</legend>
+		<table id="dg">
+		</table>
+	</fieldset>
 
 	<script type="text/javascript">
     $.extend($.fn.datagrid.defaults.editors, {
@@ -50,7 +53,11 @@
         text : '取消',
         iconCls : 'icon-undo',
         handler : reject
-      }, '-' ],
+      }, '-', '-', {
+        text : '导出到Excel',
+        iconCls : 'icon-print',
+        handler : exportWillListInExcel
+      }, '-', ],
       idField : 'teacherAccount',
       url : '${pageContext.request.contextPath}/admin/will/getWillListInDatagrid',
       columns : [ [ {
@@ -276,5 +283,11 @@
       row = $('#dg').datagrid('getChanges');
       alert(row.length + ' rows are changed!');
     }
+
+    function exportWillListInExcel() {
+      window.location.href = "${pageContext.request.contextPath}/admin/will/exportWillListInExcel"
+    }
+    $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
+    $("legend").css("color", "#0099FF").attr("align", "left");
   </script>
 </body>

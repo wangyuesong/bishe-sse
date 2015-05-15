@@ -1,7 +1,5 @@
 package sse.service.impl;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -9,8 +7,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +23,11 @@ import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
+import sse.excelmodel.MatchPairExcelModel;
+import sse.excelmodel.WillExcelModel;
 import sse.pageModel.GenericDataGrid;
 import sse.pageModel.TeacherSelectModel;
+import sse.utils.ExcelUtil;
 import sse.utils.PaginationAndSortModel;
 
 /**
@@ -183,50 +182,6 @@ public class AdminWillServiceImpl {
         return count;
     }
 
-    public void exportCurrentMatchConditionInExcel()
-    {
-
-        List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, "s.account", "ASC");
-        List<MatchPair> matchPairs = new LinkedList<MatchPair>();
-        for (Student s : allStudents)
-        {
-            if (s.getTeacher() != null)
-                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel(), s.getMatchType()));
-            else
-                matchPairs.add(new MatchPair(s, null, null, null));
-        }
-        int count = matchPairs.size();
-        Workbook wb = new HSSFWorkbook();
-        Sheet sheet = wb.createSheet("匹配情况");
-        short rowNum = 0;
-        short colNum = 0;
-        Row row;
-        for (rowNum = 0; rowNum < count; rowNum++)
-        {
-            MatchPair currentMatchPair = matchPairs.get(rowNum);
-            row = sheet.createRow(rowNum);
-            row.createCell(colNum++).setCellValue(currentMatchPair.getStudentAccount());
-            row.createCell(colNum++).setCellValue(currentMatchPair.getStudentName());
-            row.createCell(colNum++).setCellValue(currentMatchPair.getTeacherAccount());
-            row.createCell(colNum++).setCellValue(currentMatchPair.getTeacherName());
-            row.createCell(colNum++).setCellValue(
-                    currentMatchPair.getMatchLevel() == null ? "" : currentMatchPair.getMatchLevel().getValue());
-            row.createCell(colNum++).setCellValue(
-                    currentMatchPair.getMatchType() == null ? "" : currentMatchPair.getMatchType().getValue());
-            colNum = 0;
-        }
-        FileOutputStream fileOut;
-        try {
-            fileOut = new FileOutputStream("/Users/yuesongwang/Desktop/Try.xlsx");
-            wb.write(fileOut);
-            fileOut.close();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
     /**
      * @Method: removeMatchedStudentsFromWillListByStudentId
      * @Description: Remove those who get matched during one level match from will list
@@ -256,8 +211,12 @@ public class AdminWillServiceImpl {
             for (int i = 1; i < 4; i++)
             {
                 String levelWill = wm.getWillByLevel(i);
-                if (levelWill == null)
+                if (StringUtils.isEmpty(levelWill))
+                {
+                    willDaoImpl.beginTransaction();
                     willDaoImpl.deleteStudentWillByLevelWithoutTransaction(Integer.parseInt(wm.getStudentId()), i);
+                    willDaoImpl.commitTransaction();
+                }
                 else
                     willDaoImpl.updateStudentWillByLevel(Integer.parseInt(wm.getStudentId()), i,
                             Integer.parseInt(wm.getWillByLevel(i)));
@@ -452,5 +411,82 @@ public class AdminWillServiceImpl {
     private boolean isThisStudentExistInATeacherSStudentList(Teacher t, int studentId)
     {
         return t.getStudents().contains(studentDaoImpl.findById(studentId));
+    }
+
+    /**
+     * Description: TODO
+     * 
+     * @return
+     *         Workbook
+     */
+    public Workbook exportWillListInExcel() {
+        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.studentId,w.level ASC");
+        // 转换Will为一种可以在页面上展示的WillModel
+        List<WillModel> willModelList = new ArrayList<WillModel>();
+        Will preWill = null;
+        WillModel tempModel = null;
+        for (Will w : willList)
+        {
+            if (preWill == null)
+            {
+                tempModel = new WillModel();
+                preWill = w;
+            }
+            if (preWill.getStudentId() != w.getStudentId()) {
+                willModelList.add(tempModel);
+                tempModel = new WillModel();
+            }
+            Student s = studentDaoImpl.findById(w.getStudentId());
+            tempModel.setStudentId(s.getId() + "");
+            tempModel.setStudentAccount(s.getAccount());
+            tempModel.setStudentName(s.getName());
+            tempModel.setWillByLevel(w.getLevel(), w.getTeacherId() + "");
+            tempModel
+                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getTeacherId()).getName());
+            preWill = w;
+        }
+        if (tempModel.getStudentId() != null)
+            willModelList.add(tempModel);
+        List<WillExcelModel> excelModels = new ArrayList<WillExcelModel>();
+        for (WillModel w : willModelList)
+        {
+            excelModels.add(new WillExcelModel(w.getStudentName(), w.getStudentAccount(), w.getFirstWillTeacherName(),
+                    w.getSecondWillTeacherName(), w.getThirdWillTeacherName()));
+        }
+        ExcelUtil<WillExcelModel> excelUtil = new ExcelUtil<WillExcelModel>();
+        Workbook wb = new HSSFWorkbook();
+        excelUtil.wrtieWorkbook(wb, WillExcelModel.getColNames(), "志愿表", excelModels);
+        return wb;
+    }
+
+    /**
+     * Description: 将现在的匹配情况导出到Workbook中
+     * 
+     * @return
+     *         Workbook
+     */
+    public Workbook exportCurrentMatchConditionInExcel()
+    {
+
+        List<Student> allStudents = studentDaoImpl.findForPaging("select s from Student s", null, "s.account", "ASC");
+        List<MatchPair> matchPairs = new LinkedList<MatchPair>();
+        for (Student s : allStudents)
+        {
+            if (s.getTeacher() != null)
+                matchPairs.add(new MatchPair(s, s.getTeacher(), s.getMatchLevel(), s.getMatchType()));
+            else
+                matchPairs.add(new MatchPair(s, null, null, null));
+        }
+        List<MatchPairExcelModel> excelModels = new ArrayList<MatchPairExcelModel>();
+        for (MatchPair p : matchPairs)
+        {
+            excelModels.add(new MatchPairExcelModel(p.getStudentAccount(), p.getStudentName(), p.getTeacherAccount(), p
+                    .getTeacherName(),
+                    p.getMatchLevel().getValue(), p.getMatchType().toString()));
+        }
+        ExcelUtil<MatchPairExcelModel> excelUtil = new ExcelUtil<MatchPairExcelModel>();
+        Workbook wb = new HSSFWorkbook();
+        excelUtil.wrtieWorkbook(wb, MatchPairExcelModel.getColNames(), "匹配情况", excelModels);
+        return wb;
     }
 }
