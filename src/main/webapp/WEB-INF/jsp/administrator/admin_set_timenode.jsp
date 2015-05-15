@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" isELIgnored="false"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <jsp:include page="/inc.jsp"></jsp:include>
 <script type="text/javascript"
@@ -10,11 +9,54 @@
 	href="${pageContext.request.contextPath}/resources/style/jquery.datetimepicker.css"
 	rel="stylesheet">
 
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/col.css"
+	rel="stylesheet">
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/8cols.css"
+	rel="stylesheet">
+
 <fieldset>
 	<legend id="legend" align="center">时间节点</legend>
 	<div>
 		<table id="time_node_datagrid"></table>
 	</div>
+</fieldset>
+<br />
+<fieldset>
+	<legend id="detail_legend" align="center">节点规则</legend>
+	<div class="section group">
+		<div class="col span_1_of_8">
+			<label>学生禁止:</label>
+		</div>
+		<div class="col span_3_of_8">
+			<select class="easyui-combobox" name="student_access_rule"
+				id="student_access_rule"
+				data-options="multiple:true,multiline:true,
+			url:'${pageContext.request.contextPath}/admin/timenodemessage/getAllStudentAccessRules'
+			,method: 'post'
+			,valueField: 'url'
+			,textField: 'name'"
+				style="width: 200px; height: 50px"></select>
+		</div>
+
+		<div class="col span_1_of_8">
+			<label>教师禁止:</label>
+		</div>
+		<div class="col span_3_of_8">
+			<select class="easyui-combobox" name="teacher_access_rule"
+				id="teacher_access_rule"
+				data-options="multiple:true,multiline:true,
+			url:'${pageContext.request.contextPath}/admin/timenodemessage/getAllTeacherAccessRules'
+			,method: 'post'
+			,valueField: 'url'
+			,textField: 'name'"
+				style="width: 200px; height: 50px"></select>
+		</div>
+	</div>
+	<a href="javascript:void(0);" class="easyui-linkbutton"
+		onclick="save_access_rules()"
+		data-options="iconCls:'icon-save',plain:true" id="updateWillButton">保存</a>
 </fieldset>
 <script type="text/javascript">
   var time_node_types = [ {
@@ -24,6 +66,10 @@
     "value" : "普通",
     "text" : "普通"
   } ];
+  var editIndex = undefined;
+  var selected_time_node_id = undefined;
+  var grid = $('#time_node_datagrid');
+
   $('#time_node_datagrid').datagrid(
       {
         url : '${pageContext.request.contextPath}/admin/timenodemessage/getCurrentTimeNodesInDatagrid',
@@ -53,6 +99,7 @@
             {
               field : 'time',
               title : '时间',
+              sortable : "true",
               width : 80,
               editor : {
                 type : "datetimepicker"
@@ -85,7 +132,8 @@
               width : 100,
               formatter : function(value, rowData, index) {
                 var edit = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
-                    + 'data-options="plain:true" onclick="edit_access_rules(' + rowData.id + ')">更改规则</a>';
+                    + 'data-options="plain:true" onclick="edit_access_rules(' + rowData.id + ',\'' + rowData.name
+                    + '\')">更改规则</a>';
                 var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
                     + 'data-options="plain:true" onclick="delete_time_node(' + rowData.id + ')">删除节点</a>';
                 return edit + " " + remove;
@@ -140,8 +188,6 @@
     }
   });
 
-  var editIndex = undefined;
-  var grid = $('#time_node_datagrid');
   function endEditing() {
     if (editIndex == undefined) {
       return true
@@ -160,13 +206,13 @@
   }
   function onClickCell(index, field) {
     if (editIndex != index) {
-      if (endEditing()) {
+      if (endEditing() && field != "opt") {
         grid.datagrid('selectRow', index).datagrid('beginEdit', index);
         var ed = grid.datagrid('getEditor', {
           index : index,
           field : field
         });
-        ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+        /*  ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus(); */
         editIndex = index;
       } else {
         grid.datagrid('selectRow', editIndex);
@@ -234,41 +280,63 @@
 
   }
 
-  function edit_access_rules(time_node_id) {
-    $('<div class="temp_dialog"></div>').dialog({
-      href : '${pageContext.request.contextPath}/dispatch/admin/admin_edit_access_rule',
-      onClose : function() {
-        $(this).dialog('destroy');
+  function edit_access_rules(time_node_id, time_node_name) {
+    selected_time_node_id = time_node_id;
+    $("#detail_legend").html(time_node_name + "节点规则");
+    $.ajax({
+      url : "${pageContext.request.contextPath}/admin/timenodemessage/getAccessRulesByTimeNodeIdAndRole",
+      type : "post",
+      data : {
+        "timeNodeId" : time_node_id,
+        "role" : "Student"
       },
-      width : $(document.body).width() * 0.8,
-      height : $(document.body).height() * 0.8,
-      collapsible : true,
-      modal : true,
-      title : '回复',
-      buttons : [ {
-        text : '回复',
-        iconCls : 'icon-add',
-        handler : function() {
-          $.ajax({
-            url : "${pageContext.request.contextPath}/document/makeComment",
-            type : "post",
-            data : {
-              studentId : '${sessionScope.USER.id}',
-              commentorId : '${sessionScope.USER.id}',
-              type : '开题报告',
-              content : $('#document_comment_content').val()
-            },
-            success : function(data, textStatus) {
-              $(".temp_dialog").dialog('destroy');
-              $('#feedback-datagrid').datagrid("reload");
-              $.messager.show({
-                title : '提示',
-                msg : data.msg
-              });
-            }
-          });
-        }
-      } ]
+      success : function(data, textStatus) {
+        $("#student_access_rule").combobox("clear");
+        $.each(data, function(index, value) {
+          banned = value.banned;
+          if (banned)
+            $("#student_access_rule").combobox("select", value.url);
+        })
+
+      }
+    });
+
+    $.ajax({
+      url : "${pageContext.request.contextPath}/admin/timenodemessage/getAccessRulesByTimeNodeIdAndRole",
+      type : "post",
+      data : {
+        "timeNodeId" : time_node_id,
+        "role" : "Teacher"
+      },
+      success : function(data, textStatus) {
+        $("#teacher_access_rule").combobox("clear");
+        $.each(data, function(index, value) {
+          banned = value.banned;
+          if (banned)
+            $("#teacher_access_rule").combobox("select", value.url);
+        })
+
+      }
+    });
+  }
+
+  function save_access_rules() {
+    if (selected_time_node_id == undefined)
+      return;
+    data = {
+      "teacherRules" : $("#teacher_access_rule").combo("getValues"),
+      "studentRules" : $("#student_access_rule").combo("getValues"),
+      "timeNodeId" : selected_time_node_id
+    };
+    $.ajax({
+      url : "${pageContext.request.contextPath}/admin/timenodemessage/saveAccessRules",
+      type : "post",
+      data : JSON.stringify(data),
+      dataType : "json",
+      contentType : "application/json",
+      success : function(data, textStatus) {
+
+      }
     });
   }
 

@@ -1,6 +1,7 @@
 package sse.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -72,11 +73,20 @@ public class AccessRule extends BaseModel implements Serializable {
     }
 
     public List<TimeNode> getTimeNodes() {
+        if (timeNodes == null)
+            timeNodes = new ArrayList<TimeNode>();
         return timeNodes;
     }
 
     public void setTimeNodes(List<TimeNode> timeNodes) {
         this.timeNodes = timeNodes;
+    }
+
+    public AccessRule(String url, String menuName, String role) {
+        super();
+        this.url = url;
+        this.menuName = menuName;
+        this.role = role;
     }
 
     public AccessRule(String url, String role, List<TimeNode> timeNodes) {

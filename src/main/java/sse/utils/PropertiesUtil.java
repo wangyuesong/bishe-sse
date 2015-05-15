@@ -2,6 +2,7 @@ package sse.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,5 +38,17 @@ public class PropertiesUtil {
             propMap.put(key, prop.getProperty(key));
         }
         return propMap;
+    }
+
+    public static String readProperty(String contextUrl, String key)
+    {
+        Properties prop = new Properties();
+        InputStream in = new PropertiesUtil().getClass().getResourceAsStream(contextUrl);
+        try {
+            prop.load(in);
+        } catch (IOException e) {
+            throw new SSEException("属性文件无法获取", e);
+        }
+        return prop.getProperty(key);
     }
 }

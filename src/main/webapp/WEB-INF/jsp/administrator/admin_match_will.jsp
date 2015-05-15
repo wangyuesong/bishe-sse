@@ -238,12 +238,11 @@
     function systemAssign() {
       $.ajax({
         //发送请求改变学生和老师的匹配
-        url : "${pageContext.request.contextPath}/admin/systemAssign",
+        url : "${pageContext.request.contextPath}/admin/will/systemAssign",
         dataType : 'json',
         contentType : 'application/json',
         type : "post",
         success : function(data, textStatus) {
-          alert(JSON.stringify(data));
           data_length = $('#dg').datagrid('getRows').length;
           $.each(data, function(index, value) {
             for (i = 0; i < data_length; i++) {
