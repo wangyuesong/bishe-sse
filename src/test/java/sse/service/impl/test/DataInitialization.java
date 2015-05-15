@@ -150,9 +150,11 @@ public class DataInitialization extends BaseJPATest {
 
         menus = new ArrayList<Menu>();
         em.persist(new Menu(13, "信息管理", null, "Administrator", ""));
-        menus.add(new Menu(14, "用户管理", menufbn("信息管理"), "Administrator",
-                "http://localhost:8080/sse/dispatch/administrator/admin_list_will"));
-        menus.add(new Menu(15, "文档管理", menufbn("信息管理"), "Administrator",
+        menus.add(new Menu(14, "学生管理", menufbn("信息管理"), "Administrator",
+                "http://localhost:8080/sse/dispatch/administrator/admin_maintain_student"));
+        menus.add(new Menu(15, "教师管理", menufbn("信息管理"), "Administrator",
+                "http://localhost:8080/sse/dispatch/administrator/admin_maintain_teacher"));
+        menus.add(new Menu(16, "文档管理", menufbn("信息管理"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
@@ -160,22 +162,22 @@ public class DataInitialization extends BaseJPATest {
         }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(16, "公告与日程", null, "Administrator", ""));
-        menus.add(new Menu(17, "公告管理", menufbn("公告与日程"), "Administrator",
+        em.persist(new Menu(17, "公告与日程", null, "Administrator", ""));
+        menus.add(new Menu(18, "公告管理", menufbn("公告与日程"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_list_messages"));
-        menus.add(new Menu(18, "日程节点", menufbn("公告与日程"), "Administrator",
+        menus.add(new Menu(19, "日程节点", menufbn("公告与日程"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_set_timenode"));
         for (Menu m : menus)
         {
             em.persist(m);
         }
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(19, "学生", null, "Teacher", ""));
-        menus.add(new Menu(20, "选择学生", menufbn("学生"), "Teacher",
+        em.persist(new Menu(20, "学生", null, "Teacher", ""));
+        menus.add(new Menu(21, "选择学生", menufbn("学生"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_select_student"));
-        menus.add(new Menu(21, "我的学生", menufbn("学生"), "Teacher",
+        menus.add(new Menu(22, "我的学生", menufbn("学生"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_my_students"));
-        menus.add(new Menu(22, "公告", null, "Teacher",
+        menus.add(new Menu(23, "公告", null, "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_publish_group_message"));
         for (Menu m : menus)
         {

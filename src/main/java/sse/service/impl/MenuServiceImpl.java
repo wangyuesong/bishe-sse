@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import sse.dao.impl.MenuDaoImpl;
 import sse.entity.Menu;
 import sse.entity.User;
-import sse.pageModel.MenuTreeModel;
+import sse.pagemodel.MenuTreeModel;
 
 @Service
 public class MenuServiceImpl {

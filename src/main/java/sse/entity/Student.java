@@ -35,7 +35,7 @@ public class Student extends User {
     @Column(length = 30, name = "MATCH_TYPE")
     private MatchTypeEnum matchType;
 
-    @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "TOPIC")
     private Topic topic;
 

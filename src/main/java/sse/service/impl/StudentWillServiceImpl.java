@@ -19,9 +19,9 @@ import sse.dao.impl.WillDaoImpl;
 import sse.entity.ActionEvent;
 import sse.entity.Teacher;
 import sse.entity.Will;
-import sse.pageModel.ActionEventModel;
-import sse.pageModel.GenericDataGrid;
-import sse.pageModel.TeacherListModel;
+import sse.pagemodel.ActionEventModel;
+import sse.pagemodel.GenericDataGrid;
+import sse.pagemodel.TeacherListModel;
 import sse.utils.DateTimeUtil;
 import sse.utils.PaginationAndSortModel;
 

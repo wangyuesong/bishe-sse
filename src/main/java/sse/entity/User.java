@@ -61,10 +61,10 @@ public abstract class User extends BaseModel implements Serializable {
     @Column(name = "SELF_DESCRIPTION", length = 1000)
     private String selfDescription;
 
-    @OneToMany(mappedBy = "creator", cascade = { CascadeType.REFRESH })
+    @OneToMany(mappedBy = "creator", cascade = { CascadeType.ALL })
     private List<Attachment> attachments;
 
-    @OneToMany(mappedBy = "creator", cascade = { CascadeType.REFRESH })
+    @OneToMany(mappedBy = "creator", cascade = { CascadeType.ALL })
     private List<Document> documents;
 
     @OneToMany(mappedBy = "user", cascade = { CascadeType.REFRESH })
@@ -73,7 +73,7 @@ public abstract class User extends BaseModel implements Serializable {
     @OneToMany(mappedBy = "listener", cascade = { CascadeType.REFRESH })
     private List<ActionEvent> actionsAsListener;
 
-    @OneToMany(mappedBy = "actor", cascade = { CascadeType.REFRESH })
+    @OneToMany(mappedBy = "actor", cascade = { CascadeType.ALL })
     private List<ActionEvent> actionsAsActor;
 
     public User() {

@@ -49,10 +49,10 @@ import sse.enums.DocumentTypeEnum;
 import sse.enums.TopicStatusEnum;
 import sse.enums.TopicTypeEnum;
 import sse.exception.SSEException;
-import sse.pageModel.DocumentCommentListModel;
-import sse.pageModel.DocumentListModel;
-import sse.pageModel.GenericDataGrid;
-import sse.pageModel.TopicModel;
+import sse.pagemodel.DocumentCommentListModel;
+import sse.pagemodel.DocumentListModel;
+import sse.pagemodel.GenericDataGrid;
+import sse.pagemodel.TopicModel;
 import sse.utils.FtpTool;
 
 /**

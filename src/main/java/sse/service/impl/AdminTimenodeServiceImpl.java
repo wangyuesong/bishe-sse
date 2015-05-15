@@ -28,10 +28,10 @@ import sse.entity.TimeNode;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.TimeNodeTypeEnum;
 import sse.exception.SSEException;
-import sse.pageModel.AccessRuleListModel;
-import sse.pageModel.GenericDataGrid;
-import sse.pageModel.SystemMessageListModel;
-import sse.pageModel.TimeNodeListModel;
+import sse.pagemodel.AccessRuleListModel;
+import sse.pagemodel.GenericDataGrid;
+import sse.pagemodel.SystemMessageListModel;
+import sse.pagemodel.TimeNodeListModel;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.utils.AccessRulePropertiesUtil;
 import sse.utils.PaginationAndSortModel;
@@ -158,31 +158,21 @@ public class AdminTimenodeServiceImpl {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         for (TimeNodeListModel model : models)
         {
+            TimeNode t;
             // 新建
             if (model.getId() == 0)
-            {
-                TimeNode t;
-                try {
-                    t = new TimeNode(TimeNodeTypeEnum.getType(model.getType()), model.getName(), sdf.parse(model
-                            .getTime()), model.getDescription());
-                } catch (ParseException e) {
-                    throw new SSEException("时间格式不对", e);
-                }
-                timeNodeDaoImpl.persistWithTransaction(t);
-            }
+                t = new TimeNode();
             else
-            {
-                TimeNode t = timeNodeDaoImpl.findById(model.getId());
-                t.setType(TimeNodeTypeEnum.getType(model.getType()));
-                t.setName(model.getName());
-                try {
-                    t.setTime(sdf.parse(model.getTime()));
-                } catch (ParseException e) {
-                    throw new SSEException("时间格式不对", e);
-                }
-                t.setDescription(model.getDescription());
-                timeNodeDaoImpl.mergeWithTransaction(t);
+                t = timeNodeDaoImpl.findById(model.getId());
+            t.setType(TimeNodeTypeEnum.getType(model.getType()));
+            t.setName(model.getName());
+            try {
+                t.setTime(sdf.parse(model.getTime()));
+            } catch (ParseException e) {
+                throw new SSEException("时间格式不对", e);
             }
+            t.setDescription(model.getDescription());
+            timeNodeDaoImpl.mergeWithTransaction(t);
         }
         return new BasicJson(true, "保存成功", null);
     }

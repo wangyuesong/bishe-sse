@@ -29,9 +29,9 @@ import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.WillStatusEnum;
-import sse.pageModel.CandidateStudentListModel;
-import sse.pageModel.GenericDataGrid;
-import sse.pageModel.StudentListModel;
+import sse.pagemodel.CandidateStudentListModel;
+import sse.pagemodel.GenericDataGrid;
+import sse.pagemodel.StudentListModel;
 import sse.utils.PaginationAndSortModel;
 
 /**

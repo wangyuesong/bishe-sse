@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.entity.User;
-import sse.pageModel.MenuTreeModel;
+import sse.pagemodel.MenuTreeModel;
 import sse.service.impl.MenuServiceImpl;
 
 

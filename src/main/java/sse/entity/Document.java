@@ -52,16 +52,17 @@ public class Document extends BaseModel implements Serializable {
     @JoinColumn(nullable = false, name = "CREATOR")
     private User creator;
 
-    @OneToMany(mappedBy = "document", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToMany(mappedBy = "document", cascade = { CascadeType.ALL })
     private List<DocumentComment> documentComments;
 
-    @OneToMany(mappedBy = "document", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToMany(mappedBy = "document", cascade = { CascadeType.ALL })
     private List<Attachment> documentAttachments;
 
-    /** 
+    /**
      * Description: 级联增加操作
+     * 
      * @param a
-     * void
+     *            void
      */
     public void addAttachment(Attachment a)
     {
@@ -69,10 +70,11 @@ public class Document extends BaseModel implements Serializable {
         documentAttachments.add(a);
     }
 
-    /** 
+    /**
      * Description: 同上
+     * 
      * @param dc
-     * void
+     *            void
      */
     public void addDocumentComment(DocumentComment dc)
     {

@@ -25,8 +25,8 @@ import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 import sse.excelmodel.MatchPairExcelModel;
 import sse.excelmodel.WillExcelModel;
-import sse.pageModel.GenericDataGrid;
-import sse.pageModel.TeacherSelectModel;
+import sse.pagemodel.GenericDataGrid;
+import sse.pagemodel.TeacherSelectModel;
 import sse.utils.ExcelUtil;
 import sse.utils.PaginationAndSortModel;
 
