@@ -64,8 +64,6 @@ public abstract class User extends BaseModel implements Serializable {
     @OneToMany(mappedBy = "creator", cascade = { CascadeType.ALL })
     private List<Attachment> attachments;
 
-    @OneToMany(mappedBy = "creator", cascade = { CascadeType.ALL })
-    private List<Document> documents;
 
     @OneToMany(mappedBy = "user", cascade = { CascadeType.REFRESH })
     private List<DocumentComment> documentComments;
@@ -95,13 +93,6 @@ public abstract class User extends BaseModel implements Serializable {
         this.actionsAsActor = actionsAsActor;
     }
 
-    public List<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(List<Document> documents) {
-        this.documents = documents;
-    }
 
     public List<DocumentComment> getDocumentComments() {
         return documentComments;

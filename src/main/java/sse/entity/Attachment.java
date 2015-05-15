@@ -1,13 +1,25 @@
 package sse.entity;
 
+import java.io.IOException;
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.PreRemove;
+import javax.persistence.Table;
 
 import sse.enums.AttachmentStatusEnum;
-import sse.enums.WillStatusEnum;
-
-import java.sql.Timestamp;
+import sse.exception.SSEException;
+import sse.utils.FtpTool;
 
 /**
  * The persistent class for the document database table.
@@ -54,6 +66,19 @@ public class Attachment extends BaseModel implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private AttachmentStatusEnum status;
+
+    // 附件在数据库的记录删除前，将FTPServer上的也删除
+    @PreRemove
+    public void deleteAttachmentOnFtpServer()
+    {
+        FtpTool ftpTool = new FtpTool();
+        String url = this.getUrl();
+        try {
+            ftpTool.deleteFile(url);
+        } catch (IOException e) {
+            throw new SSEException("删除附件错误", e);
+        }
+    }
 
     public SystemMessage getSystemMessage() {
         return systemMessage;

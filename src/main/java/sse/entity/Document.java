@@ -17,6 +17,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import sse.enums.DocumentStatusEnum;
 import sse.enums.DocumentTypeEnum;
 
 /**
@@ -37,12 +38,16 @@ public class Document extends BaseModel implements Serializable {
     @Column(nullable = false, length = 45)
     private String name;
 
-    @Column(nullable = false, length = 5000)
+    @Column(length = 5000)
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
+    @Column(length = 40, nullable = false)
     private DocumentTypeEnum documentType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 40, nullable = false)
+    private DocumentStatusEnum documentStatus = DocumentStatusEnum.未开始;
 
     @ManyToOne
     @JoinColumn(name = "LAST_MODIFIED_BY")
@@ -82,8 +87,32 @@ public class Document extends BaseModel implements Serializable {
         documentComments.add(dc);
     }
 
+    public DocumentTypeEnum getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(DocumentTypeEnum documentType) {
+        this.documentType = documentType;
+    }
+
+    public DocumentStatusEnum getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(DocumentStatusEnum documentStatus) {
+        this.documentStatus = documentStatus;
+    }
+
     public Document() {
         super();
+    }
+
+    public Document(String name, DocumentTypeEnum documentType, User lastModifiedBy, User creator) {
+        super();
+        this.name = name;
+        this.documentType = documentType;
+        this.lastModifiedBy = lastModifiedBy;
+        this.creator = creator;
     }
 
     public Document(int id, String name, String content, DocumentTypeEnum documenttype, User lastModifiedBy,

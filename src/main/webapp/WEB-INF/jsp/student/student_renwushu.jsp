@@ -37,7 +37,7 @@
         type : "post",
         data : {
           "userId" : '${sessionScope.USER.id}',
-          "type" : "开题报告"
+          "type" : "任务书"
         },
         success : function(data, textStatus) {
           $('#document_description').text(data.content);
@@ -54,7 +54,7 @@
           type : "post",
           data : {
             "userId" : '${sessionScope.USER.id}',
-            "type" : "开题报告",
+            "type" : "任务书",
             "documentStatus" : $("#document_status").val()
           },
           success : function(data, textStatus) {
@@ -70,7 +70,7 @@
       $('#feedback-datagrid').datagrid({
         url : '${pageContext.request.contextPath}/document/getDocumentCommentsByStudentIdAndDocumentType',
         queryParams : {
-          "type" : "开题报告",
+          "type" : "任务书",
           "studentId" : '${sessionScope.USER.id}'
         },
         type : 'post',
@@ -111,7 +111,7 @@
       var form_data = {
         'creatorId' : '${sessionScope.USER.id}',
         'ownerId' : '${sessionScope.USER.id}',
-        'documentType' : '开题报告'
+        'documentType' : '任务书'
       };
 
       $("#file_upload").uploadify({
@@ -143,7 +143,7 @@
               {
                 url : '${pageContext.request.contextPath}/attachment/getAllForeverAttachmentsByUserIdAndDocumentType',
                 queryParams : {
-                  'type' : '开题报告',
+                  'type' : '任务书',
                   'userId' : '${sessionScope.USER.id}'
                 },
                 type : 'post',
@@ -209,12 +209,12 @@
         type : "post",
         data : {
           'userId' : '${sessionScope.USER.id}',
-          'type' : '开题报告',
+          'type' : '任务书',
           'documentDescription' : $("#document_description").val()
         },
         success : function(data, textStatus) {
           $.messager.show({
-            title : '成功',
+            title : '提示',
             msg : data.msg
           });
           $("#document_description").attr("disabled", true);
@@ -243,7 +243,7 @@
               data : {
                 studentId : '${sessionScope.USER.id}',
                 commentorId : '${sessionScope.USER.id}',
-                type : '开题报告',
+                type : '任务书',
                 content : $('#document_comment_content').val()
               },
               success : function(data, textStatus) {
@@ -265,7 +265,7 @@
         type : "post",
         data : {
           'userId' : '${sessionScope.USER.id}',
-          'type' : '开题报告'
+          'type' : '任务书'
         },
         success : function(data, textStatus) {
           $("#attachment_list_grid").datagrid('reload');
@@ -287,11 +287,11 @@
   </script>
 	<div style="height: 800px">
 		<div class="easyui-accordion" style="width: 100%; height: 80%;">
-			<div title="开题报告" style="padding: 10px">
+			<div title="任务书" style="padding: 10px">
 				<div id="kaitibaogao-container">
 					<div id="kaitibaogao-template">
 						<div class="section group">
-							<div class="col span_4_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
+							<div class="col span_4_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的任务书</div>
 							<div class="col span_1_of_6" bgcolor="#D1DDAA">
 								进行状态:&nbsp;<select id="document_status">
 									<option value="未开始">未开始</option>
@@ -372,19 +372,5 @@
 		</div>
 	</div>
 
-	<!-- <div id="create-kaitibaogao-template" style="display: none;">
-		<h3 style="color: #0099FF;">您尚未创建您的开题报告</h3>
-		<p>
-			点击<a href="javascript:void(0);" onclick='add_document()'>这里</a>来创建您的开题报告
-		</p>
-	</div> -->
-
-	<!-- <div id="feedback-template" style="display: none">
-		<div
-			style="background: #E6E6E6; color: #FFF; border: 1px solid #F7F7F7;">
-			<p style="display: inline;" id="feedback-header"></p>
-		</div>
-		<div id="feedback-content"></div>
-	</div> -->
 </body>
 

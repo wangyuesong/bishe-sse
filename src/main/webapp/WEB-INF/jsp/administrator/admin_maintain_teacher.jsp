@@ -4,8 +4,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <jsp:include page="/inc.jsp"></jsp:include>
 <fieldset>
-	<legend>学生账号</legend>
-	<table id="student_grid">
+	<legend>教师账号</legend>
+	<table id="teacher_grid">
 	</table>
 </fieldset>
 
@@ -13,11 +13,11 @@
 
 <script>
   var editIndex = undefined;
-  var grid = $('#student_grid');
+  var grid = $('#teacher_grid');
   $(function() {
 
     grid.datagrid({
-      url : '${pageContext.request.contextPath}/admin/user/getAllStudents',
+      url : '${pageContext.request.contextPath}/admin/user/getAllTeachers',
       type : 'post',
       onClickCell : onClickCell,
       fitColumns : true,
@@ -35,7 +35,7 @@
       columns : [ [
           {
             field : 'account',
-            title : '学号',
+            title : '工号',
             sortable : "true",
             width : 80,
             editor : {
@@ -61,8 +61,8 @@
             }
           },
           {
-            field : 'gpa',
-            title : '绩点',
+            field : 'capacity',
+            title : '容量',
             sortable : "true",
             width : 80,
             editor : {
@@ -70,16 +70,16 @@
             }
           },
           {
-            field : 'email',
-            title : 'Email',
+            field : 'degree',
+            title : '学历',
             width : 80,
             editor : {
               type : "textbox"
             }
           },
           {
-            field : 'phone',
-            title : '电话',
+            field : 'title',
+            title : '职称',
             width : 80,
             editor : {
               type : "textbox"
@@ -102,12 +102,28 @@
             }
           },
           {
+            field : 'direction',
+            title : '方向',
+            width : 100,
+            editor : {
+              type : "textbox"
+            }
+          },
+          {
+            field : 'candidateTopics',
+            title : '备选题目',
+            width : 100,
+            editor : {
+              type : "textbox"
+            }
+          },
+          {
             field : 'opt',
             title : '操作',
             width : 50,
             formatter : function(value, rowData, index) {
               var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
-                  + 'data-options="plain:true" onclick="delete_student(' + rowData.id + ')">删除</a>';
+                  + 'data-options="plain:true" onclick="delete_teacher(' + rowData.id + ')">删除</a>';
               return remove;
             }
           } ] ],
@@ -187,7 +203,7 @@
     if (endEditing()) {
       var changed_rows = grid.datagrid('getChanges');
       $.ajax({
-        url : "${pageContext.request.contextPath}/admin/user/changeStudents",
+        url : "${pageContext.request.contextPath}/admin/user/changeTeachers",
         type : "post",
         dataType : 'json',
         contentType : 'application/json',
@@ -206,12 +222,12 @@
     grid.datagrid('rejectChanges');
     editIndex = undefined;
   }
-  function delete_student(student_id) {
+  function delete_teacher(teacher_id) {
     $.ajax({
-      url : "${pageContext.request.contextPath}/admin/user/deleteStudent",
+      url : "${pageContext.request.contextPath}/admin/user/deleteTeacher",
       type : "post",
       data : {
-        "studentId" : student_id
+        "teacherId" : teacher_id
       },
       success : function(data, textStatus) {
         $.messager.show({

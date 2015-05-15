@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 
 public enum DocumentTypeEnum {
 
-    任务书("任务书"), 开题报告("开题报告"), 中期自查("中期自查"), 最终论文("最终论文"), UNKNOWN("Unknown");
+    任务书("任务书"), 开题报告("开题报告"),  最终论文("最终论文"), UNKNOWN("Unknown");
 
     private final String value;
 

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,16 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import sse.commandmodel.BasicJson;
 import sse.commandmodel.DocumentFormModel;
 import sse.commandmodel.WillModel;
 import sse.dao.impl.AttachmentDaoImpl;
@@ -41,18 +37,15 @@ import sse.entity.Document;
 import sse.entity.DocumentComment;
 import sse.entity.Student;
 import sse.entity.Teacher;
-import sse.entity.Topic;
 import sse.entity.User;
 import sse.entity.Will;
 import sse.enums.AttachmentStatusEnum;
+import sse.enums.DocumentStatusEnum;
 import sse.enums.DocumentTypeEnum;
-import sse.enums.TopicStatusEnum;
-import sse.enums.TopicTypeEnum;
 import sse.exception.SSEException;
 import sse.pagemodel.DocumentCommentListModel;
 import sse.pagemodel.DocumentListModel;
 import sse.pagemodel.GenericDataGrid;
-import sse.pagemodel.TopicModel;
 import sse.utils.FtpTool;
 
 /**
@@ -416,7 +409,9 @@ public class DocumentSerivceImpl {
         {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             if (StringUtils.equals(d.getDocumenttype().getValue(), type))
-                return new DocumentInfo(d.getName(), d.getContent(), sdf.format(d.getCreateTime()), sdf.format(d
+                return new DocumentInfo(d.getName(), d.getContent(), d.getDocumentStatus().getValue(), d.getCreator()
+                        .getName(), sdf.format(d
+                        .getCreateTime()), sdf.format(d
                         .getUpdateTime()));
         }
         return null;
@@ -440,7 +435,6 @@ public class DocumentSerivceImpl {
             {
                 document.setContent(document_description);
                 documentDaoImpl.mergeWithTransaction(document);
-                studentDaoImpl.refresh(studentDaoImpl.findById(id));
             }
         }
         return false;
@@ -510,8 +504,26 @@ public class DocumentSerivceImpl {
     {
         String name;
         String content;
+        String documentStatus;
         String create_time;
         String update_time;
+        String ownerName;
+
+        public String getOwnerName() {
+            return ownerName;
+        }
+
+        public void setOwnerName(String ownerName) {
+            this.ownerName = ownerName;
+        }
+
+        public String getDocumentStatus() {
+            return documentStatus;
+        }
+
+        public void setDocumentStatus(String documentStatus) {
+            this.documentStatus = documentStatus;
+        }
 
         public String getName() {
             return name;
@@ -545,10 +557,13 @@ public class DocumentSerivceImpl {
             this.update_time = update_time;
         }
 
-        public DocumentInfo(String name, String content, String create_time, String update_time) {
+        public DocumentInfo(String name, String content, String documentStatus, String ownerName, String create_time,
+                String update_time) {
             super();
             this.name = name;
             this.content = content;
+            this.ownerName = ownerName;
+            this.documentStatus = documentStatus;
             this.create_time = create_time;
             this.update_time = update_time;
         }
@@ -667,6 +682,27 @@ public class DocumentSerivceImpl {
             this.url = url;
         }
 
+    }
+
+    /**
+     * Description: TODO
+     * 
+     * @param userId
+     * @param type
+     * @param documentStatus
+     *            void
+     */
+    public BasicJson changeDocumentStatusByUserIdAndType(int userId, String type, String documentStatus) {
+        List<Document> documents = studentDaoImpl.findById(userId).getDocuments();
+        for (Document document : documents)
+        {
+            if (StringUtils.equals(type, document.getDocumenttype().getValue()))
+            {
+                document.setDocumentStatus(DocumentStatusEnum.getType(documentStatus));
+                documentDaoImpl.mergeWithTransaction(document);
+            }
+        }
+        return new BasicJson(true, "状态更新成功", null);
     }
 
 }

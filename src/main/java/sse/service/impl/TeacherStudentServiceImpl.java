@@ -28,6 +28,8 @@ import sse.dao.impl.WillDaoImpl;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.Will;
+import sse.enums.MatchLevelEnum;
+import sse.enums.MatchTypeEnum;
 import sse.enums.WillStatusEnum;
 import sse.pagemodel.CandidateStudentListModel;
 import sse.pagemodel.GenericDataGrid;
@@ -126,13 +128,30 @@ public class TeacherStudentServiceImpl {
         Will w = willDaoImpl.findById(willId);
         w.setStatus(WillStatusEnum.getType(decision));
         willDaoImpl.mergeWithTransaction(w);
-        Student s = null;
-        if (StringUtils.equals("接受", decision)) {
-            s = studentDaoImpl.findById(w.getStudentId());
-            Teacher t = teacherDaoImpl.findById(w.getTeacherId());
-            t.addStudent(s);
-            teacherDaoImpl.mergeWithTransaction(t);
+        Student s = studentDaoImpl.findById(w.getStudentId());
+        Teacher t = teacherDaoImpl.findById(w.getTeacherId());
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("studentId", s.getId());
+        List<Will> wills = willDaoImpl.findForPaging("select w from Will w where w.studentId=:studentId", params);
+        MatchLevelEnum matchLevel = MatchLevelEnum.调剂;
+        for (Will one : wills)
+        {
+            if (one.getTeacherId() == t.getId())
+                matchLevel = MatchLevelEnum.getTypeByIntLevel(one.getLevel());
         }
+        if (StringUtils.equals("接受", decision)) {
+            s.setMatchLevel(matchLevel);
+            s.setMatchType(MatchTypeEnum.教师接受);
+            t.addStudent(s);
+        }
+        if (StringUtils.equals("拒绝", decision)) {
+            s.setMatchLevel(null);
+            s.setMatchType(null);
+            t.removeStudent(s);
+        }
+        teacherDaoImpl.mergeWithTransaction(t);
+        // 需要手工merge一下Student，因为不能设置Teacher的List<Student>为CascadeType.ALL
+        studentDaoImpl.mergeWithTransaction(s);
         return new BasicJson(true, "已" + decision, null);
     }
 

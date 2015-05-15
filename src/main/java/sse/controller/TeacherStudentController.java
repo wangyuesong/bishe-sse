@@ -90,8 +90,7 @@ public class TeacherStudentController {
     public List<SimpleAttachmentInfo> getAllForeverAttachments(String type, int studentId, HttpServletRequest request,
             HttpServletResponse response) {
         return studentDocumentServiceImpl.getAttachmentsOfStudentByUserIdDocumentTypeAndAttachmentStatus(studentId,
-                // Get方法传中文乱码，暂时用拼音
-                DocumentTypeEnum.getTypeByPinYin(type), AttachmentStatusEnum.FOREVER);
+                DocumentTypeEnum.getType(type), AttachmentStatusEnum.FOREVER);
     }
 
     @ResponseBody

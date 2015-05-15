@@ -1,5 +1,8 @@
 package sse.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
@@ -8,8 +11,11 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 
+import sse.enums.DocumentTypeEnum;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 
@@ -35,12 +41,25 @@ public class Student extends User {
     @Column(length = 30, name = "MATCH_TYPE")
     private MatchTypeEnum matchType;
 
-    @OneToOne(cascade = { CascadeType.ALL })
-    @JoinColumn(name = "TOPIC")
+    @OneToOne(mappedBy = "student", cascade = { CascadeType.ALL })
     private Topic topic;
+
+    @OneToMany(mappedBy = "creator", cascade = { CascadeType.ALL })
+    private List<Document> documents;
 
     public Topic getTopic() {
         return topic;
+    }
+
+    @PrePersist
+    public void createMyDocuments() {
+        List<String> values = DocumentTypeEnum.getAllTypeValues();
+        for (String value : values)
+        {
+            Document d = new Document(this.getName() + "的" + value, DocumentTypeEnum.getType(value)
+                    , this, this);
+            this.getDocuments().add(d);
+        }
     }
 
     public void setTopic(Topic topic) {
@@ -69,6 +88,16 @@ public class Student extends User {
 
     public void setTeacher(Teacher teacher) {
         this.teacher = teacher;
+    }
+
+    public List<Document> getDocuments() {
+        if (documents == null)
+            documents = new ArrayList<Document>();
+        return documents;
+    }
+
+    public void setDocuments(List<Document> documents) {
+        this.documents = documents;
     }
 
     public Student() {

@@ -42,7 +42,8 @@ public class Topic extends BaseModel implements Serializable {
     @Column(name = "TEACHER_COMMENT", length = 1000)
     private String teacherComment;
     
-    @OneToOne(mappedBy = "topic")
+    @OneToOne
+    @JoinColumn(name = "STUDENT")
     private Student student;
 
     @Enumerated(EnumType.STRING)

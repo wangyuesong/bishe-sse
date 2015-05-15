@@ -31,42 +31,31 @@
 <body>
 	<script>
     $(function() {
-      //载入Document相关信息
-      $.ajax({
-        url : "${pageContext.request.contextPath}/document/getDocumentInfoByUserIdAndType",
-        type : "post",
-        data : {
-          "userId" : '${sessionScope.USER.id}',
-          "type" : "开题报告"
-        },
-        success : function(data, textStatus) {
-          $('#document_description').text(data.content);
-          $('#create_time').html(data.create_time);
-          $('#update_time').html(data.update_time);
-          $("#document_status").val(data.documentStatus);
-        }
-      });
-
-      //绑定状态改变事件
-      $("#document_status").change(function() {
-        $.ajax({
-          url : "${pageContext.request.contextPath}/document/changeDocumentStatusByUserIdAndType",
-          type : "post",
-          data : {
-            "userId" : '${sessionScope.USER.id}',
-            "type" : "开题报告",
-            "documentStatus" : $("#document_status").val()
-          },
-          success : function(data, textStatus) {
-            $.messager.show({
-              title : '提示',
-              msg : data.msg
-            });
-          }
-        });
-
-      });
-
+      /* var exits = false; */
+      //查看该用户是否已经创建该文档，如果没有则加载引导文档创建的界面，如果有的话则将已有文档载入
+      /*    $.ajax({
+           url : "${pageContext.request.contextPath}/document/checkIfHasSuchDocumentByUserIdAndType",
+           type : "post",
+           async : false,
+           data : {
+             "userId" : '${sessionScope.USER.id}',
+             "type" : "开题报告"
+           },
+           success : function(data, textStatus) {
+             if (!(data == ""))
+               exists = true;
+             if (!exists)
+               $('#kaitibaogao-container').prepend($('#create-kaitibaogao-template').html());
+             else {
+               $('#document_description').text(data.content);
+               $('#create_time').html(data.create_time);
+               $('#update_time').html(data.update_time);
+               $('#kaitibaogao-container').prepend($('#kaitibaogao-template').html());
+             }
+           }
+         }); */
+      //如果文档存在，尝试加载评论
+      /*      if (exists) */
       $('#feedback-datagrid').datagrid({
         url : '${pageContext.request.contextPath}/document/getDocumentCommentsByStudentIdAndDocumentType',
         queryParams : {
@@ -99,7 +88,7 @@
         } ] ],
         toolbar : [ '-', {
           text : '回复',
-          iconCls : 'icon-redo',
+          iconCls : 'icon-reload',
           handler : function() {
             add_comment();
 
@@ -117,7 +106,7 @@
       $("#file_upload").uploadify({
         'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
         'buttonText' : '浏览',
-        'uploader' : '${pageContext.request.contextPath}/attachment/uploadForeverAttachments',
+        'uploader' : '${pageContext.request.contextPath}/document/uploadForeverAttachments',
         'formData' : form_data,
         'removeCompleted' : true,
         'fileSizeLimit' : '3MB',
@@ -141,7 +130,7 @@
       $('#attachment_list_grid')
           .datagrid(
               {
-                url : '${pageContext.request.contextPath}/attachment/getAllForeverAttachmentsByUserIdAndDocumentType',
+                url : '${pageContext.request.contextPath}/document/getAllForeverAttachmentsByUserIdAndDocumentType',
                 queryParams : {
                   'type' : '开题报告',
                   'userId' : '${sessionScope.USER.id}'
@@ -179,7 +168,7 @@
                       formatter : function(value, rowData, index) {
                         var remove = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnDelete"'
                             + 'data-options="plain:true" onclick="delete_one_attachment(' + rowData.id + ')">删除</a>';
-                        var download = '<a href="${pageContext.request.contextPath}/attachment/downloadAttachmentByAttachmentId?attachmentId='
+                        var download = '<a href="${pageContext.request.contextPath}/document/downloadAttachmentByAttachmentId?attachmentId='
                             + rowData.id + '">下载</a>';
                         remove += " " + download;
                         return remove;
@@ -205,11 +194,11 @@
 
     function submit_document_description() {
       $.ajax({
-        url : "${pageContext.request.contextPath}/document/updateDocumentDescriptionByUserIdAndType",
+        url : "${pageContext.request.contextPath}/document/updateDocumentDescription",
         type : "post",
         data : {
           'userId' : '${sessionScope.USER.id}',
-          'type' : '开题报告',
+          'documentType' : '开题报告',
           'documentDescription' : $("#document_description").val()
         },
         success : function(data, textStatus) {
@@ -259,9 +248,44 @@
         } ]
       });
     }
+
+    //Modal Dialog创建文档
+    /*  function add_document() {
+       $('<div class="temp_dialog"></div>').dialog({
+         href : '${pageContext.request.contextPath}/dispatch/student/student_add_document',
+         onClose : function() {
+           $.ajax({
+             url : "${pageContext.request.contextPath}/document/cancelCreateDocument",
+             type : "post",
+             success : function(data, textStatus) {
+               $.messager.show({
+                 title : '提示',
+                 msg : data.msg
+               });
+             }
+           });
+           $(this).dialog('destroy');
+         },
+         width : $(document.body).width() * 0.9,
+         height : $(document.body).height() * 0.9,
+         collapsible : true,
+         modal : true,
+         title : '添加新文档',
+         buttons : [ {
+           text : '创建',
+           iconCls : 'icon-add',
+           handler : function() {
+             var d = $(this).closest('.window-body');
+             $('#document_add_form').submit();
+             $(".temp_dialog").datagrid('destroy');
+
+           }
+         } ]
+       });
+     } */
     function show_up_files() {
       $.ajax({
-        url : "${pageContext.request.contextPath}/attachment/getAllForeverAttachmentsByUserIdAndDocumentType",
+        url : "${pageContext.request.contextPath}/document/getAllForeverAttachmentsByUserIdAndDocumentType",
         type : "post",
         data : {
           'userId' : '${sessionScope.USER.id}',
@@ -274,7 +298,7 @@
     };
     function delete_one_attachment(id) {
       $.ajax({
-        url : "${pageContext.request.contextPath}/attachment/deleteOneAttachmentByAttachmentId?attachmentId=" + id,
+        url : "${pageContext.request.contextPath}/document/deleteOneAttachmentByAttachmentId?attachmentId=" + id,
         type : "get",
         success : function(data, textStatus) {
           $("#attachment_list_grid").datagrid('reload');
@@ -291,14 +315,7 @@
 				<div id="kaitibaogao-container">
 					<div id="kaitibaogao-template">
 						<div class="section group">
-							<div class="col span_4_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
-							<div class="col span_1_of_6" bgcolor="#D1DDAA">
-								进行状态:&nbsp;<select id="document_status">
-									<option value="未开始">未开始</option>
-									<option value="进行中">进行中</option>
-									<option value="完成">完成</option>
-								</select>
-							</div>
+							<div class="col span_6_of_6" bgcolor="#D1DDAA">${sessionScope.USER.name}的开题报告</div>
 						</div>
 						<div class="section group">
 							<div class="col span_1_of_6">创建时间:</div>

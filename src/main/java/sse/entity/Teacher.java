@@ -1,5 +1,6 @@
 package sse.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -40,11 +41,16 @@ public class Teacher extends User {
     @Column(length = 1000, name = "CANDIDATE_TOPICS")
     private String candidateTopics;
 
-
     public void addStudent(Student s)
     {
         s.setTeacher(this);
-        this.students.add(s);
+        getStudents().add(s);
+    }
+
+    public void removeStudent(Student s)
+    {
+        students.remove(s);
+        s.setTeacher(null);
     }
 
     public String getCandidateTopics() {
@@ -64,6 +70,8 @@ public class Teacher extends User {
     }
 
     public List<Student> getStudents() {
+        if (students == null)
+            students = new ArrayList<Student>();
         return students;
     }
 

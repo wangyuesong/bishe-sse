@@ -17,7 +17,6 @@
 	<table id="messages_datagrid">
 	</table>
 </fieldset>
-
 <script type="text/javascript">
   $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
   $("legend").css("color", "#0099FF").attr("align", "left");

@@ -79,6 +79,10 @@
       url : '${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage',
       type : "post",
       success : function(result) {
+        $.messager.show({
+          title : '提示',
+          msg : data.msg
+        });
       }
     });
 
@@ -95,12 +99,13 @@
       'simUploadLimit' : 2,
       'onQueueComplete' : function(event, data) {
         show_up_files();
+        $("#message_add_form").submit();
       },
       'onFallback' : function() {
         $.messager.alert("提示", "检测到您的浏览器不支持Flash，请安装Flash插件");
       },
       'onUploadError' : function(file, errorCode, errorMsg, errorString) {
-        $.message.alert("错误", '上传出错，请联系管理员');
+        $.messager.alert("错误", '上传出错，请联系管理员');
       }
 
     });

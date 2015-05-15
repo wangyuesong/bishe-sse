@@ -46,9 +46,9 @@ import sse.service.impl.UserServiceImpl;
  * @version V1.0
  */
 @Controller
-@RequestMapping(value = "/document/")
-public class DocumentController {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DocumentController.class);
+@RequestMapping(value = "/attachment/")
+public class AttachmentController {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AttachmentController.class);
 
     @Autowired
     public DocumentSerivceImpl documentServiceImpl;
@@ -58,52 +58,6 @@ public class DocumentController {
 
     @Autowired
     private ActionEventServiceImpl actionEventServiceImpl;
-
-    // 所有Read 方法
-    /**
-     * Description: 获得创建者id为creatorId的所有Document
-     * 
-     * @param creatorId
-     * @param request
-     * @param response
-     * @return
-     *         GenericDataGrid<DocumentListModel>
-     */
-    @ResponseBody
-    @RequestMapping(value = "/getAllDocumentsByCreatorId")
-    public GenericDataGrid<DocumentListModel> getAllDocumentsByCreatorId(int creatorId, HttpServletRequest request,
-            HttpServletResponse response) {
-        int page = 1;
-        int pageSize = 10;
-        HttpSession session = request.getSession();
-        if (session.getAttribute("USER") == null)
-            return null;
-        GenericDataGrid<DocumentListModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(
-                page, pageSize,
-                null,
-                null,
-                creatorId);
-        return documents;
-    }
-
-    /**
-     * Description: 获得创建者id为studentId，type为type的Document的所有documentComment
-     * 
-     * @param studentId
-     * @param type
-     * @param request
-     * @return
-     *         GenericDataGrid<DocumentCommentListModel>
-     */
-    @ResponseBody
-    @RequestMapping(value = "/getDocumentCommentsByStudentIdAndDocumentType", method = { RequestMethod.POST })
-    public GenericDataGrid<DocumentCommentListModel> getDocumentCommentsByStudentIdAndDocumentType(int studentId,
-            String type,
-            HttpServletRequest request)
-    {
-        return documentServiceImpl
-                .findDocumentCommentsForPagingByStudentIdAndDocumentType(studentId, type);
-    }
 
     @ResponseBody
     @RequestMapping(value = "/getAllTempAttachmentsByUserIdAndDocumentType")
@@ -123,37 +77,8 @@ public class DocumentController {
                 DocumentTypeEnum.getType(type), AttachmentStatusEnum.FOREVER);
     }
 
-    // 所有CUR 方法
-
     /**
-     * Description: 增加Document评论
-     * 
-     * @param studentId
-     * @param commentorId
-     * @param type
-     * @param content
-     * @param request
-     * @return
-     *         BasicJson
-     */
-    @ResponseBody
-    @RequestMapping(value = "/makeComment", method = { RequestMethod.POST })
-    public BasicJson makeComment(DocumentCommentFormModel model,
-            HttpServletRequest request)
-    {
-        int documentId = documentServiceImpl.findDocumentIdByStudentIdAndDocumentType(
-                Integer.parseInt(model.getStudentId()), model.getType());
-        documentServiceImpl.makeDocumentComment(documentId, model.getContent(),
-                Integer.parseInt(model.getCommentorId()));
-
-        actionEventServiceImpl.createActionEvent(Integer.parseInt(model.getCommentorId()), "在" + model.getType()
-                + "下留言");
-
-        return new BasicJson(true, "留言成功", null);
-    }
-
-    /**
-     * Description: 创建附件，该方法为文档已经创建时对文档附件的创建动作, 由于可能是教师上传的附件，因此需要一个creatorId一个ownerId，creatorId为上传附件者的id
+     * Description: 创建附件
      * 
      * @param creatorId
      * @param ownerId
@@ -179,7 +104,7 @@ public class DocumentController {
     }
 
     /**
-     * Description: 创建附件，该方法为文档尚未创建时对文档附件的创建动作，需要confirmCreateDocument
+     * Description: 创建附件，该方法为系统消息尚未创建时对文档附件的创建动作，需要confirmCreateDocument来完成创建
      * 
      * @param request
      * @param response
@@ -286,46 +211,4 @@ public class DocumentController {
 
         return new BasicJson(true, "删除附件成功", null);
     }
-
-    /**
-     * Description: 查找一个Document相关的信息
-     * 
-     * @param userId
-     * @param type
-     * @param request
-     * @return
-     *         DocumentInfo
-     */
-    @ResponseBody
-    @RequestMapping(value = "/getDocumentInfoByUserIdAndType", method = { RequestMethod.POST })
-    public DocumentInfo getDocumentInfoByUserIdAndType(int userId, String type, HttpServletRequest request)
-    {
-        return documentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(userId, type);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/updateDocumentDescriptionByUserIdAndType", method = { RequestMethod.POST })
-    public BasicJson updateDocumentDescription(int userId, String type, String documentDescription,
-            HttpServletRequest request)
-    {
-        documentServiceImpl.updateDocumentDescription(userId, type,
-                documentDescription);
-
-        actionEventServiceImpl.createActionEvent(((User) (request.getSession().getAttribute("USER"))).getId(),
-                "更新了" + documentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(userId, type).getName() + "的描述");
-        return new BasicJson(true, "更新成功", null);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/changeDocumentStatusByUserIdAndType", method = { RequestMethod.POST })
-    public BasicJson changeDocumentStatusByUserIdAndType(int userId, String type, String documentStatus,
-            HttpServletRequest request)
-    {
-
-        BasicJson returnJson = documentServiceImpl.changeDocumentStatusByUserIdAndType(userId, type, documentStatus);
-        actionEventServiceImpl.createActionEvent(((User) (request.getSession().getAttribute("USER"))).getId(),
-                "更新了" + documentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(userId, type).getName() + "的状态");
-        return returnJson;
-    }
-
 }

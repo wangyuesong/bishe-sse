@@ -126,11 +126,11 @@ public class DataInitialization extends BaseJPATest {
         menus.add(new Menu(6, "选题申请", menufbn("我的毕设"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_select_topic"));
         menus.add(new Menu(7, "任务书", menufbn("我的毕设"), "Student",
-                "http://localhost:8080/sse/dispatch/student/student_list_documents"));
+                "http://localhost:8080/sse/dispatch/student/student_renwushu"));
         menus.add(new Menu(8, "开题报告", menufbn("我的毕设"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_kaitibaogao"));
         menus.add(new Menu(9, "最终论文", menufbn("我的毕设"), "Student",
-                "http://localhost:8080/sse/dispatch/student/student_list_documents"));
+                "http://localhost:8080/sse/dispatch/student/student_zuizhonglunwen"));
 
         for (Menu m : menus)
         {
@@ -183,11 +183,6 @@ public class DataInitialization extends BaseJPATest {
         {
             em.persist(m);
         }
-        // Document and comments
-        Document d = new Document(1, "王岳松的开题报告", "测试文字", DocumentTypeEnum.开题报告, yuesongWang, yuesongWang);
-        em.persist(d);
-        DocumentComment dc = new DocumentComment("测试评论", pingSun, d);
-        em.persist(dc);
 
         // Topic
         Topic t = new Topic(1, "测试主选题", "测试副选题", "测试主内容", null, TopicStatusEnum.待审核, "不错！", TopicTypeEnum.个人选题);
