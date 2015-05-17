@@ -101,27 +101,6 @@ public class AdminTimenodeServiceImpl {
         return new GenericDataGrid<SystemMessageListModel>(count, messageModels);
     }
 
-    /**
-     * Description: TODO
-     * 
-     * @return
-     *         List<SimpleAttachmentInfo>
-     */
-    public List<SimpleAttachmentInfo> getTempAttachmentsOfAdmin() {
-        // TODO Auto-generated method stub
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("role", "Administrator");
-        params.put("status", AttachmentStatusEnum.TEMP);
-        List<Attachment> attachments = attachmentDaoImpl
-                .findForPaging("select a from Attachment a where a.creator.role=:role and a.status=:status", params);
-        List<SimpleAttachmentInfo> attachmentInfos = new ArrayList<DocumentSerivceImpl.SimpleAttachmentInfo>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (Attachment a : attachments)
-            attachmentInfos.add(new SimpleAttachmentInfo(a.getId(), a.getListName(), sdf.format(a.getCreateTime()),
-                    "管理员"));
-        return attachmentInfos;
-    }
-
     public void confirmCreateDocumentAndAddSystemMessageToDB(SystemMessageFormModel formModel) {
         SystemMessage message = new SystemMessage();
         message.setContent(formModel.getContent());
@@ -140,7 +119,7 @@ public class AdminTimenodeServiceImpl {
                 attachment.setStatus(AttachmentStatusEnum.FOREVER);
                 message.addAttachment(attachment);
             }
-        systemMessageDaoImpl.persistWithTransaction(message);
+        systemMessageDaoImpl.mergeWithTransaction(message);
     }
 
     public void deleteSystemMessage(int messageId)

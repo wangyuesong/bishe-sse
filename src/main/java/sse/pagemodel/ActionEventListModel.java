@@ -16,14 +16,14 @@ package sse.pagemodel;
  * @author yuesongwang
  *
  */
-public class ActionEventModel {
+public class ActionEventListModel {
 
     int id;
     String actor;
     String create_time;
     String description;
 
-    public ActionEventModel(int id, String actor, String create_time, String description) {
+    public ActionEventListModel(int id, String actor, String create_time, String description) {
         super();
         this.id = id;
         this.actor = actor;

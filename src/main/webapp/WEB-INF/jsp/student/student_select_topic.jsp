@@ -59,7 +59,7 @@
 				</div>
 				<div class="col span_7_of_8">
 					<input class="easyui-textbox" name="mainName" id="mainName"
-						style="width: 100%;"></input>
+						required="true" style="width: 100%;"></input>
 				</div>
 			</div>
 

@@ -5,6 +5,21 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <jsp:include page="/inc.jsp"></jsp:include>
+<link
+	href="${pageContext.request.contextPath}/resources/style/uploadify.css"
+	rel="stylesheet" type="text/css" />
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/js/jquery.uploadify.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="${pageContext.request.contextPath}/resources/style/jquery.wysiwyg.css">
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/js/jquery.wysiwyg.js"></script>
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/col.css"
+	rel="stylesheet">
+<link
+	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/8cols.css"
+	rel="stylesheet">
 <style>
 .input {
 	width: 170px;
@@ -105,10 +120,10 @@
   }
   //Modal dialog 创建回复
   function add_message() {
-    $('<div class="temp_dialog"></div>').dialog({
+    $dialog = $('<div class="temp_dialog"></div>').dialog({
       href : '${pageContext.request.contextPath}/dispatch/administrator/admin_add_message',
       onClose : function() {
-        $(".temp_dialog").dialog('destroy');
+        $(this).dialog('destroy');
       },
       width : $(document.body).width() > 400 ? $(document.body).width() * 0.7 : 400,
       height : $(document.body).height() > 500 ? $(document.body).height() : 500,
@@ -120,8 +135,8 @@
         text : '发布',
         iconCls : 'icon-add',
         handler : function() {
-          $("#message_add_form").submit();
-          $(".temp_dialog").dialog('destroy');
+          submit_message();
+          $dialog.dialog('destroy');
           $('#messages_datagrid').datagrid('reload');
         }
       } ]

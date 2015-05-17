@@ -11,7 +11,7 @@ import sse.entity.Student;
 import sse.entity.Topic;
 import sse.enums.TopicStatusEnum;
 import sse.enums.TopicTypeEnum;
-import sse.pagemodel.TopicModel;
+import sse.pagemodel.TopicDetailModel;
 
 /**
  * @author yuesongwang
@@ -37,17 +37,17 @@ public class StudentTopicServiceImpl {
      * @return
      *         TopicModel
      */
-    public TopicModel getTopicByStudentId(int studentId)
+    public TopicDetailModel getTopicByStudentId(int studentId)
     {
         Topic t = studentDaoImpl.findById(studentId).getTopic();
         if (t == null)
             return null;
-        TopicModel tm = new TopicModel(t.getId(), t.getDescription(), t.getMainName(), t.getSubName(), t.getOutsider(),
+        TopicDetailModel tm = new TopicDetailModel(t.getId(), t.getDescription(), t.getMainName(), t.getSubName(), t.getOutsider(),
                 t.getPassStatus().getValue(), t.getTeacherComment(), t.getTopicType().getValue());
         return tm;
     }
 
-    public void saveTopic(TopicModel tm, int studentId)
+    public void saveTopic(TopicDetailModel tm, int studentId)
     {
         Student s = studentDaoImpl.findById(studentId);
         Topic t = s.getTopic();
@@ -61,6 +61,8 @@ public class StudentTopicServiceImpl {
         t.setDescription(tm.getDescription());
         t.setOutsider(tm.getOutsider());
         t.setTopicType(TopicTypeEnum.getType(tm.getTopicType()));
+        // 一对一关系，两侧都需要手动设置
+        t.setStudent(s);
         s.setTopic(t);
         studentDaoImpl.mergeWithTransaction(s);
     }

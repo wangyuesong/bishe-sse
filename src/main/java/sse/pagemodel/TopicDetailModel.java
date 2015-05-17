@@ -9,7 +9,7 @@ package sse.pagemodel;
  * @date 2015年5月12日 上午12:37:01
  * @version V1.0
  */
-public class TopicModel {
+public class TopicDetailModel {
     int id;
     String description;
     String mainName;
@@ -19,7 +19,7 @@ public class TopicModel {
     String teacherComment;
     String topicType;
 
-    public TopicModel() {
+    public TopicDetailModel() {
         super();
     }
 
@@ -27,7 +27,8 @@ public class TopicModel {
         return id;
     }
 
-    public TopicModel(int id, String description, String mainName, String subName, String outsider, String passStatus,
+    public TopicDetailModel(int id, String description, String mainName, String subName, String outsider,
+            String passStatus,
             String teacherComment, String topicType) {
         super();
         this.id = id;

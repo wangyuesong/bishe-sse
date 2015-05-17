@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,21 +18,17 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import sse.commandmodel.BasicJson;
-import sse.commandmodel.DocumentCommentFormModel;
 import sse.commandmodel.DocumentFormModel;
-import sse.entity.Document;
 import sse.entity.User;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
 import sse.exception.SSEException;
-import sse.pagemodel.DocumentCommentListModel;
-import sse.pagemodel.DocumentListModel;
-import sse.pagemodel.GenericDataGrid;
 import sse.service.impl.ActionEventServiceImpl;
+import sse.service.impl.AttachmentServiceImpl;
+import sse.service.impl.AttachmentServiceImpl.AttachmentInfo;
+import sse.service.impl.AttachmentServiceImpl.SimpleAttachmentInfo;
 import sse.service.impl.DocumentSerivceImpl;
-import sse.service.impl.DocumentSerivceImpl.AttachmentInfo;
 import sse.service.impl.DocumentSerivceImpl.DocumentInfo;
-import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.service.impl.UserServiceImpl;
 
 /**
@@ -51,6 +46,9 @@ public class AttachmentController {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AttachmentController.class);
 
     @Autowired
+    public AttachmentServiceImpl attachmentServiceImpl;
+
+    @Autowired
     public DocumentSerivceImpl documentServiceImpl;
 
     @Autowired
@@ -59,22 +57,37 @@ public class AttachmentController {
     @Autowired
     private ActionEventServiceImpl actionEventServiceImpl;
 
-    @ResponseBody
-    @RequestMapping(value = "/getAllTempAttachmentsByUserIdAndDocumentType")
-    public List<SimpleAttachmentInfo> getAllTempAttachmentsByUserIdAndDocumentType(int userId, String type,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        return documentServiceImpl.getAttachmentsOfStudentByUserIdDocumentTypeAndAttachmentStatus(userId,
-                DocumentTypeEnum.getType(type), AttachmentStatusEnum.TEMP);
-    }
-
+    /**
+     * Description: 获得某个user的类型为type的文档的所有附件信息
+     * 
+     * @param userId
+     * @param type
+     * @param request
+     * @param response
+     * @return
+     *         List<SimpleAttachmentInfo>
+     */
     @ResponseBody
     @RequestMapping(value = "/getAllForeverAttachmentsByUserIdAndDocumentType")
     public List<SimpleAttachmentInfo> getAllForeverAttachmentsByUserIdAndDocumentType(int userId, String type,
             HttpServletRequest request,
             HttpServletResponse response) {
-        return documentServiceImpl.getAttachmentsOfStudentByUserIdDocumentTypeAndAttachmentStatus(userId,
+        return attachmentServiceImpl.getAttachmentsOfStudentByUserIdDocumentTypeAndAttachmentStatus(userId,
                 DocumentTypeEnum.getType(type), AttachmentStatusEnum.FOREVER);
+    }
+
+    /** 
+     * Description: TODO
+     * @param request
+     * @param response
+     * @return
+     * List<SimpleAttachmentInfo>
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getAllTempAttachmentsOfAdmin")
+    public List<SimpleAttachmentInfo> getAllTempAttachments(HttpServletRequest request,
+            HttpServletResponse response) {
+        return attachmentServiceImpl.getTempAttachmentsOfAdmin();
     }
 
     /**
@@ -96,15 +109,15 @@ public class AttachmentController {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
         // Attachment上传到Ftp
-        AttachmentInfo info = documentServiceImpl.uploadAttachmentToFtp(creatorId, fileMap);
+        AttachmentInfo info = attachmentServiceImpl.uploadAttachmentToFtp(creatorId, fileMap);
         // 创建Attachment纪录并将Attachemnt和Document关联
-        documentServiceImpl.createForeverAttachmentEntryInDB(info, ownerId, documentType);
+        attachmentServiceImpl.createForeverAttachmentEntryInDB(info, ownerId, documentType);
         DocumentInfo d = documentServiceImpl.getDocumentInfoByStudentIdAndDocumentType(ownerId, documentType);
         actionEventServiceImpl.createActionEvent(creatorId, "上传了附件" + info.getListName() + "到" + d.getName());
     }
 
     /**
-     * Description: 创建附件，该方法为系统消息尚未创建时对文档附件的创建动作，需要confirmCreateDocument来完成创建
+     * Description: 创建附件，附件状态为Temp，该方法为系统消息尚未创建时对文档附件的创建动作，需要confirmCreateDocument来完成创建
      * 
      * @param request
      * @param response
@@ -117,9 +130,9 @@ public class AttachmentController {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
         // Upload temporary doucments to ftp server
-        AttachmentInfo info = documentServiceImpl.uploadAttachmentToFtp(creatorId, fileMap);
+        AttachmentInfo info = attachmentServiceImpl.uploadAttachmentToFtp(creatorId, fileMap);
         // Create temp entry in DB Attachment table
-        documentServiceImpl.createTempAttachmentEntryInDB(info);
+        attachmentServiceImpl.createTempAttachmentEntryInDB(info);
     }
 
     /**
@@ -137,6 +150,17 @@ public class AttachmentController {
         actionEventServiceImpl.createActionEvent(creatorId, "创建了文档:" + documentModel.getDocument_name());
     }
 
+    /**
+     * Description: 取消创建附件
+     * 
+     * @param creatorId
+     * @param documentType
+     * @param request
+     * @param response
+     * @return
+     * @throws SSEException
+     *             BasicJson
+     */
     @ResponseBody
     @RequestMapping(value = "/cancelCreateDocument")
     public BasicJson cancelCreateDocument(int creatorId, String documentType, HttpServletRequest request,

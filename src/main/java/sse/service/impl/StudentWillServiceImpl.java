@@ -19,7 +19,7 @@ import sse.dao.impl.WillDaoImpl;
 import sse.entity.ActionEvent;
 import sse.entity.Teacher;
 import sse.entity.Will;
-import sse.pagemodel.ActionEventModel;
+import sse.pagemodel.ActionEventListModel;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.TeacherListModel;
 import sse.utils.DateTimeUtil;
@@ -113,7 +113,7 @@ public class StudentWillServiceImpl {
      * @return GenericDataGrid<ActionEventModel>
      * @throws
      */
-    public GenericDataGrid<ActionEventModel> findTeachersActionEventsForPagingInGenericDataGrid(int teacherId,
+    public GenericDataGrid<ActionEventListModel> findTeachersActionEventsForPagingInGenericDataGrid(int teacherId,
             int studentId,
             PaginationAndSortModel pam) {
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -126,14 +126,14 @@ public class StudentWillServiceImpl {
                         pam.getRows(),
                         "ae." + pam.getSort(), pam.getOrder());
 
-        List<ActionEventModel> actionEventModels = new ArrayList<ActionEventModel>();
+        List<ActionEventListModel> actionEventModels = new ArrayList<ActionEventListModel>();
         for (ActionEvent e : actionEvents)
         {
-            ActionEventModel aem = new ActionEventModel(e.getId(), e.getActor().getName(), DateTimeUtil.formatToMin(e
+            ActionEventListModel aem = new ActionEventListModel(e.getId(), e.getActor().getName(), DateTimeUtil.formatToMin(e
                     .getCreateTime()), e.getDescription());
             actionEventModels.add(aem);
         }
-        GenericDataGrid<ActionEventModel> dataGrid = new GenericDataGrid<ActionEventModel>();
+        GenericDataGrid<ActionEventListModel> dataGrid = new GenericDataGrid<ActionEventListModel>();
         dataGrid.setRows(actionEventModels);
         dataGrid.setTotal(actionEventDaoImpl
                 .findForCount(

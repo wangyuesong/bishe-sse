@@ -63,13 +63,6 @@ public class AdminTimeNodeAndMessageController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/getAllTempAttachments")
-    public List<SimpleAttachmentInfo> getAllTempAttachments(HttpServletRequest request,
-            HttpServletResponse response) {
-        return adminTimenodeServiceImpl.getTempAttachmentsOfAdmin();
-    }
-
-    @ResponseBody
     @RequestMapping(value = "/confirmCreateSystemMessage")
     public BasicJson confirmCreateDocument(SystemMessageFormModel model, HttpServletRequest request) {
         adminTimenodeServiceImpl.confirmCreateDocumentAndAddSystemMessageToDB(model);

@@ -99,9 +99,7 @@ public class DataInitialization extends BaseJPATest {
         willList.add(new Will(fbn("张一帆"), fbn("李美惠"), 3));
 
         for (Will w : willList)
-        {
             em.persist(w);
-        }
 
         yuesongWang.setTeacher(yanLiu);
         yuesongWang.setMatchLevel(MatchLevelEnum.第一志愿);
@@ -109,39 +107,44 @@ public class DataInitialization extends BaseJPATest {
         em.merge(yuesongWang);
 
         List<Menu> menus = new ArrayList<Menu>();
-        em.persist(new Menu(1, "指导教师", null, "Student", ""));
-        menus.add(new Menu(2, "所有老师", menufbn("指导教师"), "Student",
+        em.persist(new Menu("选择导师", null, "Student", ""));
+        menus.add(new Menu("所有老师", menufbn("选择导师"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_all_teachers"));
-        menus.add(new Menu(3, "填报志愿", menufbn("指导教师"), "Student",
+        menus.add(new Menu("填报志愿", menufbn("选择导师"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_select_will"));
-        menus.add(new Menu(4, "我的老师", menufbn("指导教师"), "Student",
+        menus.add(new Menu("我的老师", menufbn("选择导师"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_my_teacher"));
 
         for (Menu m : menus)
-        {
             em.persist(m);
-        }
+
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(5, "我的毕设", null, "Student", ""));
-        menus.add(new Menu(6, "选题申请", menufbn("我的毕设"), "Student",
+        em.persist(new Menu("毕设相关", null, "Student", ""));
+        menus.add(new Menu("选题申请", menufbn("毕设相关"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_select_topic"));
-        menus.add(new Menu(7, "任务书", menufbn("我的毕设"), "Student",
+        menus.add(new Menu("任务书", menufbn("毕设相关"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_renwushu"));
-        menus.add(new Menu(8, "开题报告", menufbn("我的毕设"), "Student",
+        menus.add(new Menu("开题报告", menufbn("毕设相关"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_kaitibaogao"));
-        menus.add(new Menu(9, "最终论文", menufbn("我的毕设"), "Student",
+        menus.add(new Menu("最终论文", menufbn("毕设相关"), "Student",
                 "http://localhost:8080/sse/dispatch/student/student_zuizhonglunwen"));
 
         for (Menu m : menus)
-        {
             em.persist(m);
-        }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(10, "志愿", null, "Administrator", ""));
-        menus.add(new Menu(11, "志愿表", menufbn("志愿"), "Administrator",
+        em.persist(new Menu("个人中心", null, "Student", ""));
+        menus.add(new Menu("个人信息", menufbn("个人中心"), "Student",
+                "http://localhost:8080/sse/dispatch/student/student_personal_center"));
+
+        for (Menu m : menus)
+            em.persist(m);
+
+        menus = new ArrayList<Menu>();
+        em.persist(new Menu("志愿", null, "Administrator", ""));
+        menus.add(new Menu("志愿表", menufbn("志愿"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_list_will"));
-        menus.add(new Menu(12, "分配志愿", menufbn("志愿"), "Administrator",
+        menus.add(new Menu("分配志愿", menufbn("志愿"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
@@ -149,12 +152,12 @@ public class DataInitialization extends BaseJPATest {
         }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(13, "信息管理", null, "Administrator", ""));
-        menus.add(new Menu(14, "学生管理", menufbn("信息管理"), "Administrator",
+        em.persist(new Menu("信息管理", null, "Administrator", ""));
+        menus.add(new Menu("学生管理", menufbn("信息管理"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_maintain_student"));
-        menus.add(new Menu(15, "教师管理", menufbn("信息管理"), "Administrator",
+        menus.add(new Menu("教师管理", menufbn("信息管理"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_maintain_teacher"));
-        menus.add(new Menu(16, "文档管理", menufbn("信息管理"), "Administrator",
+        menus.add(new Menu("文档管理", menufbn("信息管理"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_match_will"));
         for (Menu m : menus)
         {
@@ -162,23 +165,28 @@ public class DataInitialization extends BaseJPATest {
         }
 
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(17, "公告与日程", null, "Administrator", ""));
-        menus.add(new Menu(18, "公告管理", menufbn("公告与日程"), "Administrator",
+        em.persist(new Menu("公告与日程", null, "Administrator", ""));
+        menus.add(new Menu("公告管理", menufbn("公告与日程"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_list_messages"));
-        menus.add(new Menu(19, "日程节点", menufbn("公告与日程"), "Administrator",
+        menus.add(new Menu("日程节点", menufbn("公告与日程"), "Administrator",
                 "http://localhost:8080/sse/dispatch/administrator/admin_set_timenode"));
         for (Menu m : menus)
         {
             em.persist(m);
         }
         menus = new ArrayList<Menu>();
-        em.persist(new Menu(20, "学生", null, "Teacher", ""));
-        menus.add(new Menu(21, "选择学生", menufbn("学生"), "Teacher",
+        em.persist(new Menu("学生相关", null, "Teacher", ""));
+        menus.add(new Menu("选择学生", menufbn("学生相关"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_select_student"));
-        menus.add(new Menu(22, "我的学生", menufbn("学生"), "Teacher",
+        menus.add(new Menu("我的学生", menufbn("学生相关"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_my_students"));
-        menus.add(new Menu(23, "公告", null, "Teacher",
-                "http://localhost:8080/sse/dispatch/teacher/teacher_publish_group_message"));
+        em.persist(new Menu("选题相关", null, "Teacher", ""));
+        menus.add(new Menu("批准选题", menufbn("选题相关"), "Teacher",
+                "http://localhost:8080/sse/dispatch/teacher/teacher_review_topic"));
+
+        em.persist(new Menu("个人中心", null, "Teacher", ""));
+        menus.add(new Menu("个人信息", null, "Teacher",
+                "http://localhost:8080/sse/dispatch/teacher/teacher_personal_center"));
         for (Menu m : menus)
         {
             em.persist(m);

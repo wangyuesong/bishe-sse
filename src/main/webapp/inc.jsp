@@ -9,6 +9,9 @@
 <script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/easyui/jquery.min.js"></script>
 <script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/easyui/src/jquery.form.js"></script>
+
+<script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/easyui/jquery.easyui.min.js"></script>
 <script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/easyui/locale/easyui-lang-zh_CN.js"></script>
@@ -23,3 +26,6 @@
 <link rel="stylesheet" type="text/css"
 	href="${pageContext.request.contextPath}/resources/style/eventCalendar.css" />
 
+<!-- Textarea autosize -->
+<script type="text/javascript"
+	src="${pageContext.request.contextPath}/resources/js/autosize.js"></script>

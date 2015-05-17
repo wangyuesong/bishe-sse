@@ -27,7 +27,7 @@ import sse.exception.SSEException;
 import sse.pagemodel.DocumentCommentListModel;
 import sse.pagemodel.DocumentListModel;
 import sse.pagemodel.GenericDataGrid;
-import sse.pagemodel.TopicModel;
+import sse.pagemodel.TopicDetailModel;
 import sse.service.impl.DocumentSerivceImpl;
 import sse.service.impl.DocumentSerivceImpl.AttachmentInfo;
 import sse.service.impl.DocumentSerivceImpl.DocumentInfo;
@@ -57,14 +57,14 @@ public class StudentTopicController {
 
     @ResponseBody
     @RequestMapping(value = "/getTopic", method = { RequestMethod.POST })
-    public TopicModel getTopic(int studentId)
+    public TopicDetailModel getTopic(int studentId)
     {
         return studentTopicServiceImpl.getTopicByStudentId(studentId);
     }
 
     @ResponseBody
     @RequestMapping(value = "/saveTopic")
-    public BasicJson saveTopic(TopicModel tm, int studentId)
+    public BasicJson saveTopic(TopicDetailModel tm, int studentId)
     {
         studentTopicServiceImpl.saveTopic(tm, studentId);
         return new BasicJson(true, "保存成功", null);

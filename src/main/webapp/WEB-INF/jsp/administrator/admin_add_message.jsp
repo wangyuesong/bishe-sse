@@ -1,21 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<jsp:include page="/inc.jsp"></jsp:include>
-<link rel="stylesheet" type="text/css"
-	href="${pageContext.request.contextPath}/resources/style/jquery.wysiwyg.css">
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/js/jquery.wysiwyg.js"></script>
-<link
-	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/col.css"
-	rel="stylesheet">
-<link
-	href="${pageContext.request.contextPath}/resources/responsivegridsystem/css/8cols.css"
-	rel="stylesheet">
-<link
-	href="${pageContext.request.contextPath}/resources/style/uploadify.css"
-	rel="stylesheet" type="text/css" />
-<script type="text/javascript"
-	src="${pageContext.request.contextPath}/resources/js/jquery.uploadify.js"></script>
+
+
 <script type="text/javascript">
   $(function() {
     //初始化编辑器
@@ -23,7 +9,7 @@
     //初始化Attachment的列表
     $('#attachment_list_grid').datagrid(
         {
-          url : '${pageContext.request.contextPath}/admin/timenodemessage/getAllTempAttachments',
+          url : '${pageContext.request.contextPath}/attachment/getAllTempAttachmentsOfAdmin',
           type : "post",
           fitColumns : true,
           border : false,
@@ -74,23 +60,29 @@
           }, '-' ]
         });
 
-    //确认创建这个Document后，数据库增加Document记录，Attachment变为永久
-    $("#message_add_form").form({
-      url : '${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage',
-      type : "post",
-      success : function(result) {
-        $.messager.show({
-          title : '提示',
-          msg : data.msg
-        });
-      }
-    });
+    /*  //确认创建这个Document后，数据库增加Document记录，Attachment变为永久
+     $("#message_add_form").form({
+       url : '${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage',
+       type : "post",
+       success : function(data, result) {
+         $.messager.show({
+           title : '提示',
+           msg : "发布成功"
+         });
+       }
+     });
+     */
+
+    var form_data = {
+      'creatorId' : '${sessionScope.USER.id}',
+    };
 
     $("#file_upload").uploadify({
       'swf' : '${pageContext.request.contextPath}/resources/uploadify.swf',
       'buttonText' : '浏览',
-      'uploader' : '${pageContext.request.contextPath}/student/document/uploadTempAttachments',
+      'uploader' : '${pageContext.request.contextPath}/attachment/uploadTempAttachments',
       'removeCompleted' : true,
+      'formData' : form_data,
       'fileSizeLimit' : '3MB',
       'fileTypeExts' : '*.doc; *.pdf; *.docx;',
       'queueID' : 'fileQueue',
@@ -99,7 +91,6 @@
       'simUploadLimit' : 2,
       'onQueueComplete' : function(event, data) {
         show_up_files();
-        $("#message_add_form").submit();
       },
       'onFallback' : function() {
         $.messager.alert("提示", "检测到您的浏览器不支持Flash，请安装Flash插件");
@@ -111,11 +102,27 @@
     });
 
   })
+  function submit_message() {
+    $.ajax({
+      url : "${pageContext.request.contextPath}/admin/timenodemessage/confirmCreateSystemMessage",
+      type : "post",
+      data : {
+        "title" : $("#title").val(),
+        "content" : $("#content").val()
+      },
+      success : function(data, textStatus) {
+        $.messager.show({
+          title : '提示',
+          msg : data.msg
+        });
+      }
+    });
+
+  }
 
   function delete_one_attachment(id) {
     $.ajax({
-      url : "${pageContext.request.contextPath}/student/document/deleteOneTempAttachmentByAttachmentId?attachmentId="
-          + id,
+      url : "${pageContext.request.contextPath}/attachment/deleteOneAttachmentByAttachmentId?attachmentId=" + id,
       type : "get",
       success : function(data, textStatus) {
         $("#attachment_list_grid").datagrid('reload');
@@ -127,7 +134,7 @@
   }
   function download_one_attachment(id) {
     $.ajax({
-      url : "${pageContext.request.contextPath}/student/document/downloadAttachment?attachmentId=" + id,
+      url : "${pageContext.request.contextPath}/attachment/downloadAttachment?attachmentId=" + id,
       type : "post",
       aysnc : false,
       success : function(data, textStatus) {
@@ -140,7 +147,7 @@
 
   function show_up_files() {
     $.ajax({
-      url : "${pageContext.request.contextPath}/student/document/getAllTempAttachments",
+      url : "${pageContext.request.contextPath}/attachment/getAllTempAttachmentsOfAdmin",
       type : "get",
       success : function(data, textStatus) {
         $("#attachment_list_grid").datagrid('reload');
@@ -150,25 +157,23 @@
 </script>
 <div align="center">
 	<fieldset>
-		<form id="message_add_form">
-			<div class="section group">
-				<div class="col span_1_of_8">
-					<label>标题:</label>
-				</div>
-				<div class="col span_7_of_8">
-					<input name="title" id="title" style="width: 100%;"></input>
-				</div>
+		<div class="section group">
+			<div class="col span_1_of_8">
+				<label>标题:</label>
 			</div>
+			<div class="col span_7_of_8">
+				<input name="title" id="title" style="width: 100%;"></input>
+			</div>
+		</div>
 
-			<div class="section group">
-				<div class="col span_1_of_8">
-					<label>内容:</label>
-				</div>
-				<div class="col span_7_of_8">
-					<textarea id="content" name="content" rows="5" cols="80"></textarea>
-				</div>
+		<div class="section group">
+			<div class="col span_1_of_8">
+				<label>内容:</label>
 			</div>
-		</form>
+			<div class="col span_7_of_8">
+				<textarea id="content" name="content" rows="5" cols="80"></textarea>
+			</div>
+		</div>
 	</fieldset>
 	<fieldset>
 		<legend align="left">相关附件</legend>

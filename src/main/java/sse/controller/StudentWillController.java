@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.WillModel;
 import sse.entity.User;
-import sse.pagemodel.ActionEventModel;
+import sse.pagemodel.ActionEventListModel;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.TeacherListModel;
 import sse.service.impl.DocumentSerivceImpl;
@@ -47,11 +47,11 @@ public class StudentWillController {
 
     @ResponseBody
     @RequestMapping(value = "/getTeacherActionEventsInDatagrid", method = { RequestMethod.GET, RequestMethod.POST })
-    public GenericDataGrid<ActionEventModel> getTeacherActionEventsInDatagrid(String teacherId,
+    public GenericDataGrid<ActionEventListModel> getTeacherActionEventsInDatagrid(String teacherId,
             HttpServletRequest request)
     {
         PaginationAndSortModel pam = new PaginationAndSortModel(request);
-        GenericDataGrid<ActionEventModel> s = studentWillService.findTeachersActionEventsForPagingInGenericDataGrid(
+        GenericDataGrid<ActionEventListModel> s = studentWillService.findTeachersActionEventsForPagingInGenericDataGrid(
                 Integer.parseInt(teacherId),
                 ((User) request.getSession().getAttribute("USER")).getId(),
                 pam);

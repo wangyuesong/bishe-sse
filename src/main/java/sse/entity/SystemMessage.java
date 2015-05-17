@@ -37,7 +37,7 @@ public class SystemMessage extends BaseModel implements Serializable {
     @Column(length = 5000)
     private String content;
 
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, mappedBy = "systemMessage")
+    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "systemMessage")
     private List<Attachment> attachments;
 
     public void addAttachment(Attachment a)
