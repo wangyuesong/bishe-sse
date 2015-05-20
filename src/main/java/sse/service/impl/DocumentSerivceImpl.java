@@ -369,7 +369,7 @@ public class DocumentSerivceImpl {
             HashMap<String, String> returnMap = new HashMap<String, String>();
             for (Will w : wills)
             {
-                Teacher t = teacherDaoImpl.findById(w.getTeacherId());
+                Teacher t = w.getTeacher();
                 returnMap.put("" + w.getLevel(), t.getAccount());
             }
             return returnMap;

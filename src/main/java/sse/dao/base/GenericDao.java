@@ -8,6 +8,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
 
+import org.apache.commons.lang.StringUtils;
+
 import sse.entity.Teacher;
 
 /**
@@ -159,7 +161,8 @@ public abstract class GenericDao<K, E> implements Dao<K, E> {
     @SuppressWarnings("unchecked")
     public List<E> findForPaging(String jql, HashMap<String, Object> params, int page, int pageSize,
             String sortCriteria, String order) {
-        jql += ((sortCriteria == null || order == null) ? "" : " order by " + sortCriteria + " " + order);
+        jql += ((StringUtils.isEmpty(sortCriteria) || StringUtils.isEmpty(order) ? "" : " order by " + sortCriteria
+                + " " + order));
         Query namedQuery = this.getEntityManager().createQuery(jql, entityClass);
         if (params != null)
             for (String oneKey : params.keySet())

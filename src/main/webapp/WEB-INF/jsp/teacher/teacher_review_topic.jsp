@@ -121,7 +121,7 @@
 
 
 <fieldset style="color: #0099FF">
-	<legend id="legend" align="left" style="color: #0099FF">学生列表</legend>
+	<legend id="legend" align="left" style="color: #0099FF">学生选题列表</legend>
 	<div id="topic_list_grid"></div>
 </fieldset>
 <br />

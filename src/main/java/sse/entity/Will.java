@@ -3,13 +3,14 @@ package sse.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -25,9 +26,9 @@ import sse.enums.WillStatusEnum;
 @NamedQueries(
 {
         @NamedQuery(name = "Will.findAll", query = "SELECT w FROM Will w"),
-        @NamedQuery(name = "Will.findAllWillByStudentId", query = "select w from Will w where w.studentId = :studentId order by w.level ASC")
+        @NamedQuery(name = "Will.findAllWillByStudentId", query = "select w from Will w where w.student.id = :studentId order by w.level ASC")
 })
-public class Will extends BaseModel implements Serializable {
+public class Will extends BaseModel implements Serializable, Comparable<Will> {
     /**
      * 
      */
@@ -38,11 +39,13 @@ public class Will extends BaseModel implements Serializable {
     @Column(unique = true, nullable = false)
     private int id;
 
-    @Column(nullable = false)
-    private int studentId;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Student student;
 
-    @Column(nullable = false)
-    private int teacherId;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Teacher teacher;
 
     @Column(nullable = false)
     private int level;
@@ -51,25 +54,7 @@ public class Will extends BaseModel implements Serializable {
     @Column(length = 10, nullable = false)
     private WillStatusEnum status = WillStatusEnum.待定;
 
-    public Will() {
-        super();
-    }
-
-    public Will(int studentId, int teacherId, int level, WillStatusEnum status) {
-        super();
-        this.studentId = studentId;
-        this.teacherId = teacherId;
-        this.level = level;
-        this.status = status;
-    }
-
-    public Will(int studentId, int teacherId, int level) {
-        super();
-        this.studentId = studentId;
-        this.teacherId = teacherId;
-        this.level = level;
-    }
-
+    
     public int getId() {
         return id;
     }
@@ -78,20 +63,20 @@ public class Will extends BaseModel implements Serializable {
         this.id = id;
     }
 
-    public int getStudentId() {
-        return studentId;
+    public Student getStudent() {
+        return student;
     }
 
-    public void setStudentId(int studentId) {
-        this.studentId = studentId;
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
-    public int getTeacherId() {
-        return teacherId;
+    public Teacher getTeacher() {
+        return teacher;
     }
 
-    public void setTeacherId(int teacherId) {
-        this.teacherId = teacherId;
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
     }
 
     public int getLevel() {
@@ -108,6 +93,40 @@ public class Will extends BaseModel implements Serializable {
 
     public void setStatus(WillStatusEnum status) {
         this.status = status;
+    }
+
+    public Will(int id, Student student, Teacher teacher, int level, WillStatusEnum status) {
+        super();
+        this.id = id;
+        this.student = student;
+        this.teacher = teacher;
+        this.level = level;
+        this.status = status;
+    }
+
+    public Will() {
+        super();
+    }
+
+    public Will(Student student, Teacher teacher, int level) {
+        super();
+        this.student = student;
+        this.teacher = teacher;
+        this.level = level;
+    }
+
+    public Will(Student student, Teacher teacher, int level, WillStatusEnum status) {
+        super();
+        this.student = student;
+        this.teacher = teacher;
+        this.level = level;
+        this.status = status;
+    }
+
+    @Override
+    public int compareTo(Will o) {
+        
+        return 0;
     }
 
 }

@@ -95,69 +95,51 @@
   function reload_one_student_detail(studentId) {
     $("#student_detail_grid").css("visibility", "visible");
     $("#accordin_container").height($(document.body).height());
+    load_student_action_events(studentId);
     load_student_document_detail("任务书", studentId);
     load_student_document_detail("开题报告", studentId);
     load_student_document_detail("最终论文", studentId);
   }
 
-  $(function() {
-    $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
-    $("legend").css("color", "#0099FF").attr("align", "left");
-    //设置宽高
-    /*    $("#student_detail_grid").height($(document.body).height());
-     */
-    //学生列表
-    $('#student_list_grid').datagrid(
-        {
-          url : '${pageContext.request.contextPath}/teacher/student/getMyStudentsInDatagrid',
-          type : 'get',
-          fitColumns : true,
-          border : false,
-          nowrap : false,
-          pagination : true,
-          pageSize : 10,
-          singleSelect : true,
-          frozenColumns : [ [ {
-            field : 'id',
-            title : 'Id',
-            width : 10,
-            hidden : true
-          } ] ],
-          columns : [ [
-              {
-                field : 'account',
-                title : '学号',
-                width : 100,
-              },
-              {
-                field : 'name',
-                title : '姓名',
-                width : 100,
-                formatter : function(value, rowData, index) {
-                  var reload = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnChange"'
-                      + 'data-options="plain:true" onclick="reload_one_student_detail(' + rowData.id + ')">' + value
-                      + '</a>';
-                  return reload;
-                }
-              }, {
-                field : 'opt',
-                title : '邮箱',
-                width : 100,
-              }, {
-                field : 'phone',
-                title : '电话',
-                width : 100,
-              }
+  //该方法加载该学生的近期事件
+  function load_student_action_events(studentId) {
+    $("#student_action_events_grid").css("visibility", "visible");
+    $('#action_events_container').datagrid({
+      url : '${pageContext.request.contextPath}/teacher/student/getStudentActionEventsByStudentId',
+      type : 'get',
+      queryParams : {
+        "studentId" : studentId
+      },
+      fitColumns : true,
+      border : false,
+      nowrap : false,
+      pagination : true,
+      singleSelect : true,
+      frozenColumns : [ [ {
+        field : 'id',
+        title : 'Id',
+        width : 10,
+        hidden : true
+      } ] ],
+      columns : [ [ {
+        field : 'createTime',
+        title : '时间',
+        width : 40,
+      }, {
+        field : 'description',
+        title : '操作',
+        width : 200,
+      } ] ]
+    });
 
-          ] ]
-        });
-    $('#student_list_grid').datagrid('getPager').pagination({
-      pageSize : 10,
+    $('#action_events_container').datagrid('getPager').pagination({
+      pageSize : 5,
       pageList : [ 5, 10, 15 ],
       beforePageText : "第",
       afterPageText : "页,共{pages}页"
     });
-  });
+  }
+
   //该方法用于加载学生的三个不同文档
   function load_student_document_detail(type, studentId) {
     var query_prefix = "";
@@ -324,6 +306,68 @@
           }, '-' ]
         });
   }
+
+  $(function() {
+    $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
+    $("legend").css("color", "#0099FF").attr("align", "left");
+
+    autosize($('textarea'));
+
+    //设置宽高
+    /*    $("#student_detail_grid").height($(document.body).height());
+     */
+    //学生列表
+    $('#student_list_grid').datagrid(
+        {
+          url : '${pageContext.request.contextPath}/teacher/student/getMyStudentsInDatagrid',
+          type : 'get',
+          fitColumns : true,
+          border : false,
+          nowrap : false,
+          pagination : true,
+          pageSize : 10,
+          singleSelect : true,
+          frozenColumns : [ [ {
+            field : 'id',
+            title : 'Id',
+            width : 10,
+            hidden : true
+          } ] ],
+          columns : [ [
+              {
+                field : 'account',
+                title : '学号',
+                width : 100,
+              },
+              {
+                field : 'name',
+                title : '姓名',
+                width : 100,
+                formatter : function(value, rowData, index) {
+                  var reload = '<a href="javascript:void(0)" class="easyui-linkbutton" id="btnChange"'
+                      + 'data-options="plain:true" onclick="reload_one_student_detail(' + rowData.id + ')">' + value
+                      + '</a>';
+                  return reload;
+                }
+              }, {
+                field : 'opt',
+                title : '邮箱',
+                width : 100,
+              }, {
+                field : 'phone',
+                title : '电话',
+                width : 100,
+              }
+
+          ] ]
+        });
+    $('#student_list_grid').datagrid('getPager').pagination({
+      pageSize : 10,
+      pageList : [ 5, 10, 15 ],
+      beforePageText : "第",
+      afterPageText : "页,共{pages}页"
+    });
+  });
 </script>
 
 
@@ -334,6 +378,16 @@
 	<legend id="legend" align="left" style="color: #0099FF">学生列表</legend>
 	<div id="student_list_grid"></div>
 </fieldset>
+<br />
+<div id="student_action_events_grid" style="visibility: hidden">
+	<fieldset style="color: #0099FF">
+		<legend id="legend" align="left" style="color: #0099FF">近期操作</legend>
+		<div>
+			<table id="action_events_container">
+			</table>
+		</div>
+	</fieldset>
+</div>
 <br />
 <div id="student_detail_grid" style="visibility: hidden">
 	<fieldset style="color: #0099FF">
@@ -365,7 +419,7 @@
 							</div>
 							<div class="col span_4_of_6">
 								<textarea id="renwushu_document_description"
-									class="easyui-validatebox" style="width: 100%; height: 300px"
+									class="easyui-validatebox" style="width: 100%; height: 100px"
 									name="renwushu_document_description"></textarea>
 							</div>
 						</div>
@@ -438,7 +492,7 @@
 							</div>
 							<div class="col span_4_of_6">
 								<textarea id="kaitibaogao_document_description"
-									class="easyui-validatebox" style="width: 100%; height: 300px"
+									class="easyui-validatebox" style="width: 100%; height: 100px"
 									name="kaitibaogao_document_description"></textarea>
 							</div>
 						</div>
@@ -514,7 +568,7 @@
 							</div>
 							<div class="col span_4_of_6">
 								<textarea id="zuizhonglunwen_document_description"
-									class="easyui-validatebox" style="width: 100%;; height: 300px"
+									class="easyui-validatebox" style="width: 100%;; height: 100px"
 									name="zuizhonglunwen_document_description"></textarea>
 							</div>
 						</div>

@@ -14,6 +14,27 @@
 <script>
   var editIndex = undefined;
   var grid = $('#teacher_grid');
+  $.extend($.fn.datagrid.defaults.editors, {
+    textarea : {
+      init : function(container, options) {
+        var input = $('<textarea rows=1 id="self_description" class="datagrid-editable-input">').appendTo(container);
+        return input;
+      },
+      destroy : function(target) {
+        $(target).remove();
+      },
+      getValue : function(target) {
+        return $(target).val();
+      },
+      setValue : function(target, value) {
+        $(target).val(value);
+      },
+      resize : function(target, width) {
+        $(target)._outerWidth(width);
+      }
+    }
+  });
+
   $(function() {
 
     grid.datagrid({
@@ -63,10 +84,9 @@
           {
             field : 'capacity',
             title : '容量',
-            sortable : "true",
             width : 80,
             editor : {
-              type : "textbox"
+              type : "numberspinner"
             }
           },
           {
@@ -98,7 +118,7 @@
             title : '自我介绍',
             width : 80,
             editor : {
-              type : "textbox"
+              type : "textarea"
             }
           },
           {
@@ -156,6 +176,8 @@
     //CSS related
     $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
     $("legend").css("color", "#0099FF").attr("align", "left");
+    autosize($('textarea'));
+
   });
 
   function endEditing() {

@@ -75,9 +75,6 @@ public class DocumentController {
             HttpServletResponse response) {
         int page = 1;
         int pageSize = 10;
-        HttpSession session = request.getSession();
-        if (session.getAttribute("USER") == null)
-            return null;
         GenericDataGrid<DocumentListModel> documents = documentServiceImpl.findDocumentsForPagingByCreatorId(
                 page, pageSize,
                 null,
@@ -195,96 +192,6 @@ public class DocumentController {
         AttachmentInfo info = documentServiceImpl.uploadAttachmentToFtp(creatorId, fileMap);
         // Create temp entry in DB Attachment table
         documentServiceImpl.createTempAttachmentEntryInDB(info);
-    }
-
-    /**
-     * Description: 确认创建附件
-     * 
-     * @param documentModel
-     * @param request
-     * @return
-     *         boolean
-     */
-    @ResponseBody
-    @RequestMapping(value = "/confirmCreateDocument", method = { RequestMethod.POST })
-    public void confirmCreateDocument(int creatorId, DocumentFormModel documentModel, HttpServletRequest request) {
-        documentServiceImpl.confirmCreateDocumentAndAddDocumentToDB(creatorId, documentModel);
-        actionEventServiceImpl.createActionEvent(creatorId, "创建了文档:" + documentModel.getDocument_name());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/cancelCreateDocument")
-    public BasicJson cancelCreateDocument(int creatorId, String documentType, HttpServletRequest request,
-            HttpServletResponse response)
-            throws SSEException {
-        try {
-            documentServiceImpl.cancelCreateDocumentAndRemoveTempAttachmentsOnFTPServer(creatorId,
-                    DocumentTypeEnum.getType("documentType"));
-        } catch (IOException e) {
-            logger.error("删除附件出错", e);
-            throw new SSEException("删除附件出错", e);
-        }
-        return new BasicJson(true, "删除成功", null);
-    }
-
-    /**
-     * Description: 通用下载附件方法
-     * 
-     * @param request
-     * @param attachmentId
-     * @param response
-     * @throws SSEException
-     *             void
-     */
-    @RequestMapping(value = "/downloadAttachmentByAttachmentId")
-    public void downloadAttachmentByAttachmentId(int attachmentId, HttpServletRequest request,
-            HttpServletResponse response)
-            throws SSEException {
-        response.setContentType("application/octet-stream");
-
-        try {
-            response.setHeader(
-                    "Content-Disposition",
-                    "attachment; filename="
-                            + new String(documentServiceImpl.findAttachmentListNameByAttachmentId(attachmentId)
-                                    .getBytes("GB2312"), "iso8859-1"));
-        } catch (UnsupportedEncodingException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        try {
-            documentServiceImpl.downloadAttachment(attachmentId, response.getOutputStream());
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            throw new SSEException("下载失败，请联系管理员", e);
-        }
-
-    }
-
-    /**
-     * Description: 通用删除附件方法，同时删除数据库记录
-     * 
-     * @param request
-     * @param response
-     * @return
-     *         boolean
-     */
-    @ResponseBody
-    @RequestMapping(value = "/deleteOneAttachmentByAttachmentId")
-    public BasicJson deleteOneAttachmentByAttachmentId(int attachmentId, HttpServletRequest request,
-            HttpServletResponse response) {
-        actionEventServiceImpl.createActionEvent(((User) (request.getSession().getAttribute("USER"))).getId(),
-                "删除了附件" + documentServiceImpl.findAttachmentListNameByAttachmentId(attachmentId));
-        try {
-            documentServiceImpl.deleteAttachmentOnFTPServerAndDBByAttachmentId(
-                    attachmentId);
-        } catch (Exception e) {
-            logger.error("删除附件出错", e);
-            e.printStackTrace();
-            throw new SSEException("删除附件出错", e);
-        }
-
-        return new BasicJson(true, "删除附件成功", null);
     }
 
     /**

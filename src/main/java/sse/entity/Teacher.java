@@ -30,6 +30,7 @@ public class Teacher extends User {
     @Column(length = 45)
     private String title;
 
+    @Column
     private int capacity;
 
     @Column(length = 45)
@@ -40,6 +41,9 @@ public class Teacher extends User {
 
     @Column(length = 1000, name = "CANDIDATE_TOPICS")
     private String candidateTopics;
+
+    @OneToMany(mappedBy = "teacher", cascade = { CascadeType.ALL })
+    private List<Will> wills;
 
     public void addStudent(Student s)
     {
@@ -59,6 +63,14 @@ public class Teacher extends User {
 
     public void setCandidateTopics(String candidateTopics) {
         this.candidateTopics = candidateTopics;
+    }
+
+    public List<Will> getWills() {
+        return wills;
+    }
+
+    public void setWills(List<Will> wills) {
+        this.wills = wills;
     }
 
     public String getDirection() {

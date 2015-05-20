@@ -78,6 +78,8 @@
   }
   $(function() {
 
+    $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left");
+    $("legend").css("color", "#0099FF").attr("align", "left");
     $('#candidate_students_datagrid').datagrid(
         {
           url : '${pageContext.request.contextPath}/teacher/student/getCandidateStudents',

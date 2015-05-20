@@ -18,7 +18,7 @@ public class TeacherCURDModel {
     private String password;
     private String selfDescription;
     private String gender;
-    private int capcacity;
+    private int capacity;
     private String degree;
     private String title;
     private String direction;
@@ -88,14 +88,6 @@ public class TeacherCURDModel {
         this.gender = gender;
     }
 
-    public int getCapcacity() {
-        return capcacity;
-    }
-
-    public void setCapcacity(int capcacity) {
-        this.capcacity = capcacity;
-    }
-
     public String getDegree() {
         return degree;
     }
@@ -128,8 +120,16 @@ public class TeacherCURDModel {
         this.candidateTopics = candidateTopics;
     }
 
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
     public TeacherCURDModel(int id, String account, String name, String email, String phone, String password,
-            String selfDescription, String gender, int capcacity, String degree, String title, String direction,
+            String selfDescription, String gender, int capacity, String degree, String title, String direction,
             String candidateTopics) {
         super();
         this.id = id;
@@ -140,7 +140,7 @@ public class TeacherCURDModel {
         this.password = password;
         this.selfDescription = selfDescription;
         this.gender = gender;
-        this.capcacity = capcacity;
+        this.capacity = capacity;
         this.degree = degree;
         this.title = title;
         this.direction = direction;

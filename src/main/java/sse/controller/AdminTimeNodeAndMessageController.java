@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,14 +14,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.SystemMessageFormModel;
-import sse.pagemodel.SystemMessageListModel;
-import sse.pagemodel.GenericDataGrid;
-import sse.pagemodel.AccessRuleListModel;
-import sse.pagemodel.TimeNodeListModel;
 import sse.dao.impl.TimeNodeDaoImpl.CalendarEvent;
+import sse.pagemodel.AccessRuleListModel;
+import sse.pagemodel.GenericDataGrid;
+import sse.pagemodel.SystemMessageListModel;
+import sse.pagemodel.TimeNodeListModel;
 import sse.service.impl.AccessRuleServiceImpl;
-import sse.service.impl.AdminTimenodeServiceImpl;
-import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
+import sse.service.impl.AdminTimeNodeAndMessageServiceImpl;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl;
 import sse.utils.AccessRulePropertiesUtil;
@@ -37,7 +35,7 @@ import sse.utils.PaginationAndSortModel;
 public class AdminTimeNodeAndMessageController {
 
     @Autowired
-    private AdminTimenodeServiceImpl adminTimenodeServiceImpl;
+    private AdminTimeNodeAndMessageServiceImpl adminTimenodeServiceImpl;
 
     @Autowired
     private AccessRuleServiceImpl accessRuleServiceImpl;

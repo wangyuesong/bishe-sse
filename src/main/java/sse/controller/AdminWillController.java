@@ -67,12 +67,6 @@ public class AdminWillController {
         return adminWillServiceImpl.findTeacherAccountById(Integer.parseInt(request.getParameter("teacherId")));
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/doMatch", method = { RequestMethod.GET })
-    public void doMatch(HttpServletRequest request, HttpServletResponse response) {
-        List<MatchPair> matchPairs = adminWillServiceImpl.doMatch();
-    }
-
     /**
      * @Method: updateMatchPairs
      * @Description: 更新教师和学生之间的关系，在更新之前，首先检查是否有超员（教师容量小于选择人数），如果没有，则按照传入参数进行分配，否则返回错误
@@ -105,10 +99,18 @@ public class AdminWillController {
         return adminWillServiceImpl.findAllTeachersInSelectModelList();
     }
 
+    /**
+     * Description: 系统分配
+     * 
+     * @param request
+     * @param response
+     * @return
+     *         List<MatchPair>
+     */
     @ResponseBody
     @RequestMapping(value = "/systemAssign", method = { RequestMethod.GET, RequestMethod.POST })
-    public List<MatchPair> systemAssign(HttpServletRequest request, HttpServletResponse response) {
-        List<MatchPair> matchPairs = adminWillServiceImpl.doMatch();
+    public List<MatchPair> systemAssign(String sortCriteria, HttpServletRequest request, HttpServletResponse response) {
+        List<MatchPair> matchPairs = adminWillServiceImpl.doMatch(sortCriteria);
         return matchPairs;
     }
 

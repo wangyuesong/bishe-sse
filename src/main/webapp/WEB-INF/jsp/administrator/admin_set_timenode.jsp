@@ -23,41 +23,45 @@
 	</div>
 </fieldset>
 <br />
-<fieldset>
-	<legend id="detail_legend" align="center">节点规则</legend>
-	<div class="section group">
-		<div class="col span_1_of_8">
-			<label>学生禁止:</label>
-		</div>
-		<div class="col span_3_of_8">
-			<select class="easyui-combobox" name="student_access_rule"
-				id="student_access_rule"
-				data-options="multiple:true,multiline:true,
+
+<div id="time_node_detail_container" style="visibility: hidden">
+	<fieldset>
+		<legend id="detail_legend" align="center">节点规则</legend>
+		<div class="section group">
+			<div class="col span_1_of_8">
+				<label>学生禁止:</label>
+			</div>
+			<div class="col span_3_of_8">
+				<select class="easyui-combobox" name="student_access_rule"
+					id="student_access_rule"
+					data-options="multiple:true,multiline:true,
 			url:'${pageContext.request.contextPath}/admin/timenodemessage/getAllStudentAccessRules'
 			,method: 'post'
 			,valueField: 'url'
 			,textField: 'name'"
-				style="width: 200px; height: 50px"></select>
-		</div>
+					style="width: 200px; height: 50px"></select>
+			</div>
 
-		<div class="col span_1_of_8">
-			<label>教师禁止:</label>
-		</div>
-		<div class="col span_3_of_8">
-			<select class="easyui-combobox" name="teacher_access_rule"
-				id="teacher_access_rule"
-				data-options="multiple:true,multiline:true,
+			<div class="col span_1_of_8">
+				<label>教师禁止:</label>
+			</div>
+			<div class="col span_3_of_8">
+				<select class="easyui-combobox" name="teacher_access_rule"
+					id="teacher_access_rule"
+					data-options="multiple:true,multiline:true,
 			url:'${pageContext.request.contextPath}/admin/timenodemessage/getAllTeacherAccessRules'
 			,method: 'post'
 			,valueField: 'url'
 			,textField: 'name'"
-				style="width: 200px; height: 50px"></select>
+					style="width: 200px; height: 50px"></select>
+			</div>
 		</div>
-	</div>
-	<a href="javascript:void(0);" class="easyui-linkbutton"
-		onclick="save_access_rules()"
-		data-options="iconCls:'icon-save',plain:true" id="updateWillButton">保存</a>
-</fieldset>
+		<a href="javascript:void(0);" class="easyui-linkbutton"
+			onclick="save_access_rules()"
+			data-options="iconCls:'icon-save',plain:true" id="updateWillButton">保存</a>
+	</fieldset>
+</div>
+
 <script type="text/javascript">
   var time_node_types = [ {
     "value" : "关键",
@@ -282,6 +286,7 @@
 
   function edit_access_rules(time_node_id, time_node_name) {
     selected_time_node_id = time_node_id;
+    $("#time_node_detail_container").css("visibility", "visible");
     $("#detail_legend").html(time_node_name + "节点规则");
     $.ajax({
       url : "${pageContext.request.contextPath}/admin/timenodemessage/getAccessRulesByTimeNodeIdAndRole",
@@ -335,7 +340,10 @@
       dataType : "json",
       contentType : "application/json",
       success : function(data, textStatus) {
-
+        $.messager.show({
+          title : '提示',
+          msg : data.msg
+        });
       }
     });
   }

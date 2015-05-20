@@ -6,6 +6,8 @@
   $(function() {
     //初始化编辑器
     $('#content').wysiwyg();
+
+    autosize($('textarea'));
     //初始化Attachment的列表
     $('#attachment_list_grid').datagrid(
         {
@@ -171,7 +173,7 @@
 				<label>内容:</label>
 			</div>
 			<div class="col span_7_of_8">
-				<textarea id="content" name="content" rows="5" cols="80"></textarea>
+				<textarea id="content" name="content" style="width:100%" cols="80">在此键入</textarea>
 			</div>
 		</div>
 	</fieldset>

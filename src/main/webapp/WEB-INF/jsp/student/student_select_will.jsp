@@ -200,6 +200,7 @@
 		<div class="section group">
 			<div class="col span_1_of_2">
 				第一志愿 <select id="firstWill" name="firstWill" style="width: 250px;"></select>
+				<p style="font-size: 2px">备注：第一志愿较重要，如果您已经和教师取得联系，请将教师填入第一志愿，教师将有权力直接将您录取</p>
 			</div>
 			<div class="col span_1_of_2" id="firstWillDetail">
 				<table width="98%" border="0" cellpadding="2" class="tableForm"
@@ -322,7 +323,8 @@
 </fieldset>
 
 <script>
-  $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left").css("margin-top","20px");
+  $("fieldset").css("border", "1px #99BBE8 dashed").css("padding", "20px").attr("align", "left").css("margin-top",
+      "20px");
   $("legend").css("color", "#0099FF").attr("align", "left");
 </script>
 </body>

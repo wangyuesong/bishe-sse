@@ -2,10 +2,12 @@ package sse.dao.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
+
 import sse.commandmodel.WillModel;
 import sse.dao.base.GenericDao;
 import sse.entity.Will;
@@ -25,6 +27,9 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
 
     @Autowired
     TeacherDaoImpl teacherDaoImpl;
+
+    @Autowired
+    StudentDaoImpl studentDaoImpl;
 
     public List<Will> findPreviousSelectionsByStudentId(int studentId)
     {
@@ -53,7 +58,8 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
             {
                 // Keep those wills that needed to be updated or created
                 String teacherId = willModel.getWillByLevel(i);
-                willList.add(new Will(studentId, Integer.parseInt(teacherId), i));
+                willList.add(new Will(studentDaoImpl.findById(studentId), teacherDaoImpl.findById(Integer
+                        .parseInt(teacherId)), i));
             }
         }
 
@@ -76,7 +82,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public List<Will> findWillsByStudentId(int studentId)
     {
-        String queryStr = "select w from Will w where w.studentId= :studentId";
+        String queryStr = "select w from Will w where w.student.id= :studentId";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("studentId", studentId).getResultList();
     }
@@ -90,28 +96,11 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public List<Will> findWillsByTeacherId(int teacherId)
     {
-        String queryStr = "select w from Will w where w.teacherId= :teacherId";
+        String queryStr = "select w from Will w where w.teacher.id= :teacherId";
         return this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("teacherId", teacherId).getResultList();
     }
 
-    /**
-     * Description: Get one level wills which is not rejected by this teacher in ascending order
-     * 
-     * @param @param teacherId
-     * @param @param level
-     * @param @return
-     * @return List<Will>
-     */
-    public List<Will> findAllNotRejectedWillsByTeacherIdAndLevel(int teacherId, int level)
-    {
-        String queryStr = "select w from Will w where w.teacherId= :teacherId and w.status!= :status and w.level= :level order by w.updateTime asc";
-        return this.getEntityManager().createQuery(queryStr, Will.class)
-                .setParameter("teacherId", teacherId)
-                .setParameter("status", WillStatusEnum.接受)
-                .setParameter("level", level)
-                .getResultList();
-    }
 
     /**
      * Description: 删除id为studentId的志愿登记为level的志愿,没有transaction
@@ -122,7 +111,7 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      */
     public void deleteStudentWillByLevelWithoutTransaction(int studentId, int level)
     {
-        String queryStr = "select w from Will w where w.level=:level and w.studentId= :studentId";
+        String queryStr = "select w from Will w where w.level=:level and w.student.id= :studentId";
         List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("studentId", studentId).setParameter("level", level).getResultList();
         if (!CollectionUtils.isEmpty(wills))
@@ -138,25 +127,38 @@ public class WillDaoImpl extends GenericDao<Integer, Will> {
      * @return void
      */
     public void updateStudentWillByLevel(int studentId, int i, int teacherId) {
-        String queryStr = "select w from Will w where w.level=:level and w.studentId= :studentId";
+        String queryStr = "select w from Will w where w.level=:level and w.student.id= :studentId";
         List<Will> wills = this.getEntityManager().createQuery(queryStr, Will.class)
                 .setParameter("studentId", studentId).setParameter("level", i).getResultList();
         // 如果之前有这个level的will
         if (!CollectionUtils.isEmpty(wills))
         {
             Will w = wills.get(0);
-            if (w.getStudentId() != studentId || w.getTeacherId() != teacherId)
+            if (w.getStudent().getId() != studentId || w.getTeacher().getId() != teacherId)
             {
-                w.setStudentId(studentId);
-                w.setTeacherId(teacherId);
-                super.mergeWithTransaction(w);
+                w.setStudent(studentDaoImpl.findById(studentId));
+                w.setTeacher(teacherDaoImpl.findById(teacherId));
+                this.mergeWithTransaction(w);
                 // super.removeWithTransaction(w);
                 // super.persistWithTransaction(new Will(new WillPK(studentId, teacherId), i));
             }
         }
         // 如果没有这个level的will，直接创建
         else {
-            super.persistWithTransaction(new Will(studentId, teacherId, i));
+            this.persistWithTransaction(new Will(studentDaoImpl.findById(studentId), teacherDaoImpl
+                    .findById(teacherId), i));
         }
+    }
+
+    /**
+     * Description: 左链接查询返回
+     * 
+     * @return
+     *         List<Object []>
+     */
+    public List<Object[]> findWillListForPaging() {
+        String queryStr = "select s.id,s.name,s.account,w from Student s left join s.wills w order by s.id,w.level ASC";
+        List<Object[]> wills = this.getEntityManager().createQuery(queryStr).getResultList();
+        return wills;
     }
 }

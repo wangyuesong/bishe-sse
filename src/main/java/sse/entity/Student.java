@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 
 import sse.enums.DocumentTypeEnum;
 import sse.enums.MatchLevelEnum;
@@ -47,6 +48,9 @@ public class Student extends User {
     @OneToMany(mappedBy = "creator", cascade = { CascadeType.ALL })
     private List<Document> documents;
 
+    @OneToMany(mappedBy = "student", cascade = { CascadeType.ALL })
+    private List<Will> wills;
+
     public Topic getTopic() {
         return topic;
     }
@@ -60,6 +64,14 @@ public class Student extends User {
                     , this, this);
             this.getDocuments().add(d);
         }
+    }
+
+    public List<Will> getWills() {
+        return wills;
+    }
+
+    public void setWills(List<Will> wills) {
+        this.wills = wills;
     }
 
     public void setTopic(Topic topic) {

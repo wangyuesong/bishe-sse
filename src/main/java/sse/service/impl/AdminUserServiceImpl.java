@@ -123,7 +123,7 @@ public class AdminUserServiceImpl {
             t.setPassword(m.getPassword());
             t.setSelfDescription(m.getSelfDescription());
             t.setGender(m.getGender());
-            t.setCapacity(m.getCapcacity());
+            t.setCapacity(m.getCapacity());
             t.setDegree(m.getDegree());
             t.setTitle(m.getTitle());
             t.setDirection(m.getDirection());

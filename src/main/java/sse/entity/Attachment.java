@@ -55,7 +55,7 @@ public class Attachment extends BaseModel implements Serializable {
     @JoinColumn(name = "DOCUMENT")
     private Document document;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "SYSTEM_MESSAGE")
     private SystemMessage systemMessage;
 

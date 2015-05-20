@@ -22,18 +22,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sse.commandmodel.BasicJson;
+import sse.dao.impl.ActionEventDaoImpl;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.dao.impl.WillDaoImpl;
+import sse.entity.ActionEvent;
 import sse.entity.Student;
 import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
 import sse.enums.WillStatusEnum;
+import sse.pagemodel.ActionEventListModel;
 import sse.pagemodel.CandidateStudentListModel;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.StudentListModel;
+import sse.utils.DateTimeUtil;
 import sse.utils.PaginationAndSortModel;
 
 /**
@@ -56,6 +60,9 @@ public class TeacherStudentServiceImpl {
 
     @Autowired
     private WillDaoImpl willDaoImpl;
+
+    @Autowired
+    private ActionEventDaoImpl actionEventDaoImpl;
 
     /**
      * Description: 返回某教师的所有学生
@@ -98,20 +105,20 @@ public class TeacherStudentServiceImpl {
         params.put("teacherId", teacherId);
         params.put("level", 1);
         List<Will> wills = willDaoImpl.findForPaging(
-                "select w from Will w where w.teacherId=:teacherId and w.level=:level", params, pm.getPage(),
+                "select w from Will w where w.teacher.id=:teacherId and w.level=:level", params, pm.getPage(),
                 pm.getRows(),
                 pm.getSort(), pm.getOrder());
         List<CandidateStudentListModel> candidateStudents = new LinkedList<CandidateStudentListModel>();
         for (Will w : wills)
         {
-            Student s = studentDaoImpl.findById(w.getStudentId());
+            Student s = studentDaoImpl.findById(w.getStudent().getId());
             CandidateStudentListModel model = new CandidateStudentListModel(w.getId(), s.getId(), s.getAccount(),
                     s.getName(),
                     s.getEmail(), s.getPhone(), w.getStatus().getValue());
             candidateStudents.add(model);
         }
         int count = willDaoImpl.findForCount(
-                "select w from Will w where w.teacherId=:teacherId and w.level=:level", params);
+                "select w from Will w where w.teacher.id=:teacherId and w.level=:level", params);
         return new GenericDataGrid<CandidateStudentListModel>(count, candidateStudents);
     }
 
@@ -126,17 +133,20 @@ public class TeacherStudentServiceImpl {
     public BasicJson changeWillStatus(int willId, String decision) {
         // TODO Auto-generated method stub
         Will w = willDaoImpl.findById(willId);
+        int capacity = w.getTeacher().getCapacity();
+        if (capacity <= w.getTeacher().getStudents().size() && StringUtils.equals("接受", decision))
+            return new BasicJson(true, "您的学生已达到人数上限", null);
         w.setStatus(WillStatusEnum.getType(decision));
         willDaoImpl.mergeWithTransaction(w);
-        Student s = studentDaoImpl.findById(w.getStudentId());
-        Teacher t = teacherDaoImpl.findById(w.getTeacherId());
+        Student s = studentDaoImpl.findById(w.getStudent().getId());
+        Teacher t = teacherDaoImpl.findById(w.getTeacher().getId());
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("studentId", s.getId());
-        List<Will> wills = willDaoImpl.findForPaging("select w from Will w where w.studentId=:studentId", params);
+        List<Will> wills = willDaoImpl.findForPaging("select w from Will w where w.student.id=:studentId", params);
         MatchLevelEnum matchLevel = MatchLevelEnum.调剂;
         for (Will one : wills)
         {
-            if (one.getTeacherId() == t.getId())
+            if (one.getTeacher().getId() == t.getId())
                 matchLevel = MatchLevelEnum.getTypeByIntLevel(one.getLevel());
         }
         if (StringUtils.equals("接受", decision)) {
@@ -237,5 +247,40 @@ public class TeacherStudentServiceImpl {
             this.selfDescription = selfDescription;
         }
 
+    }
+
+    /**
+     * Description: TODO
+     * 
+     * @param st
+     * @return
+     *         BasicJson
+     */
+    public GenericDataGrid<ActionEventListModel> getStudentActionEventsByStudentId(int studentId,
+            PaginationAndSortModel pam) {
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("actor", studentId);
+        List<ActionEvent> actionEvents = actionEventDaoImpl
+                .findForPaging(
+                        "select ae from ActionEvent ae where ae.actor.id=:actor",
+                        params, pam.getPage(),
+                        pam.getRows(),
+                        "ae." + pam.getSort(), pam.getOrder());
+
+        List<ActionEventListModel> actionEventModels = new ArrayList<ActionEventListModel>();
+        for (ActionEvent e : actionEvents)
+        {
+            ActionEventListModel aem = new ActionEventListModel(e.getId(), e.getActor().getName(),
+                    DateTimeUtil.formatToMin(e
+                            .getCreateTime()), e.getDescription());
+            actionEventModels.add(aem);
+        }
+        GenericDataGrid<ActionEventListModel> dataGrid = new GenericDataGrid<ActionEventListModel>();
+        dataGrid.setRows(actionEventModels);
+        dataGrid.setTotal(actionEventDaoImpl
+                .findForCount(
+                        "select ae from ActionEvent ae where ae.actor.id=:actor",
+                        params));
+        return dataGrid;
     }
 }

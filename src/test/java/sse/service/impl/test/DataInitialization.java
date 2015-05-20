@@ -34,9 +34,29 @@ public class DataInitialization extends BaseJPATest {
                 .getResultList().get(0))).getId();
     }
 
+    public Teacher fbnTeacher(String name)
+    {
+        return (Teacher) (em.createQuery("select t from Teacher t where t.name=:name").setParameter("name", name)
+                .getResultList().get(0));
+    }
+
+    public Student fbnStudent(String name)
+    {
+        return (Student) (em.createQuery("select s from Student s where s.name=:name").setParameter("name", name)
+                .getResultList().get(0));
+    }
+
     public int menufbn(String name)
     {
         return ((Menu) (em.createQuery("select m from Menu m where m.name=:name").setParameter("name", name)
+                .getResultList().get(0))).getId();
+    }
+
+    public int menufbn(String name, String role)
+    {
+        return ((Menu) (em.createQuery("select m from Menu m where m.name=:name and m.role=:role")
+                .setParameter("name", name)
+                .setParameter("role", role)
                 .getResultList().get(0))).getId();
     }
 
@@ -74,29 +94,29 @@ public class DataInitialization extends BaseJPATest {
 
         List<Will> willList = new ArrayList<Will>();
         // Yuesong Wang
-        willList.add(new Will(fbn("王岳松"), fbn("刘岩"), 1));
+        willList.add(new Will(fbnStudent("王岳松"), fbnTeacher("刘岩"), 1));
 
-        willList.add(new Will(fbn("王岳松"), fbn("孙萍"), 2));
-        willList.add(new Will(fbn("王岳松"), fbn("王冬青"), 3));
+        willList.add(new Will(fbnStudent("王岳松"), fbnTeacher("孙萍"), 2));
+        willList.add(new Will(fbnStudent("王岳松"), fbnTeacher("王冬青"), 3));
         // LeiYang
-        willList.add(new Will(fbn("杨磊"), fbn("李美惠"), 1));
-        willList.add(new Will(fbn("杨磊"), fbn("尹长青"), 2));
+        willList.add(new Will(fbnStudent("杨磊"), fbnTeacher("李美惠"), 1));
+        willList.add(new Will(fbnStudent("杨磊"), fbnTeacher("尹长青"), 2));
         // JunYao zhao
-        willList.add(new Will(fbn("赵俊尧"), fbn("刘岩"), 1));
-        willList.add(new Will(fbn("赵俊尧"), fbn("尹长青"), 2));
-        willList.add(new Will(fbn("赵俊尧"), fbn("孙萍"), 3));
+        willList.add(new Will(fbnStudent("赵俊尧"), fbnTeacher("刘岩"), 1));
+        willList.add(new Will(fbnStudent("赵俊尧"), fbnTeacher("尹长青"), 2));
+        willList.add(new Will(fbnStudent("赵俊尧"), fbnTeacher("孙萍"), 3));
         // Zenan hu
-        willList.add(new Will(fbn("胡泽南"), fbn("刘岩"), 1));
-        willList.add(new Will(fbn("胡泽南"), fbn("孙萍"), 2));
-        willList.add(new Will(fbn("胡泽南"), fbn("王冬青"), 3));
+        willList.add(new Will(fbnStudent("胡泽南"), fbnTeacher("刘岩"), 1));
+        willList.add(new Will(fbnStudent("胡泽南"), fbnTeacher("孙萍"), 2));
+        willList.add(new Will(fbnStudent("胡泽南"), fbnTeacher("王冬青"), 3));
         // Boyi li
-        willList.add(new Will(fbn("李博一"), fbn("孙萍"), 1));
-        willList.add(new Will(fbn("李博一"), fbn("王冬青"), 2));
-        willList.add(new Will(fbn("李博一"), fbn("刘岩"), 3));
+        willList.add(new Will(fbnStudent("李博一"), fbnTeacher("孙萍"), 1));
+        willList.add(new Will(fbnStudent("李博一"), fbnTeacher("王冬青"), 2));
+        willList.add(new Will(fbnStudent("李博一"), fbnTeacher("刘岩"), 3));
         // Yifan Zhang
-        willList.add(new Will(fbn("张一帆"), fbn("刘岩"), 1));
-        willList.add(new Will(fbn("张一帆"), fbn("孙萍"), 2));
-        willList.add(new Will(fbn("张一帆"), fbn("李美惠"), 3));
+        willList.add(new Will(fbnStudent("张一帆"), fbnTeacher("刘岩"), 1));
+        willList.add(new Will(fbnStudent("张一帆"), fbnTeacher("孙萍"), 2));
+        willList.add(new Will(fbnStudent("张一帆"), fbnTeacher("李美惠"), 3));
 
         for (Will w : willList)
             em.persist(w);
@@ -185,7 +205,7 @@ public class DataInitialization extends BaseJPATest {
                 "http://localhost:8080/sse/dispatch/teacher/teacher_review_topic"));
 
         em.persist(new Menu("个人中心", null, "Teacher", ""));
-        menus.add(new Menu("个人信息", null, "Teacher",
+        menus.add(new Menu("个人信息", menufbn("个人中心", "Teacher"), "Teacher",
                 "http://localhost:8080/sse/dispatch/teacher/teacher_personal_center"));
         for (Menu m : menus)
         {

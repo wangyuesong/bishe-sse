@@ -241,33 +241,61 @@
     alert(rows.length + ' rows are changed!');
   }
   function systemAssign() {
-    $.ajax({
-      //发送请求改变学生和老师的匹配
-      url : "${pageContext.request.contextPath}/admin/will/systemAssign",
-      dataType : 'json',
-      contentType : 'application/json',
-      type : "post",
-      success : function(data, textStatus) {
-        data_length = $('#dg').datagrid('getRows').length;
-        $.each(data, function(index, value) {
-          for (i = 0; i < data_length; i++) {
-            if ($.trim($('#dg').datagrid('getRows')[i]['studentId']) + "" == $.trim(value.studentId) + "") {
-              var one_row_data = $('#dg').datagrid('getRows')[i];
-              $('#dg').datagrid('selectRow', i).datagrid('beginEdit', i);
-              one_row_data['teacherName'] = value.teacherName;
-              one_row_data['teacherId'] = value.teacherId;
-              one_row_data['matchLevel'] = value.matchLevel;
-              one_row_data['matchType'] = value.matchType;
-              $('#dg').datagrid('endEdit', i);
-            }
-          }
-        });
-        $.messager.show({
-          title : '提示',
-          msg : "系统分配完毕，请保存"
-        });
+    $dialog = $('<div class="temp_dialog"></div>').dialog({
+      href : '${pageContext.request.contextPath}/dispatch/administrator/admin_match_will_preference_select',
+      onClose : function() {
+        $(this).dialog('destroy');
+      },
+      width : $(document.body).width() * 0.5,
+      height : $(document.body).height() * 0.5,
+      collapsible : true,
+      resizable : true,
+      modal : true,
+      title : '优先排序',
+      buttons : [ {
+        text : '确定',
+        iconCls : 'icon-ok',
+        handler : function() {
+          //获取偏好排序
+          var a = "";
+          $('.drag-item').each(function() {
+            a += $(this).attr("value") + ",";
+          });
+          a = a.substring(0, a.length - 1);
 
-      }
+          $.ajax({
+            //发送请求改变学生和老师的匹配
+            url : "${pageContext.request.contextPath}/admin/will/systemAssign",
+            data : {
+              "sortCriteria" : a
+            },
+            type : "post",
+            success : function(data, textStatus) {
+              data_length = $('#dg').datagrid('getRows').length;
+              $.each(data, function(index, value) {
+                for (i = 0; i < data_length; i++) {
+                  if ($.trim($('#dg').datagrid('getRows')[i]['studentId']) + "" == $.trim(value.studentId) + "") {
+                    var one_row_data = $('#dg').datagrid('getRows')[i];
+                    $('#dg').datagrid('selectRow', i).datagrid('beginEdit', i);
+                    one_row_data['teacherName'] = value.teacherName;
+                    one_row_data['teacherId'] = value.teacherId;
+                    one_row_data['matchLevel'] = value.matchLevel;
+                    one_row_data['matchType'] = value.matchType;
+                    $('#dg').datagrid('endEdit', i);
+                  }
+                }
+              });
+              $dialog.dialog('destroy');
+              $.messager.show({
+                title : '提示',
+                msg : "系统分配完毕，请保存"
+              });
+
+            }
+          });
+
+        }
+      } ]
     });
 
   }

@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
+import sse.pagemodel.ActionEventListModel;
 import sse.pagemodel.CandidateStudentListModel;
 import sse.pagemodel.DocumentCommentListModel;
 import sse.pagemodel.GenericDataGrid;
@@ -47,6 +47,15 @@ public class TeacherStudentController {
         GenericDataGrid<StudentListModel> s = teacherStudentServiceImpl.getMyStudentsForPagingInGenericDataGrid(
                 teacherId, pam);
         return s;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getStudentActionEventsByStudentId")
+    public GenericDataGrid<ActionEventListModel> getStudentActionEventsByStudentId(int studentId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        PaginationAndSortModel pam = new PaginationAndSortModel(request);
+        return teacherStudentServiceImpl.getStudentActionEventsByStudentId(studentId, pam);
     }
 
     /**

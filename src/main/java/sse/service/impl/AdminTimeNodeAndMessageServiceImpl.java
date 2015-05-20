@@ -46,8 +46,8 @@ import sse.utils.PaginationAndSortModel;
  * @version V1.0
  */
 @Service
-public class AdminTimenodeServiceImpl {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AdminTimenodeServiceImpl.class);
+public class AdminTimeNodeAndMessageServiceImpl {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AdminTimeNodeAndMessageServiceImpl.class);
 
     @Autowired
     private TimeNodeDaoImpl timeNodeDaoImpl;

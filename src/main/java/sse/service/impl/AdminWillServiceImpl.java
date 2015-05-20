@@ -1,6 +1,7 @@
 package sse.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.MatchPair;
@@ -23,6 +25,7 @@ import sse.entity.Teacher;
 import sse.entity.Will;
 import sse.enums.MatchLevelEnum;
 import sse.enums.MatchTypeEnum;
+import sse.enums.WillStatusEnum;
 import sse.excelmodel.MatchPairExcelModel;
 import sse.excelmodel.WillExcelModel;
 import sse.pagemodel.GenericDataGrid;
@@ -75,7 +78,7 @@ public class AdminWillServiceImpl {
      * @return
      *         List<MatchPair>
      */
-    public List<MatchPair> doMatch()
+    public List<MatchPair> doMatch(String sortCriteria)
     {
         List<Teacher> allTeachers = teacherDaoImpl.findAll();
         List<Teacher> teachersToBeMatch = new LinkedList<Teacher>();
@@ -98,8 +101,7 @@ public class AdminWillServiceImpl {
             while (preIter.hasNext())
             {
                 Teacher t = preIter.next();
-                // If after previous match, the teacher has already get fully matched, remove the teacher from the
-                // future algorithm
+                // I在前一轮匹配中，如果某个教师已经满员，则将其派出在后面的算法中，使用iterator来完成边遍历边删除的动作
                 if ((t.getCapacity() - t.getStudents().size()) == findCurrentMatchCountByTeacherId(matchPairs,
                         t.getId()))
                     preIter.remove();
@@ -108,18 +110,28 @@ public class AdminWillServiceImpl {
             for (Teacher t : teachersToBeMatch)
             {
                 // 对于第i级别的志愿，从志愿表中选出所有还没有被老师拒绝的i等级志愿
-                willList = willDaoImpl.findAllNotRejectedWillsByTeacherIdAndLevel(t.getId(), i);
+                HashMap<String, Object> params = new HashMap<String, Object>();
+                params.put("teacherId", t.getId());
+                params.put("status", WillStatusEnum.待定);
+                params.put("level", i);
+                // 找到所有第i level的，属于teacherId的教师的，状态为待定的志愿，并加入一些排序条件
+                willList = willDaoImpl
+                        .findForPaging(
+                                "select w from Will w where w.teacher.id= :teacherId and w.status= :status and w.level= :level",
+                                params, sortCriteria, "asc");
                 // 删除这些志愿中所有已经和老师建立了关系的同学的志愿（老师已接受其第一志愿）
                 willList = removeTheWillsFromStudentsWhoAlreadyGotMatched(willList);
                 // 如果某同学在第i－1级别的匹配中已经和老师进行了匹配，则将该同学的所有will从willList中删除
+                // 想知道i－1有哪些同学被接受了，只有遍历之前的matchPairs
                 for (MatchPair matchPair : matchPairs)
                     removeMatchedStudentsFromWillListByStudentId(matchPair.getStudentId(), willList);
+
                 // Teacher's capacity is bigger than level i student's will
                 if (willList.size() <= (t.getCapacity() - t.getStudents().size()))
                 {
                     for (Will w : willList)
-                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudentId()), teacherDaoImpl
-                                .findById(w.getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
+                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudent().getId()), teacherDaoImpl
+                                .findById(w.getTeacher().getId()), MatchLevelEnum.getTypeByIntLevel(i),
                                 MatchTypeEnum.系统分配));
                 }
                 // Teacher's capacity is smaller than level i student's will
@@ -127,8 +139,8 @@ public class AdminWillServiceImpl {
                 {
                     List<Will> subWillList = willList.subList(0, t.getCapacity() - t.getStudents().size());
                     for (Will w : subWillList)
-                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudentId()), teacherDaoImpl
-                                .findById(w.getTeacherId()), MatchLevelEnum.getTypeByIntLevel(i),
+                        matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudent().getId()), teacherDaoImpl
+                                .findById(w.getTeacher().getId()), MatchLevelEnum.getTypeByIntLevel(i),
                                 MatchTypeEnum.系统分配));
                 }
             }
@@ -159,7 +171,7 @@ public class AdminWillServiceImpl {
         while (iter.hasNext())
         {
             Will w = iter.next();
-            if (studentIds.contains(w.getStudentId()))
+            if (studentIds.contains(w.getStudent().getId()))
                 iter.remove();
         }
         return willList;
@@ -193,7 +205,7 @@ public class AdminWillServiceImpl {
     private void removeMatchedStudentsFromWillListByStudentId(String studentId, List<Will> willList) {
         for (int i = 0; i < willList.size(); i++)
         {
-            if (willList.get(i).getStudentId() == Integer.parseInt(studentId))
+            if (willList.get(i).getStudent().getId() == Integer.parseInt(studentId))
                 willList.remove(i);
         }
     }
@@ -214,7 +226,8 @@ public class AdminWillServiceImpl {
                 if (StringUtils.isEmpty(levelWill))
                 {
                     willDaoImpl.beginTransaction();
-                    willDaoImpl.deleteStudentWillByLevelWithoutTransaction(Integer.parseInt(wm.getStudentId()), i);
+                    willDaoImpl
+                            .deleteStudentWillByLevelWithoutTransaction(Integer.parseInt(wm.getStudentId()), i);
                     willDaoImpl.commitTransaction();
                 }
                 else
@@ -259,35 +272,28 @@ public class AdminWillServiceImpl {
      * @return List<MatchPair>
      */
     public GenericDataGrid<WillModel> getWillListForDatagrid(int page, int pageSize) {
-        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.studentId,w.level ASC");
-        // 转换Will为一种可以在页面上展示的WillModel
+        List<Student> studentList = studentDaoImpl.findForPaging("select s from Student s order by s.account");
         List<WillModel> willModelList = new ArrayList<WillModel>();
-        Will preWill = null;
-        WillModel tempModel = null;
-        for (Will w : willList)
+        for (Student s : studentList)
         {
-            if (preWill == null)
+            // 有可能此时已经更新了Will，从Student中取出Will之前需要将Student更新一下
+            studentDaoImpl.refresh(s);
+            List<Will> wills = s.getWills();
+            if (CollectionUtils.isEmpty(wills))
+                willModelList.add(new WillModel(s.getId() + "", s.getName(), s.getAccount()));
+            else
             {
-                tempModel = new WillModel();
-                preWill = w;
+                WillModel willModel = new WillModel(s.getId() + "", s.getName(), s.getAccount());
+                for (Will oneWill : wills)
+                {
+                    willModel.setWillByLevel(oneWill.getLevel(), oneWill.getTeacher().getId() + "");
+                    willModel.setWillTeacherNameLevel(oneWill.getLevel(), oneWill.getTeacher().getName());
+                }
+                willModelList.add(willModel);
             }
-            if (preWill.getStudentId() != w.getStudentId()) {
-                willModelList.add(tempModel);
-                tempModel = new WillModel();
-            }
-            Student s = studentDaoImpl.findById(w.getStudentId());
-            tempModel.setStudentId(s.getId() + "");
-            tempModel.setStudentAccount(s.getAccount());
-            tempModel.setStudentName(s.getName());
-            tempModel.setWillByLevel(w.getLevel(), w.getTeacherId() + "");
-            tempModel
-                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getTeacherId()).getName());
-            preWill = w;
         }
-        if (tempModel.getStudentId() != null)
-            willModelList.add(tempModel);
         GenericDataGrid<WillModel> willDataGrid = new GenericDataGrid<WillModel>();
-        // 分页
+        // // 分页
         List<WillModel> subWillModelList = willModelList.subList((page - 1) * pageSize,
                 page * pageSize > willModelList.size() ? willModelList.size() : page * pageSize);
         willDataGrid.setRows(subWillModelList);
@@ -330,7 +336,7 @@ public class AdminWillServiceImpl {
                 List<Will> wills = willDaoImpl.findWillsByStudentId(s.getId());
                 boolean isWillCandiate = false;
                 for (Will w : wills)
-                    if (w.getTeacherId() == t.getId())
+                    if (w.getTeacher().getId() == t.getId())
                     {
                         s.setMatchLevel(MatchLevelEnum.getTypeByIntLevel(w.getLevel()));
                         isWillCandiate = true;
@@ -383,7 +389,7 @@ public class AdminWillServiceImpl {
             while (iter.hasNext())
             {
                 MatchPair mp2 = iter.next();
-                if (mp2.getTeacherId().equals(mp.getTeacherId()))
+                if (mp2.getTeacherId().equals(mp.getStudentId()))
                 {
                     iter.remove();
                     // 同样需要检查该学生是否早已存在于教师的studentList
@@ -420,7 +426,7 @@ public class AdminWillServiceImpl {
      *         Workbook
      */
     public Workbook exportWillListInExcel() {
-        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.studentId,w.level ASC");
+        List<Will> willList = willDaoImpl.findForPaging("select w from Will w order by w.student.id,w.level ASC");
         // 转换Will为一种可以在页面上展示的WillModel
         List<WillModel> willModelList = new ArrayList<WillModel>();
         Will preWill = null;
@@ -432,17 +438,17 @@ public class AdminWillServiceImpl {
                 tempModel = new WillModel();
                 preWill = w;
             }
-            if (preWill.getStudentId() != w.getStudentId()) {
+            if (preWill.getStudent().getId() != w.getStudent().getId()) {
                 willModelList.add(tempModel);
                 tempModel = new WillModel();
             }
-            Student s = studentDaoImpl.findById(w.getStudentId());
+            Student s = studentDaoImpl.findById(w.getStudent().getId());
             tempModel.setStudentId(s.getId() + "");
             tempModel.setStudentAccount(s.getAccount());
             tempModel.setStudentName(s.getName());
-            tempModel.setWillByLevel(w.getLevel(), w.getTeacherId() + "");
+            tempModel.setWillByLevel(w.getLevel(), w.getTeacher().getId() + "");
             tempModel
-                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getTeacherId()).getName());
+                    .setWillTeacherNameLevel(w.getLevel(), teacherDaoImpl.findById(w.getTeacher().getId()).getName());
             preWill = w;
         }
         if (tempModel.getStudentId() != null)
