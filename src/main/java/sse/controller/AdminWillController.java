@@ -1,4 +1,4 @@
-package sse.controller;
+  package sse.controller;
 
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.MatchPair;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.commandmodel.WillModel;
 import sse.exception.SSEException;
 import sse.pagemodel.GenericDataGrid;
@@ -26,7 +27,6 @@ import sse.pagemodel.TeacherSelectModel;
 import sse.service.impl.AdminWillServiceImpl;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl;
-import sse.utils.PaginationAndSortModel;
 
 /**
  * @author yuesongwang

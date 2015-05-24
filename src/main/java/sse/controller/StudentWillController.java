@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.commandmodel.WillModel;
 import sse.entity.User;
 import sse.pagemodel.ActionEventListModel;
@@ -23,7 +24,6 @@ import sse.pagemodel.TeacherListModel;
 import sse.service.impl.DocumentSerivceImpl;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.StudentWillServiceImpl.TeacherDetail;
-import sse.utils.PaginationAndSortModel;
 
 @Controller
 @RequestMapping(value = "/student/will")

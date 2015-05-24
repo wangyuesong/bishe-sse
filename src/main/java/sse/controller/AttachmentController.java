@@ -202,7 +202,7 @@ public class AttachmentController {
             e1.printStackTrace();
         }
         try {
-            documentServiceImpl.downloadAttachment(attachmentId, response.getOutputStream());
+            attachmentServiceImpl.downloadAttachment(attachmentId, response.getOutputStream());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             throw new SSEException("下载失败，请联系管理员", e);

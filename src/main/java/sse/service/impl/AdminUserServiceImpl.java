@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
 import sse.entity.Student;
@@ -14,7 +15,6 @@ import sse.entity.Teacher;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.StudentCURDModel;
 import sse.pagemodel.TeacherCURDModel;
-import sse.utils.PaginationAndSortModel;
 
 /**
  * @Project: sse

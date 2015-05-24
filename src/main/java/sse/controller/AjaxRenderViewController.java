@@ -1,11 +1,5 @@
 package sse.controller;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import sse.dao.impl.AccessRuleDaoImpl;
 import sse.dao.impl.TimeNodeDaoImpl;
-import sse.entity.AccessRule;
-import sse.entity.TimeNode;
-import sse.permission.PermissionCheckEntity;
 import sse.service.impl.AccessRuleServiceImpl;
 
 @Controller

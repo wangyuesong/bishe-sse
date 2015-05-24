@@ -54,7 +54,6 @@ public class Will extends BaseModel implements Serializable, Comparable<Will> {
     @Column(length = 10, nullable = false)
     private WillStatusEnum status = WillStatusEnum.待定;
 
-    
     public int getId() {
         return id;
     }
@@ -125,7 +124,7 @@ public class Will extends BaseModel implements Serializable, Comparable<Will> {
 
     @Override
     public int compareTo(Will o) {
-        
+
         return 0;
     }
 

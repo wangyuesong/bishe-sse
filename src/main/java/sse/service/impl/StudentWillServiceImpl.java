@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import sse.commandmodel.PaginationAndSortModel;
 import sse.commandmodel.WillModel;
 import sse.dao.impl.ActionEventDaoImpl;
 import sse.dao.impl.StudentDaoImpl;
@@ -23,7 +24,6 @@ import sse.pagemodel.ActionEventListModel;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.TeacherListModel;
 import sse.utils.DateTimeUtil;
-import sse.utils.PaginationAndSortModel;
 
 @Service
 public class StudentWillServiceImpl {

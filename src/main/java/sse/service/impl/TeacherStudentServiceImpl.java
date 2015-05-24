@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.dao.impl.ActionEventDaoImpl;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
@@ -38,7 +39,6 @@ import sse.pagemodel.CandidateStudentListModel;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.StudentListModel;
 import sse.utils.DateTimeUtil;
-import sse.utils.PaginationAndSortModel;
 
 /**
  * @Project: sse

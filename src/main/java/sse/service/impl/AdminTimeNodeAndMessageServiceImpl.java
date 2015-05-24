@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.commandmodel.SystemMessageFormModel;
 import sse.dao.impl.AccessRuleDaoImpl;
 import sse.dao.impl.AttachmentDaoImpl;
@@ -34,7 +35,6 @@ import sse.pagemodel.SystemMessageListModel;
 import sse.pagemodel.TimeNodeListModel;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.utils.AccessRulePropertiesUtil;
-import sse.utils.PaginationAndSortModel;
 
 /**
  * @Project: sse
@@ -163,7 +163,7 @@ public class AdminTimeNodeAndMessageServiceImpl {
     }
 
     /**
-     * Description: 右侧日历获取所有时间节点
+     * Description: 右侧日历获取所有时间节点,用于日历
      * 
      * @return
      *         List<CalendarEvent>
@@ -196,7 +196,7 @@ public class AdminTimeNodeAndMessageServiceImpl {
      * @return
      *         List<AccessRuleListModel>
      */
-    public List<AccessRuleListModel> getStudentAccessRulesByTimeNodeId(int timeNodeId, String role) {
+    public List<AccessRuleListModel> getAccessRulesByTimeNodeId(int timeNodeId, String role) {
         Map<String, String> maps;
         if (StringUtils.equals(role, "Student"))
             maps = AccessRulePropertiesUtil.getStudentAccessRuleNameAndURLMapping();

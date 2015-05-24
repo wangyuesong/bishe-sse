@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
 import sse.pagemodel.ActionEventListModel;
@@ -24,7 +25,6 @@ import sse.service.impl.DocumentSerivceImpl.DocumentInfo;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.service.impl.TeacherStudentServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl.StudentDetail;
-import sse.utils.PaginationAndSortModel;
 import sse.utils.SessionUtil;
 
 @Controller
@@ -59,7 +59,7 @@ public class TeacherStudentController {
     }
 
     /**
-     * Description: 根据参数学生id studentId和文档类型type来获取学生的某个文档，如果该文档尚未创建，返回null
+     * Description: 根据参数学生id studentId和文档类型type来获取学生的某个文档
      * 
      * @param request
      * @param studentId

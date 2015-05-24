@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.commandmodel.SystemMessageFormModel;
 import sse.dao.impl.TimeNodeDaoImpl.CalendarEvent;
 import sse.pagemodel.AccessRuleListModel;
@@ -24,7 +25,6 @@ import sse.service.impl.AdminTimeNodeAndMessageServiceImpl;
 import sse.service.impl.StudentWillServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl;
 import sse.utils.AccessRulePropertiesUtil;
-import sse.utils.PaginationAndSortModel;
 
 /**
  * @author yuesongwang
@@ -124,9 +124,9 @@ public class AdminTimeNodeAndMessageController {
     @RequestMapping(value = "/getAccessRulesByTimeNodeIdAndRole")
     public List<AccessRuleListModel> getStudentAccessRulesByTimeNodeIdAndRole(int timeNodeId, String role,
             HttpServletRequest request) {
-        return adminTimenodeServiceImpl.getStudentAccessRulesByTimeNodeId(timeNodeId, role);
+        return adminTimenodeServiceImpl.getAccessRulesByTimeNodeId(timeNodeId, role);
     }
-
+ 
     @ResponseBody
     @RequestMapping(value = "/saveAccessRules")
     public BasicJson saveAccessRules(@RequestBody UpdateRuleModel model,

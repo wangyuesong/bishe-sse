@@ -51,6 +51,17 @@ public class Student extends User {
     @OneToMany(mappedBy = "student", cascade = { CascadeType.ALL })
     private List<Will> wills;
 
+    @OneToMany(mappedBy = "student", cascade = { CascadeType.ALL })
+    private List<WeeklyReport> weeklyReports;
+
+    public List<WeeklyReport> getWeeklyReports() {
+        return weeklyReports;
+    }
+
+    public void setWeeklyReports(List<WeeklyReport> weeklyReports) {
+        this.weeklyReports = weeklyReports;
+    }
+
     public Topic getTopic() {
         return topic;
     }

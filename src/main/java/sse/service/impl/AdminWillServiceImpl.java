@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import sse.commandmodel.BasicJson;
 import sse.commandmodel.MatchPair;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.commandmodel.WillModel;
 import sse.dao.impl.StudentDaoImpl;
 import sse.dao.impl.TeacherDaoImpl;
@@ -31,7 +32,6 @@ import sse.excelmodel.WillExcelModel;
 import sse.pagemodel.GenericDataGrid;
 import sse.pagemodel.TeacherSelectModel;
 import sse.utils.ExcelUtil;
-import sse.utils.PaginationAndSortModel;
 
 /**
  * @Project: sse
@@ -127,7 +127,9 @@ public class AdminWillServiceImpl {
                     removeMatchedStudentsFromWillListByStudentId(matchPair.getStudentId(), willList);
 
                 // Teacher's capacity is bigger than level i student's will
-                if (willList.size() <= (t.getCapacity() - t.getStudents().size()))
+                if (willList.size() <= (t.getCapacity() - t.getStudents().size() - findCurrentMatchCountByTeacherId(
+                        matchPairs,
+                        t.getId())))
                 {
                     for (Will w : willList)
                         matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudent().getId()), teacherDaoImpl
@@ -137,7 +139,9 @@ public class AdminWillServiceImpl {
                 // Teacher's capacity is smaller than level i student's will
                 else
                 {
-                    List<Will> subWillList = willList.subList(0, t.getCapacity() - t.getStudents().size());
+                    List<Will> subWillList = willList.subList(0, t.getCapacity() - t.getStudents().size()
+                            - findCurrentMatchCountByTeacherId(matchPairs,
+                                    t.getId()));
                     for (Will w : subWillList)
                         matchPairs.add(new MatchPair(studentDaoImpl.findById(w.getStudent().getId()), teacherDaoImpl
                                 .findById(w.getTeacher().getId()), MatchLevelEnum.getTypeByIntLevel(i),

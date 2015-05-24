@@ -10,7 +10,7 @@
 /**
  * 
  */
-package sse.utils;
+package sse.commandmodel;
 
 import javax.servlet.http.HttpServletRequest;
 

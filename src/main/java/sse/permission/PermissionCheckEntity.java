@@ -14,7 +14,7 @@ import sse.entity.TimeNode;
  * @date 2015年5月13日 下午4:15:03
  * @version V1.0
  */
-public class PermissionCheckEntity implements Comparable {
+public class PermissionCheckEntity implements Comparable<PermissionCheckEntity> {
 
     private TimeNode timeNode;
 
@@ -61,8 +61,7 @@ public class PermissionCheckEntity implements Comparable {
      *         boolean
      */
     @Override
-    public int compareTo(Object obj) {
-        PermissionCheckEntity otherEntity = (PermissionCheckEntity) obj;
-        return this.timeNode.getTime().compareTo(otherEntity.getTimeNode().getTime());
+    public int compareTo(PermissionCheckEntity obj) {
+        return this.timeNode.getTime().compareTo(obj.getTimeNode().getTime());
     }
 }

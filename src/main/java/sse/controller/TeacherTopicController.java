@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import sse.commandmodel.BasicJson;
+import sse.commandmodel.PaginationAndSortModel;
 import sse.enums.AttachmentStatusEnum;
 import sse.enums.DocumentTypeEnum;
 import sse.pagemodel.CandidateStudentListModel;
@@ -29,7 +30,6 @@ import sse.service.impl.DocumentSerivceImpl.DocumentInfo;
 import sse.service.impl.DocumentSerivceImpl.SimpleAttachmentInfo;
 import sse.service.impl.TeacherStudentServiceImpl;
 import sse.service.impl.TeacherStudentServiceImpl.StudentDetail;
-import sse.utils.PaginationAndSortModel;
 import sse.utils.SessionUtil;
 
 @Controller

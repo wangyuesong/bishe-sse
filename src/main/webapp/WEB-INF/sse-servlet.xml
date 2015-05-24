@@ -17,23 +17,6 @@
 	<context:component-scan base-package="sse.service" />
 	<context:component-scan base-package="sse.controller" />
 	
-	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-        <property name="host" value="smtp.qq.com"/>
-        <property name="protocol" value="smtp" /> 
-        <!-- 465 for Gamil -->
-        <property name="port" value="465"/>
-        <property name="username" value="573978301@qq.com"/>
-        <property name="password" value="Wys-19930615"/>
-        <property name="javaMailProperties">
-            <props>
-                <prop key="mail.transport.protocol">smtp</prop>
-                <prop key="mail.smtp.auth">true</prop>
-                <!-- true for Gamil -->
-                <prop key="mail.smtp.starttls.enable">false</prop>
-                <prop key="mail.debug">true</prop>
-            </props>
-        </property>
-    </bean>
 	
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
